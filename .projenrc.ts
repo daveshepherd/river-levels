@@ -1,7 +1,9 @@
 import { awscdk } from 'projen';
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
+  copyrightOwner: 'Dave Shepherd',
   defaultReleaseBranch: 'main',
+  license: 'MIT',
   name: 'river-levels',
   projenrcTs: true,
 
