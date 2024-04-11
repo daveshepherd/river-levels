@@ -1,4 +1,4 @@
-import { awscdk } from 'projen';
+import { awscdk, github } from 'projen';
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
   copyrightOwner: 'Dave Shepherd',
@@ -6,6 +6,10 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   license: 'MIT',
   name: 'river-levels',
   projenrcTs: true,
+
+  githubOptions: {
+    projenCredentials: github.GithubCredentials.fromApp({}),
+  },
 
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
