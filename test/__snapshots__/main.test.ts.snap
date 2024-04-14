@@ -2,11 +2,33 @@
 
 exports[`Snapshot 1`] = `
 {
+  "Outputs": {
+    "TestBucket": {
+      "Value": {
+        "Fn::GetAtt": [
+          "MyBucketF68F3FF0",
+          "Arn",
+        ],
+      },
+    },
+  },
   "Parameters": {
     "BootstrapVersion": {
       "Default": "/cdk-bootstrap/hnb659fds/version",
       "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "MyBucketF68F3FF0": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
   },
   "Rules": {
