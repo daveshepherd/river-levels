@@ -6,6 +6,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   license: 'MIT',
   name: 'river-levels',
   projenrcTs: true,
+  release: true,
 
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
