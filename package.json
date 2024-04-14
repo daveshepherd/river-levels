@@ -1,5 +1,6 @@
 {
   "name": "river-levels",
+  "description": "A scraper and APIs for getting river readings from the Environment Agency",
   "scripts": {
     "build": "npx projen build",
     "bump": "npx projen bump",
