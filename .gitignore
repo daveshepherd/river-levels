@@ -53,5 +53,4 @@ junit.xml
 .cdk.staging/
 .parcel-cache/
 !/src/storage-stack/crawler-function.ts
-!/.github/workflows/run-tests.yml
 !/.projenrc.ts

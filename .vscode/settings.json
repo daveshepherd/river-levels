@@ -3,6 +3,7 @@
         "storage-stack",
         "readings-store",
         "crawler",
-        "integ-tests"
+        "integ-tests",
+        "workflows"
     ]
 }

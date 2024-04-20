@@ -1,6 +1,5 @@
 import { awscdk, github } from 'projen';
 import { LambdaRuntime } from 'projen/lib/awscdk';
-import { GithubWorkflow } from 'projen/lib/github';
 import { JobPermission } from 'projen/lib/github/workflows-model';
 
 const project = new awscdk.AwsCdkTypeScriptApp({
@@ -34,6 +33,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   name: 'river-levels',
   projenrcTs: true,
   release: true,
+  workflowPackageCache: true,
 });
 project.addTask('integ:force', {
   description:
@@ -54,38 +54,68 @@ project.addTask('integ:watch', {
     },
   ],
 });
-new GithubWorkflow(project.github!, 'Run-Tests').addJob('build', {
+const deploymentJob = {
   runsOn: ['ubuntu-latest'],
   permissions: {
-    pullRequests: JobPermission.WRITE,
+    idToken: JobPermission.WRITE,
   },
+  if: "needs.release.outputs.tag_exists != 'true'",
   steps: [
     {
-      name: 'Check-out-code',
+      name: 'Checkout',
       uses: 'actions/checkout@v4',
+      with: {
+        ref: '${{ github.event.pull_request.head.ref }}',
+        repository: '${{ github.event.pull_request.head.repo.full_name }}',
+      },
     },
     {
-      name: 'Set-up-node',
+      name: 'Download build artifacts',
+      uses: 'actions/download-artifact@v4',
+      with: {
+        name: 'build-artifact',
+        path: 'dist',
+      },
+    },
+    {
+      name: 'Setup Node.js',
       uses: 'actions/setup-node@v4',
+      with: {
+        cache: 'yarn',
+      },
     },
     {
       name: 'Install dependencies',
-      run: 'echo "npm install"',
+      run: 'yarn install --check-files',
+    },
+    {
+      name: 'build',
+      run: 'npx projen build',
+    },
+    {
+      name: 'configure aws credentials',
+      uses: 'aws-actions/configure-aws-credentials@v3',
+      with: {
+        'role-to-assume': '${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}',
+        'role-session-name': 'river-levels-deploy',
+        'aws-region': 'eu-west-2',
+      },
+    },
+    {
+      name: 'deploy',
+      run: 'yarn deploy --require-approval never',
     },
   ],
+};
+project.github?.tryFindWorkflow('release')?.addJob('deploy_development', {
+  name: 'Deploy to Development',
+  environment: 'development',
+  needs: ['release'],
+  ...deploymentJob,
 });
-
-project.github!.workflows[3].on({
-  pullRequestTarget: {
-    types: [
-      'opened',
-      'synchronize',
-      'reopened',
-      'labeled',
-      'ready_for_review',
-      'edited',
-    ],
-  },
+project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
+  name: 'Deploy to Production',
+  needs: ['deploy_development'],
+  ...deploymentJob,
 });
-
 project.synth();
