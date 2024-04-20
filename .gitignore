@@ -53,4 +53,5 @@ junit.xml
 .cdk.staging/
 .parcel-cache/
 !/src/resize-image-function.ts
+!/.github/workflows/run-tests.yml
 !/.projenrc.ts
