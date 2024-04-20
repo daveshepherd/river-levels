@@ -148,6 +148,7 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
+          "src/resize-image.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],

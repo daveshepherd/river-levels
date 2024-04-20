@@ -43,7 +43,30 @@
     },
     "bundle": {
       "name": "bundle",
-      "description": "Prepare assets"
+      "description": "Prepare assets",
+      "steps": [
+        {
+          "spawn": "bundle:resize-image.lambda"
+        }
+      ]
+    },
+    "bundle:resize-image.lambda": {
+      "name": "bundle:resize-image.lambda",
+      "description": "Create a JavaScript bundle from src/resize-image.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/resize-image.lambda.ts --target=\"node18\" --platform=\"node\" --outfile=\"assets/resize-image.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:resize-image.lambda:watch": {
+      "name": "bundle:resize-image.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/resize-image.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/resize-image.lambda.ts --target=\"node18\" --platform=\"node\" --outfile=\"assets/resize-image.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
     },
     "clobber": {
       "name": "clobber",
