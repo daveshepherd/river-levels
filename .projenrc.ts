@@ -8,6 +8,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   defaultReleaseBranch: 'main',
   description:
     'A scraper and APIs for getting river readings from the Environment Agency',
+  devDeps: ['@aws-cdk/integ-tests-alpha', 'cdk-nag', 'source-map-support'],
+  experimentalIntegRunner: true,
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
@@ -15,6 +17,16 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   name: 'river-levels',
   projenrcTs: true,
   release: true,
+});
+project.addTask('integ:force', {
+  description:
+    "Run integration snapshot tests, forcing tests to run even if there's no changes",
+  steps: [
+    {
+      exec: 'integ-runner $@ --language typescript --force',
+      receiveArgs: true,
+    },
+  ],
 });
 
 new GithubWorkflow(project.github!, 'Run-Tests').addJob('build', {

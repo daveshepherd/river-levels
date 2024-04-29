@@ -182,6 +182,36 @@
         }
       ]
     },
+    "integ": {
+      "name": "integ",
+      "description": "Run integration snapshot tests",
+      "steps": [
+        {
+          "exec": "integ-runner $@ --language typescript",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "integ:force": {
+      "name": "integ:force",
+      "description": "Run integration snapshot tests, forcing tests to run even if there's no changes",
+      "steps": [
+        {
+          "exec": "integ-runner $@ --language typescript --force",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "integ:update": {
+      "name": "integ:update",
+      "description": "Run and update integration snapshot tests",
+      "steps": [
+        {
+          "exec": "integ-runner $@ --language typescript --update-on-failed",
+          "receiveArgs": true
+        }
+      ]
+    },
     "package": {
       "name": "package",
       "description": "Creates the distribution package"
@@ -255,6 +285,9 @@
         },
         {
           "spawn": "eslint"
+        },
+        {
+          "spawn": "integ"
         }
       ]
     },
@@ -291,13 +324,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@aws-cdk/integ-tests-alpha,@types/jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,source-map-support,ts-jest,ts-node,typescript"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen standard-version ts-jest ts-node typescript aws-cdk-lib constructs"
+          "exec": "yarn upgrade @aws-cdk/integ-tests-alpha @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk cdk-nag esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen source-map-support standard-version ts-jest ts-node typescript @aws-cdk/integ-runner aws-cdk-lib constructs"
         },
         {
           "exec": "npx projen"

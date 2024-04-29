@@ -1,6 +1,10 @@
 {
   "dependencies": [
     {
+      "name": "@aws-cdk/integ-tests-alpha",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -22,6 +26,10 @@
     {
       "name": "aws-cdk",
       "version": "^2.1.0",
+      "type": "build"
+    },
+    {
+      "name": "cdk-nag",
       "type": "build"
     },
     {
@@ -55,6 +63,10 @@
       "type": "build"
     },
     {
+      "name": "source-map-support",
+      "type": "build"
+    },
+    {
       "name": "standard-version",
       "version": "^9",
       "type": "build"
@@ -70,6 +82,16 @@
     {
       "name": "typescript",
       "type": "build"
+    },
+    {
+      "name": "@aws-cdk/integ-runner",
+      "version": "latest",
+      "type": "devenv"
+    },
+    {
+      "name": "@aws-cdk/integ-tests-alpha",
+      "version": "latest",
+      "type": "devenv"
     },
     {
       "name": "aws-cdk-lib",

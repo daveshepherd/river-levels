@@ -1,0 +1,4 @@
+{
+  "maxWorkers": 10,
+  "parallelRegions": ["eu-west-2"]
+}

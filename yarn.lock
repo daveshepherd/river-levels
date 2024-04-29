@@ -25,6 +25,36 @@
   resolved "https://registry.yarnpkg.com/@aws-cdk/asset-node-proxy-agent-v6/-/asset-node-proxy-agent-v6-2.0.3.tgz#9b5d213b5ce5ad4461f6a4720195ff8de72e6523"
   integrity sha512-twhuEG+JPOYCYPx/xy5uH2+VUsIEhPTzDY0F1KuB+ocjWWB/KEDiOVL19nHvbPCB6fhWnkykXEMJ4HHcKvjtvg==
 
+"@aws-cdk/aws-service-spec@0.0.64":
+  version "0.0.64"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-service-spec/-/aws-service-spec-0.0.64.tgz#40a0eedd08b7c67d65c011ae343788528068d793"
+  integrity sha512-HkDYdnuegCfA4cBNjNExgrpNzbkHjbdb5nhq4Aw2NasAgECcGh0OsEoCgINqh6X4FHdCscJlwHm2cUbfHBx04Q==
+  dependencies:
+    "@aws-cdk/service-spec-types" "^0.0.64"
+    "@cdklabs/tskb" "^0.0.3"
+
+"@aws-cdk/integ-runner@latest":
+  version "2.139.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.139.0-alpha.0.tgz#ec90aa0cd429a04cdb5fd3e4e5f294d8ec0c0185"
+  integrity sha512-RUeCEXglvN+Z73r7wuteQQozIaG2aVxTUnEozQPQvv4zQqdpA9TKxX59iry8to/Oco/H13RsSUAIeEYezm7sRw==
+  dependencies:
+    "@aws-cdk/aws-service-spec" "0.0.64"
+    aws-cdk "2.139.0"
+  optionalDependencies:
+    fsevents "2.3.2"
+
+"@aws-cdk/integ-tests-alpha@latest":
+  version "2.139.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.139.0-alpha.0.tgz#17de65514890b4b4745caf7707927191be8f679e"
+  integrity sha512-IkeNTvIsO/lYtkY01q/hN1P6nMo8mNPEfSCUlbNbNCqAJ8NCe95A3/8vI3pG3gUO4eSt1xgpXuIoC28fNX7XHA==
+
+"@aws-cdk/service-spec-types@^0.0.64":
+  version "0.0.64"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/service-spec-types/-/service-spec-types-0.0.64.tgz#c8be9e9099b8c3eb538b4ca3656777edb50b0128"
+  integrity sha512-YHu/KekOAmptELaruTfggwLHIxWKP/I+JY+z/YNG5Vww/hiqLAUnHKa2AesmxEv9q8fiKb1UGtdLd5aO+iXOCw==
+  dependencies:
+    "@cdklabs/tskb" "^0.0.3"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.23.5", "@babel/code-frame@^7.24.1", "@babel/code-frame@^7.24.2":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.24.2.tgz#718b4b19841809a58b29b68cde80bc5e1aa6d9ae"
@@ -317,6 +347,11 @@
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
+
+"@cdklabs/tskb@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@cdklabs/tskb/-/tskb-0.0.3.tgz#4b79846d9381eb1252ba85d5d20b7cd7d99b6ecb"
+  integrity sha512-JR+MuD4awAXvutu7HArephXfZm09GPTaSAQUqNcJB5+ZENRm4kV+L6vJL6Tn1xHjCcHksO+HAqj3gYtm5K94vA==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -1274,6 +1309,13 @@ aws-cdk-lib@^2.1.0:
     table "^6.8.2"
     yaml "1.10.2"
 
+aws-cdk@2.139.0:
+  version "2.139.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.139.0.tgz#439e20bd08fba9fe4ee627a85641f28f219e3330"
+  integrity sha512-MjMsySQbhR5yTWCphnuVQuS15UdGMV6v4XIM+C8SN7/eUOfv7BFr7QgYMUm5WXCG/f66RnY0zjJbOLRxvcjCrQ==
+  optionalDependencies:
+    fsevents "2.3.2"
+
 aws-cdk@^2.1.0:
   version "2.139.0"
   resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.139.0.tgz#439e20bd08fba9fe4ee627a85641f28f219e3330"
@@ -1441,6 +1483,11 @@ case@1.6.3, case@^1.6.3:
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
+
+cdk-nag@^2.28.102:
+  version "2.28.102"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.28.102.tgz#715aff68a7cc817ef465eb1d82e0d9e6e5f3ce6a"
+  integrity sha512-L4c8f4rMaMkMINaY4HQKvAcEcLgs8hrYes7j7MTb6JY+TGMeWdQYxboVsmcrLGWXLsl46SImBRdEW1p4FK5VTg==
 
 chalk@^2.4.2:
   version "2.4.2"
@@ -4360,6 +4407,14 @@ source-map-support@0.5.13:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.13.tgz#31b24a9c2e73c2de85066c0feb7d44767ed52932"
   integrity sha512-SHSKFHadjVA5oR4PPqhtAVdcBWwRYVd6g6cAXnIbRiIwc2EhPrTuKUBdSLvlEKyIP3GCf89fltvcZiP9MMFA1w==
+  dependencies:
+    buffer-from "^1.0.0"
+    source-map "^0.6.0"
+
+source-map-support@^0.5.21:
+  version "0.5.21"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
+  integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
