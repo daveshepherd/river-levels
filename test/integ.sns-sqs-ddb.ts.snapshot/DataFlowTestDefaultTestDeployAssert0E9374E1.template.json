@@ -27,7 +27,7 @@
      "Message": "\"{\\\"id\\\":\\\"test-id-1\\\",\\\"message\\\":\\\"This message should be validated\\\"}\""
     },
     "flattenResponse": "false",
-    "salt": "1714394349428"
+    "salt": "1714396568823"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -156,7 +156,7 @@
      "Key": "{\"id\":{\"S\":\"test-id-1\"}}"
     },
     "flattenResponse": "false",
-    "salt": "1714394349428"
+    "salt": "1714396568824"
    },
    "DependsOn": [
     "AwsApiCallSNSpublish67d2c9882e72c0bfb2c609c5fe53480b"

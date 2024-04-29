@@ -33,6 +33,7 @@ function parseData(data) {
   return data;
 }
 async function handler(event) {
+  console.log("update");
   const updatedRecords = [];
   const failedRecords = [];
   for (const record of event.Records) {
