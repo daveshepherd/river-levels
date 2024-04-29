@@ -17,7 +17,7 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// lib/functions/sqs-ddb-function.ts
+// src/functions/sqs-ddb-function.ts
 var sqs_ddb_function_exports = {};
 __export(sqs_ddb_function_exports, {
   handler: () => handler
@@ -33,7 +33,6 @@ function parseData(data) {
   return data;
 }
 async function handler(event) {
-  console.log("update");
   const updatedRecords = [];
   const failedRecords = [];
   for (const record of event.Records) {

@@ -6,7 +6,7 @@ import 'source-map-support/register';
 import { IntegTest, ExpectedResult } from '@aws-cdk/integ-tests-alpha';
 import { App, Duration, Aspects } from 'aws-cdk-lib';
 import { AwsSolutionsChecks } from 'cdk-nag';
-import { CdkIntegTestsDemoStack } from '../lib/cdk-integ-tests-demo-stack';
+import { CdkIntegTestsDemoStack } from '../src/cdk-integ-tests-demo-stack';
 // CDK App for Integration Tests
 const app = new App();
 // Add the cdk-nag AwsSolutions Pack with extra verbose logging enabled.
@@ -29,7 +29,7 @@ const integ = new IntegTest(app, 'DataFlowTest', {
       },
     },
   },
-  regions: ['eu-west-2'], //stackUnderTest.region],
+  regions: [stackUnderTest.region],
 });
 
 /**

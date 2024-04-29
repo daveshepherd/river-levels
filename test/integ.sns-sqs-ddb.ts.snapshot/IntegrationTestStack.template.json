@@ -318,7 +318,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f67cb8541bf14ae113be7ee219c83d959daa20b5d76685c2924ad8e1b40f7ea4.zip"
+     "S3Key": "9e7d8936245df1ec7e67b0adc9aa87707444f87ebdf031433c2c340e6517ee46.zip"
     },
     "Environment": {
      "Variables": {
@@ -337,7 +337,7 @@
      ]
     },
     "Runtime": "nodejs20.x",
-    "Timeout": 60
+    "Timeout": 30
    },
    "DependsOn": [
     "RoleDefaultPolicy5FFB7DAB",

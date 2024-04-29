@@ -6,7 +6,7 @@
         "IntegrationTestStack"
       ],
       "regions": [
-        "eu-west-2"
+        "${Token[AWS.Region.7]}"
       ],
       "cdkCommandOptions": {
         "destroy": {

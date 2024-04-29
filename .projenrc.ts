@@ -6,6 +6,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
   copyrightOwner: 'Dave Shepherd',
   defaultReleaseBranch: 'main',
+  deps: ['@aws-sdk/client-dynamodb', 'aws-lambda'],
   description:
     'A scraper and APIs for getting river readings from the Environment Agency',
   devDeps: ['@aws-cdk/integ-tests-alpha', 'cdk-nag', 'source-map-support'],
