@@ -40,7 +40,7 @@
     "@typescript-eslint/eslint-plugin": "^6",
     "@typescript-eslint/parser": "^6",
     "aws-cdk": "^2.1.0",
-    "cdk-nag": "^2.28.104",
+    "cdk-nag": "^2.28.106",
     "esbuild": "^0.20.2",
     "eslint": "^8",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -55,7 +55,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.565.0",
+    "@aws-sdk/client-dynamodb": "^3.567.0",
     "aws-cdk-lib": "^2.1.0",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.0.5"
