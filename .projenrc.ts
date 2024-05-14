@@ -38,11 +38,11 @@ new GithubWorkflow(project.github!, 'Run-Tests').addJob('build', {
   steps: [
     {
       name: 'Check-out-code',
-      uses: 'actions/checkout@v3',
+      uses: 'actions/checkout@v4',
     },
     {
       name: 'Set-up-node',
-      uses: 'actions/setup-node@v1',
+      uses: 'actions/setup-node@v4',
     },
     {
       name: 'Install dependencies',
