@@ -1,0 +1,313 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "IntegrationTestStorageStack": {
+        "id": "IntegrationTestStorageStack",
+        "path": "IntegrationTestStorageStack",
+        "children": {
+          "river-levels": {
+            "id": "river-levels",
+            "path": "IntegrationTestStorageStack/river-levels",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "IntegrationTestStorageStack/river-levels/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::GlobalTable",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "station",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "timestamp",
+                        "attributeType": "N"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "keySchema": [
+                      {
+                        "attributeName": "station",
+                        "keyType": "HASH"
+                      },
+                      {
+                        "attributeName": "timestamp",
+                        "keyType": "RANGE"
+                      }
+                    ],
+                    "replicas": [
+                      {
+                        "region": {
+                          "Ref": "AWS::Region"
+                        },
+                        "deletionProtectionEnabled": false
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnGlobalTable",
+                  "version": "2.142.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.TableV2",
+              "version": "2.142.0"
+            }
+          },
+          "RiverLevelsTable": {
+            "id": "RiverLevelsTable",
+            "path": "IntegrationTestStorageStack/RiverLevelsTable",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.142.0"
+            }
+          },
+          "Exports": {
+            "id": "Exports",
+            "path": "IntegrationTestStorageStack/Exports",
+            "children": {
+              "Output{\"Ref\":\"riverlevels918EE9F8\"}": {
+                "id": "Output{\"Ref\":\"riverlevels918EE9F8\"}",
+                "path": "IntegrationTestStorageStack/Exports/Output{\"Ref\":\"riverlevels918EE9F8\"}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.142.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.3.0"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "IntegrationTestStorageStack/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.142.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "IntegrationTestStorageStack/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.142.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.142.0"
+        }
+      },
+      "DataStoreTest": {
+        "id": "DataStoreTest",
+        "path": "DataStoreTest",
+        "children": {
+          "DefaultTest": {
+            "id": "DefaultTest",
+            "path": "DataStoreTest/DefaultTest",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "DataStoreTest/DefaultTest/Default",
+                "constructInfo": {
+                  "fqn": "constructs.Construct",
+                  "version": "10.3.0"
+                }
+              },
+              "DeployAssert": {
+                "id": "DeployAssert",
+                "path": "DataStoreTest/DefaultTest/DeployAssert",
+                "children": {
+                  "AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9": {
+                    "id": "AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9",
+                    "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9",
+                    "children": {
+                      "SdkProvider": {
+                        "id": "SdkProvider",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9/SdkProvider",
+                        "children": {
+                          "AssertionsProvider": {
+                            "id": "AssertionsProvider",
+                            "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9/SdkProvider/AssertionsProvider",
+                            "constructInfo": {
+                              "fqn": "constructs.Construct",
+                              "version": "10.3.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                          "version": "2.142.0-alpha.0"
+                        }
+                      },
+                      "Default": {
+                        "id": "Default",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9/Default",
+                        "children": {
+                          "Default": {
+                            "id": "Default",
+                            "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItemc497eb9d9ec1f8065dabf33851b509e9/Default/Default",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.142.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CustomResource",
+                          "version": "2.142.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "@aws-cdk/integ-tests-alpha.AwsApiCall",
+                      "version": "2.142.0-alpha.0"
+                    }
+                  },
+                  "SingletonFunction1488541a7b23466481b69b4408076b81": {
+                    "id": "SingletonFunction1488541a7b23466481b69b4408076b81",
+                    "path": "DataStoreTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81",
+                    "children": {
+                      "Staging": {
+                        "id": "Staging",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Staging",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.142.0"
+                        }
+                      },
+                      "Role": {
+                        "id": "Role",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Role",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.142.0"
+                        }
+                      },
+                      "Handler": {
+                        "id": "Handler",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Handler",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.142.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "constructs.Construct",
+                      "version": "10.3.0"
+                    }
+                  },
+                  "AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc": {
+                    "id": "AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc",
+                    "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc",
+                    "children": {
+                      "SdkProvider": {
+                        "id": "SdkProvider",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc/SdkProvider",
+                        "children": {
+                          "AssertionsProvider": {
+                            "id": "AssertionsProvider",
+                            "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc/SdkProvider/AssertionsProvider",
+                            "constructInfo": {
+                              "fqn": "constructs.Construct",
+                              "version": "10.3.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                          "version": "2.142.0-alpha.0"
+                        }
+                      },
+                      "Default": {
+                        "id": "Default",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc/Default",
+                        "children": {
+                          "Default": {
+                            "id": "Default",
+                            "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc/Default/Default",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.142.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CustomResource",
+                          "version": "2.142.0"
+                        }
+                      },
+                      "AssertionResults": {
+                        "id": "AssertionResults",
+                        "path": "DataStoreTest/DefaultTest/DeployAssert/AwsApiCallDynamoDBgetItemed71d9b7923de33eae457394b46f5bfc/AssertionResults",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnOutput",
+                          "version": "2.142.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "@aws-cdk/integ-tests-alpha.AwsApiCall",
+                      "version": "2.142.0-alpha.0"
+                    }
+                  },
+                  "BootstrapVersion": {
+                    "id": "BootstrapVersion",
+                    "path": "DataStoreTest/DefaultTest/DeployAssert/BootstrapVersion",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnParameter",
+                      "version": "2.142.0"
+                    }
+                  },
+                  "CheckBootstrapVersion": {
+                    "id": "CheckBootstrapVersion",
+                    "path": "DataStoreTest/DefaultTest/DeployAssert/CheckBootstrapVersion",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnRule",
+                      "version": "2.142.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Stack",
+                  "version": "2.142.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "@aws-cdk/integ-tests-alpha.IntegTestCase",
+              "version": "2.142.0-alpha.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "@aws-cdk/integ-tests-alpha.IntegTest",
+          "version": "2.142.0-alpha.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.3.0"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.142.0"
+    }
+  }
+}

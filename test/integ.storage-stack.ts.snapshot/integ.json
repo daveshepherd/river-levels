@@ -1,0 +1,22 @@
+{
+  "version": "36.0.0",
+  "testCases": {
+    "DataStoreTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestStorageStack"
+      ],
+      "regions": [
+        "${Token[AWS.Region.13]}"
+      ],
+      "cdkCommandOptions": {
+        "destroy": {
+          "args": {
+            "force": true
+          }
+        }
+      },
+      "assertionStack": "DataStoreTest/DefaultTest/DeployAssert",
+      "assertionStackName": "DataStoreTestDefaultTestDeployAssert45A5C396"
+    }
+  }
+}

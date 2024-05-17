@@ -1,0 +1,19 @@
+{
+  "version": "36.0.0",
+  "files": {
+    "0b78c27ee204794bcaa8b49a8ac957ffac96443788aaf30c920433afeecb2b20": {
+      "source": {
+        "path": "IntegrationTestStorageStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "0b78c27ee204794bcaa8b49a8ac957ffac96443788aaf30c920433afeecb2b20.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
