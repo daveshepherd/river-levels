@@ -29,6 +29,14 @@
       "type": "build"
     },
     {
+      "name": "aws-sdk-client-mock",
+      "type": "build"
+    },
+    {
+      "name": "aws-sdk-client-mock-jest",
+      "type": "build"
+    },
+    {
       "name": "cdk-nag",
       "type": "build"
     },
@@ -56,6 +64,10 @@
     {
       "name": "jest-junit",
       "version": "^15",
+      "type": "build"
+    },
+    {
+      "name": "nock",
       "type": "build"
     },
     {
@@ -94,6 +106,10 @@
       "type": "devenv"
     },
     {
+      "name": "@aws-lambda-powertools/tracer",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-dynamodb",
       "type": "runtime"
     },
@@ -104,6 +120,10 @@
     },
     {
       "name": "aws-lambda",
+      "type": "runtime"
+    },
+    {
+      "name": "axios",
       "type": "runtime"
     },
     {

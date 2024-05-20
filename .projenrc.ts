@@ -6,10 +6,22 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.1.0',
   copyrightOwner: 'Dave Shepherd',
   defaultReleaseBranch: 'main',
-  deps: ['@aws-sdk/client-dynamodb', 'aws-lambda'],
+  deps: [
+    '@aws-lambda-powertools/tracer',
+    '@aws-sdk/client-dynamodb',
+    'aws-lambda',
+    'axios',
+  ],
   description:
     'A scraper and APIs for getting river readings from the Environment Agency',
-  devDeps: ['@aws-cdk/integ-tests-alpha', 'cdk-nag', 'source-map-support'],
+  devDeps: [
+    '@aws-cdk/integ-tests-alpha',
+    'aws-sdk-client-mock-jest',
+    'aws-sdk-client-mock',
+    'cdk-nag',
+    'nock',
+    'source-map-support',
+  ],
   experimentalIntegRunner: true,
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),

@@ -12,8 +12,6 @@ describe('StorageStack', () => {
 
     const template = Template.fromStack(storageStack);
 
-    console.log(JSON.stringify(template));
-
     template.hasResource('AWS::DynamoDB::GlobalTable', {
       DeletionPolicy: 'Retain',
     });
