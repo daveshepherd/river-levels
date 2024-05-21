@@ -1,7 +1,7 @@
 import { App, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import * as lambda from './resize-image-function';
+import * as lambda from './crawler-function';
 
 export class MyStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
@@ -10,7 +10,7 @@ export class MyStack extends Stack {
     const bucket = new s3.Bucket(this, 'MyBucket', {
       versioned: true,
     });
-    new lambda.ResizeImageFunction(this, 'lambda-mine');
+    new lambda.CrawlerFunction(this, 'lambda-mine');
 
     new CfnOutput(this, 'TestBucket', { value: bucket.bucketArn });
   }

@@ -17,7 +17,6 @@
     "cdk.json",
     "LICENSE",
     "src/crawler-function.ts",
-    "src/resize-image-function.ts",
     "tsconfig.dev.json",
     "tsconfig.json"
   ],
