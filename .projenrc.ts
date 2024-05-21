@@ -1,4 +1,5 @@
 import { awscdk, github } from 'projen';
+import { LambdaRuntime } from 'projen/lib/awscdk';
 import { GithubWorkflow } from 'projen/lib/github';
 import { JobPermission } from 'projen/lib/github/workflows-model';
 
@@ -25,6 +26,9 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   experimentalIntegRunner: true,
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
+  },
+  lambdaOptions: {
+    runtime: LambdaRuntime.NODEJS_20_X,
   },
   license: 'MIT',
   name: 'river-levels',
