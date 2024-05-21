@@ -5,6 +5,8 @@
     "build": "npx projen build",
     "bump": "npx projen bump",
     "bundle": "npx projen bundle",
+    "bundle:crawler.lambda": "npx projen bundle:crawler.lambda",
+    "bundle:crawler.lambda:watch": "npx projen bundle:crawler.lambda:watch",
     "bundle:resize-image.lambda": "npx projen bundle:resize-image.lambda",
     "bundle:resize-image.lambda:watch": "npx projen bundle:resize-image.lambda:watch",
     "clobber": "npx projen clobber",

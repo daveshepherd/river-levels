@@ -46,7 +46,28 @@
       "description": "Prepare assets",
       "steps": [
         {
+          "spawn": "bundle:crawler.lambda"
+        },
+        {
           "spawn": "bundle:resize-image.lambda"
+        }
+      ]
+    },
+    "bundle:crawler.lambda": {
+      "name": "bundle:crawler.lambda",
+      "description": "Create a JavaScript bundle from src/crawler.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/crawler.lambda.ts --target=\"node18\" --platform=\"node\" --outfile=\"assets/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:crawler.lambda:watch": {
+      "name": "bundle:crawler.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/crawler.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/crawler.lambda.ts --target=\"node18\" --platform=\"node\" --outfile=\"assets/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

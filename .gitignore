@@ -52,6 +52,7 @@ junit.xml
 /cdk.out/
 .cdk.staging/
 .parcel-cache/
+!/src/crawler-function.ts
 !/src/resize-image-function.ts
 !/.github/workflows/run-tests.yml
 !/.projenrc.ts
