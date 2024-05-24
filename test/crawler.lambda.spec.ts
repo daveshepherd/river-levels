@@ -1,4 +1,5 @@
 import 'aws-sdk-client-mock-jest';
+import * as target from '../src/crawler.lambda';
 import * as floodApi from '../src/flood-api-client/readings';
 import * as readingStore from '../src/store/readings';
 
@@ -7,8 +8,6 @@ jest.mock('../src/store/readings');
 
 const floodApiMock = floodApi as jest.Mocked<typeof floodApi>;
 const readingStoreMock = readingStore as jest.Mocked<typeof readingStore>;
-
-import * as target from '../src/crawler.lambda';
 
 describe('crawler', () => {
   it('basic test', async () => {
@@ -55,146 +54,126 @@ describe('crawler', () => {
     ]);
   });
 
-  // it('test that we drop anomylous values when only multiple new readings are returned', async () => {
-  //   floodApi.getReadingsSince.mockReturnValue([
-  //     {
-  //       date: new Date('2020-01-01T11:45:00Z'),
-  //       depth: 0.83,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:30:00Z'),
-  //       depth: 0.831,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:15:00Z'),
-  //       depth: 3.1,
-  //     },
-  //   ]);
+  it('test that we drop anomylous values when only multiple new readings are returned', async () => {
+    floodApiMock.getReadingsSince.mockResolvedValue([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+      {
+        date: new Date('2020-01-01T11:15:00Z'),
+        depth: 3.1,
+      },
+    ]);
 
-  //   const latestReadingDate = new Date();
-  //   latestReadingDate.setDate(latestReadingDate.getDate() - 1);
-  //   readingStore.getLatestReading.mockReturnValue({
-  //     date: latestReadingDate,
-  //     depth: 0.833,
-  //   });
+    const latestReadingDate = new Date();
+    latestReadingDate.setDate(latestReadingDate.getDate() - 1);
+    readingStoreMock.getLatestReading.mockResolvedValue({
+      date: latestReadingDate,
+      depth: 0.833,
+    });
 
-  //   readingStore.updateReadings.mockReturnValue();
+    await target.handler();
 
-  //   notifications.sendNotifications.mockReturnValue();
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
+    expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledWith([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+    ]);
+  });
 
-  //   await target.handler();
+  it('test that we drop anomylous value when only one new reading is returned', async () => {
+    floodApiMock.getReadingsSince.mockResolvedValue([
+      {
+        date: new Date('2022-10-11T01:00:00Z'),
+        depth: 3.672,
+      },
+    ]);
 
-  //   expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledWith([
-  //     {
-  //       date: new Date('2020-01-01T11:45:00Z'),
-  //       depth: 0.83,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:30:00Z'),
-  //       depth: 0.831,
-  //     },
-  //   ]);
-  //   expect(notifications.sendNotifications).toHaveBeenCalledTimes(1);
-  // });
+    const latestReadingDate = new Date();
+    latestReadingDate.setDate(latestReadingDate.getDate() - 1);
+    readingStoreMock.getLatestReading.mockResolvedValue({
+      date: latestReadingDate,
+      depth: 0.659,
+    });
 
-  // it('test that we drop anomylous value when only one new reading is returned', async () => {
-  //   floodApi.getReadingsSince.mockReturnValue([
-  //     {
-  //       date: new Date('2022-10-11T01:00:00Z'),
-  //       depth: 3.672,
-  //     },
-  //   ]);
+    await target.handler();
 
-  //   const latestReadingDate = new Date();
-  //   latestReadingDate.setDate(latestReadingDate.getDate() - 1);
-  //   readingStore.getLatestReading.mockReturnValue({
-  //     date: latestReadingDate,
-  //     depth: 0.659,
-  //   });
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
+    expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
+  });
 
-  //   readingStore.updateReadings.mockReturnValue();
+  it('test that no new readings is ok', async () => {
+    floodApiMock.getReadingsSince.mockResolvedValue([]);
 
-  //   notifications.sendNotifications.mockReturnValue();
+    const latestReadingDate = new Date();
+    latestReadingDate.setDate(latestReadingDate.getDate() - 1);
+    readingStoreMock.getLatestReading.mockResolvedValue({
+      date: latestReadingDate,
+      depth: 0.833,
+    });
 
-  //   await target.handler();
+    await target.handler();
 
-  //   expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
-  //   expect(notifications.sendNotifications).toHaveBeenCalledTimes(0);
-  // });
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
+    expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
+  });
 
-  // it('test that no new readings is ok', async () => {
-  //   floodApi.getReadingsSince.mockReturnValue([]);
+  it('should only get a limited number of dates if the stored data is too old', async () => {
+    floodApiMock.getReadings.mockResolvedValue([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+      {
+        date: new Date('2020-01-01T11:15:00Z'),
+        depth: 0.831,
+      },
+    ]);
 
-  //   const latestReadingDate = new Date();
-  //   latestReadingDate.setDate(latestReadingDate.getDate() - 1);
-  //   readingStore.getLatestReading.mockReturnValue({
-  //     date: latestReadingDate,
-  //     depth: 0.833,
-  //   });
+    readingStoreMock.getLatestReading.mockResolvedValue({
+      date: new Date('2020-01-01T11:00:00Z'),
+      depth: 0.833,
+    });
 
-  //   readingStore.updateReadings.mockReturnValue();
+    await target.handler();
 
-  //   notifications.sendNotifications.mockReturnValue();
-
-  //   await target.handler();
-
-  //   expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
-  //   expect(notifications.sendNotifications).toHaveBeenCalledTimes(0);
-  // });
-
-  // it('should only get a limited number of dates if the stored data is too old', async () => {
-  //   floodApi.getReadings.mockReturnValue([
-  //     {
-  //       date: new Date('2020-01-01T11:45:00Z'),
-  //       depth: 0.83,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:30:00Z'),
-  //       depth: 0.831,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:15:00Z'),
-  //       depth: 0.831,
-  //     },
-  //   ]);
-
-  //   readingStore.getLatestReading.mockReturnValue({
-  //     date: new Date('2020-01-01T11:00:00Z'),
-  //     depth: 0.833,
-  //   });
-
-  //   readingStore.updateReadings.mockReturnValue();
-
-  //   notifications.sendNotifications.mockReturnValue();
-
-  //   await target.handler();
-
-  //   expect(floodApi.getReadings).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
-  //   expect(readingStore.updateReadings).toHaveBeenCalledWith([
-  //     {
-  //       date: new Date('2020-01-01T11:45:00Z'),
-  //       depth: 0.83,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:30:00Z'),
-  //       depth: 0.831,
-  //     },
-  //     {
-  //       date: new Date('2020-01-01T11:15:00Z'),
-  //       depth: 0.831,
-  //     },
-  //   ]);
-  //   expect(notifications.sendNotifications).toHaveBeenCalledTimes(1);
-  // });
+    expect(floodApi.getReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledWith([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+      {
+        date: new Date('2020-01-01T11:15:00Z'),
+        depth: 0.831,
+      },
+    ]);
+  });
 });
