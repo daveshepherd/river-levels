@@ -1,7 +1,8 @@
 import 'source-map-support/register';
 import { ExpectedResult, IntegTest } from '@aws-cdk/integ-tests-alpha';
-import { App, Aspects } from 'aws-cdk-lib';
-import { AwsSolutionsChecks } from 'cdk-nag';
+import { App, Aspects, Duration } from 'aws-cdk-lib';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { StorageStack } from '../src/storage-stack';
 
 const app = new App();
@@ -24,40 +25,37 @@ const integ = new IntegTest(app, 'DataStoreTest', {
 });
 
 integ.assertions
-  .awsApiCall('DynamoDB', 'putItem', {
-    Item: {
-      station: {
-        S: 'station_name',
-      },
-      timestamp: {
-        N: '1',
-      },
-    },
-    TableName: stackUnderTest.riverLevelsTableName,
+  .invokeFunction({
+    functionName: stackUnderTest.crawlerFunctionName,
+    logRetention: RetentionDays.ONE_WEEK,
   })
   .next(
     integ.assertions
-      .awsApiCall('DynamoDB', 'getItem', {
-        TableName: stackUnderTest.riverLevelsTableName,
-        Key: {
-          station: {
-            S: 'station_name',
-          },
-          timestamp: {
-            N: '1',
-          },
+      .awsApiCall('DynamoDB', 'Query', {
+        ExpressionAttributeValues: {
+          ':station': { S: 'kenilworth' },
         },
+        KeyConditionExpression: 'station = :station',
+        Limit: 1,
+        ScanIndexForward: false,
+        TableName: stackUnderTest.riverLevelsTableName,
       })
       .expect(
         ExpectedResult.objectLike({
-          Item: {
-            station: {
-              S: 'station_name',
-            },
-            timestamp: {
-              N: '1',
-            },
-          },
+          Count: 1,
         }),
-      ),
+      )
+      .waitForAssertions({
+        totalTimeout: Duration.minutes(5),
+        interval: Duration.seconds(15),
+        backoffRate: 3,
+      }),
   );
+
+NagSuppressions.addStackSuppressions(stackUnderTest, [
+  {
+    id: 'AwsSolutions-IAM4',
+    reason:
+      'it is acceptable to use build in iam policies for basic lambda runtime',
+  },
+]);

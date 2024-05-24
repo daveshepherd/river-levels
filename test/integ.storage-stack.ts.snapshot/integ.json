@@ -6,7 +6,7 @@
         "IntegrationTestStorageStack"
       ],
       "regions": [
-        "${Token[AWS.Region.13]}"
+        "${Token[AWS.Region.9]}"
       ],
       "cdkCommandOptions": {
         "destroy": {

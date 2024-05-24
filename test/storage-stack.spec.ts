@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import { StorageStack } from '../src/storage-stack';
 
 describe('StorageStack', () => {
@@ -25,6 +25,34 @@ describe('StorageStack', () => {
         { AttributeName: 'station', KeyType: 'HASH' },
         { AttributeName: 'timestamp', KeyType: 'RANGE' },
       ],
+    });
+
+    template.hasResource('AWS::Lambda::Function', {});
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Runtime: 'nodejs20.x',
+      Environment: {
+        Variables: {
+          DYNAMODB_READINGS_TABLE: storageStack.resolve(
+            storageStack.riverLevelsTableName,
+          ),
+        },
+      },
+    });
+    template.hasResource('AWS::IAM::Role', {});
+    template.hasResourceProperties('AWS::IAM::Role', {
+      Description: Match.anyValue(),
+      Path: '/service-role/',
+      ManagedPolicyArns: [
+        Match.anyValue(),
+        Match.anyValue(),
+        Match.anyValue(),
+        Match.anyValue(),
+      ],
+    });
+    template.hasResource('AWS::IAM::ManagedPolicy', {});
+    template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      Description: Match.anyValue(),
+      Path: '/service-policy/',
     });
   });
   test('that a replica is created if specified', () => {
