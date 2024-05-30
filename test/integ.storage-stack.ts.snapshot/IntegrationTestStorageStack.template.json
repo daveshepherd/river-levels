@@ -171,7 +171,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "91eb1d193300dca35859f1fb95ed8f506fb37aab2bb4f05156b65a3fd0ffc801.zip"
+     "S3Key": "69a8c845d4bdd167f3f7ae55e271a09f215c8eda7921e0fe0285648b1032938c.zip"
     },
     "Description": "src/crawler.lambda.ts",
     "Environment": {
@@ -229,6 +229,14 @@
    },
    "Export": {
     "Name": "IntegrationTestStorageStack:ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
+   }
+  },
+  "ExportsOutputRefriverlevelstableA1F25F33A0433BB0": {
+   "Value": {
+    "Ref": "riverlevelstableA1F25F33"
+   },
+   "Export": {
+    "Name": "IntegrationTestStorageStack:ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
    }
   }
  },
