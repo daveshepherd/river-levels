@@ -6,6 +6,7 @@ import {
   Role,
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
 import * as lambda from './crawler-function';
 
@@ -21,7 +22,7 @@ export class StorageStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
-    const riverLevelsTable = new dynamodb.TableV2(this, 'river-levels', {
+    const riverLevelsTable = new dynamodb.TableV2(this, 'river-levels-table', {
       deletionProtection: props?.setDestroyPolicyToAllResources ? false : true,
       partitionKey: { name: 'station', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
@@ -33,7 +34,7 @@ export class StorageStack extends cdk.Stack {
     });
     this.riverLevelsTableName = riverLevelsTable.tableName;
 
-    const executionRole = new Role(this, 'river-levels-crawler', {
+    const executionRole = new Role(this, 'crawler-role', {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
       description:
         'The service role for running the river levels crawler lambda',
@@ -52,7 +53,7 @@ export class StorageStack extends cdk.Stack {
     executionRole.addManagedPolicy(
       ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
     );
-    const dynmodbAccessPolicy = new ManagedPolicy(this, 'Policy', {
+    const dynmodbAccessPolicy = new ManagedPolicy(this, 'crawler-policy', {
       description: 'Grant access to the river levels table',
       path: '/service-policy/',
       statements: [
@@ -64,10 +65,14 @@ export class StorageStack extends cdk.Stack {
     });
     executionRole.addManagedPolicy(dynmodbAccessPolicy);
 
-    const crawler = new lambda.CrawlerFunction(this, 'crawler', {
+    const crawlerLogGroup = new LogGroup(this, 'crawler-log-group', {
+      retention: RetentionDays.ONE_YEAR,
+    });
+    const crawler = new lambda.CrawlerFunction(this, 'crawler-lambda', {
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
       },
+      logGroup: crawlerLogGroup,
       role: executionRole,
       timeout: cdk.Duration.seconds(60),
     });
