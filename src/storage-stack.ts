@@ -1,11 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import {
   ManagedPolicy,
   PolicyStatement,
   Role,
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { Architecture, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
 import * as lambda from './crawler-function';
@@ -68,15 +71,38 @@ export class StorageStack extends cdk.Stack {
     const crawlerLogGroup = new LogGroup(this, 'crawler-log-group', {
       retention: RetentionDays.ONE_YEAR,
     });
+    const layerArn =
+      'arn:aws:lambda:' +
+      process.env.CDK_DEFAULT_REGION +
+      ':580247275435:layer:LambdaInsightsExtension-Arm64:19';
+    const layer = LayerVersion.fromLayerVersionArn(
+      this,
+      'LayerFromArn',
+      layerArn,
+    );
     const crawler = new lambda.CrawlerFunction(this, 'crawler-lambda', {
+      architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
       },
+      layers: [layer],
       logGroup: crawlerLogGroup,
+      memorySize: 256,
       role: executionRole,
       timeout: cdk.Duration.seconds(60),
+      // tracing: Tracing.ACTIVE,
     });
     this.crawlerFunctionName = crawler.functionName;
+
+    new Rule(this, 'crawler-cron', {
+      enabled: false,
+      schedule: Schedule.rate(cdk.Duration.minutes(10)),
+      targets: [
+        new LambdaFunction(crawler, {
+          retryAttempts: 3,
+        }),
+      ],
+    });
 
     // If Destroy Policy Aspect is present:
     if (props?.setDestroyPolicyToAllResources) {

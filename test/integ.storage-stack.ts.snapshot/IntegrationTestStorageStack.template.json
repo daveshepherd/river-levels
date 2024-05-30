@@ -167,6 +167,9 @@
   "crawlerlambda65FC80E0": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
     "Code": {
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
@@ -183,11 +186,15 @@
      }
     },
     "Handler": "index.handler",
+    "Layers": [
+     "arn:aws:lambda:eu-west-2:580247275435:layer:LambdaInsightsExtension-Arm64:19"
+    ],
     "LoggingConfig": {
      "LogGroup": {
       "Ref": "crawlerloggroup6A20A1A3"
      }
     },
+    "MemorySize": 256,
     "Role": {
      "Fn::GetAtt": [
       "crawlerrole985C99ED",
@@ -210,6 +217,50 @@
    "DependsOn": [
     "crawlerrole985C99ED"
    ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "crawlercronD1309D29": {
+   "Type": "AWS::Events::Rule",
+   "Properties": {
+    "ScheduleExpression": "rate(5 minutes)",
+    "State": "DISABLED",
+    "Targets": [
+     {
+      "Arn": {
+       "Fn::GetAtt": [
+        "crawlerlambda65FC80E0",
+        "Arn"
+       ]
+      },
+      "Id": "Target0",
+      "RetryPolicy": {
+       "MaximumRetryAttempts": 3
+      }
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "crawlercronAllowEventRuleIntegrationTestStorageStackcrawlerlambda8647373F5E009610": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "crawlerlambda65FC80E0",
+      "Arn"
+     ]
+    },
+    "Principal": "events.amazonaws.com",
+    "SourceArn": {
+     "Fn::GetAtt": [
+      "crawlercronD1309D29",
+      "Arn"
+     ]
+    }
+   },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   }

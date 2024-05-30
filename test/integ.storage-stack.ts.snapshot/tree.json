@@ -242,6 +242,14 @@
               "version": "2.143.0"
             }
           },
+          "LayerFromArn": {
+            "id": "LayerFromArn",
+            "path": "IntegrationTestStorageStack/LayerFromArn",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.143.0"
+            }
+          },
           "crawler-lambda": {
             "id": "crawler-lambda",
             "path": "IntegrationTestStorageStack/crawler-lambda",
@@ -278,6 +286,9 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
+                    "architectures": [
+                      "arm64"
+                    ],
                     "code": {
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
@@ -294,11 +305,15 @@
                       }
                     },
                     "handler": "index.handler",
+                    "layers": [
+                      "arn:aws:lambda:eu-west-2:580247275435:layer:LambdaInsightsExtension-Arm64:19"
+                    ],
                     "loggingConfig": {
                       "logGroup": {
                         "Ref": "crawlerloggroup6A20A1A3"
                       }
                     },
+                    "memorySize": 256,
                     "role": {
                       "Fn::GetAtt": [
                         "crawlerrole985C99ED",
@@ -327,6 +342,72 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.143.0"
+            }
+          },
+          "crawler-cron": {
+            "id": "crawler-cron",
+            "path": "IntegrationTestStorageStack/crawler-cron",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "IntegrationTestStorageStack/crawler-cron/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Events::Rule",
+                  "aws:cdk:cloudformation:props": {
+                    "scheduleExpression": "rate(5 minutes)",
+                    "state": "DISABLED",
+                    "targets": [
+                      {
+                        "id": "Target0",
+                        "arn": {
+                          "Fn::GetAtt": [
+                            "crawlerlambda65FC80E0",
+                            "Arn"
+                          ]
+                        },
+                        "retryPolicy": {
+                          "maximumRetryAttempts": 3
+                        }
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_events.CfnRule",
+                  "version": "2.143.0"
+                }
+              },
+              "AllowEventRuleIntegrationTestStorageStackcrawlerlambda8647373F": {
+                "id": "AllowEventRuleIntegrationTestStorageStackcrawlerlambda8647373F",
+                "path": "IntegrationTestStorageStack/crawler-cron/AllowEventRuleIntegrationTestStorageStackcrawlerlambda8647373F",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                  "aws:cdk:cloudformation:props": {
+                    "action": "lambda:InvokeFunction",
+                    "functionName": {
+                      "Fn::GetAtt": [
+                        "crawlerlambda65FC80E0",
+                        "Arn"
+                      ]
+                    },
+                    "principal": "events.amazonaws.com",
+                    "sourceArn": {
+                      "Fn::GetAtt": [
+                        "crawlercronD1309D29",
+                        "Arn"
+                      ]
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                  "version": "2.143.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_events.Rule",
               "version": "2.143.0"
             }
           },
