@@ -18,6 +18,7 @@
     "integ": "npx projen integ",
     "integ:force": "npx projen integ:force",
     "integ:update": "npx projen integ:update",
+    "integ:watch": "npx projen integ:watch",
     "package": "npx projen package",
     "post-compile": "npx projen post-compile",
     "post-upgrade": "npx projen post-upgrade",

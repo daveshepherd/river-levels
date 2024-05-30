@@ -45,7 +45,15 @@ project.addTask('integ:force', {
     },
   ],
 });
-
+project.addTask('integ:watch', {
+  description: 'Watch the integration snapshot tests',
+  steps: [
+    {
+      exec: 'integ-runner $@ --language typescript --watch',
+      receiveArgs: true,
+    },
+  ],
+});
 new GithubWorkflow(project.github!, 'Run-Tests').addJob('build', {
   runsOn: ['ubuntu-latest'],
   permissions: {

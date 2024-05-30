@@ -212,6 +212,16 @@
         }
       ]
     },
+    "integ:watch": {
+      "name": "integ:watch",
+      "description": "Watch the integration snapshot tests",
+      "steps": [
+        {
+          "exec": "integ-runner $@ --language typescript --watch",
+          "receiveArgs": true
+        }
+      ]
+    },
     "package": {
       "name": "package",
       "description": "Creates the distribution package"
