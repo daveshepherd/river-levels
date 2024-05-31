@@ -82,7 +82,7 @@
         {
          "Ref": "AWS::Partition"
         },
-        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
        ]
       ]
      },
@@ -94,12 +94,12 @@
         {
          "Ref": "AWS::Partition"
         },
-        ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
        ]
       ]
      },
      {
-      "Ref": "crawlerpolicyF36192F2"
+      "Ref": "crawlerrolecrawlerpolicy8AFFD705"
      }
     ],
     "Path": "/service-role/",
@@ -113,6 +113,34 @@
       "Value": "integ"
      }
     ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "crawlerrolecrawlerpolicy8AFFD705": {
+   "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "Description": "Grant access to the river levels table",
+    "Path": "/service-policy/",
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "riverlevelstableA1F25F33",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -139,34 +167,6 @@
       "Ref": "crawlerrole985C99ED"
      }
     ]
-   },
-   "UpdateReplacePolicy": "Delete",
-   "DeletionPolicy": "Delete"
-  },
-  "crawlerpolicyF36192F2": {
-   "Type": "AWS::IAM::ManagedPolicy",
-   "Properties": {
-    "Description": "Grant access to the river levels table",
-    "Path": "/service-policy/",
-    "PolicyDocument": {
-     "Statement": [
-      {
-       "Action": [
-        "dynamodb:Query",
-        "dynamodb:Scan",
-        "dynamodb:UpdateItem"
-       ],
-       "Effect": "Allow",
-       "Resource": {
-        "Fn::GetAtt": [
-         "riverlevelstableA1F25F33",
-         "Arn"
-        ]
-       }
-      }
-     ],
-     "Version": "2012-10-17"
-    }
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -254,6 +254,7 @@
     }
    },
    "DependsOn": [
+    "crawlerrolecrawlerpolicy8AFFD705",
     "crawlerroleDefaultPolicyD657C666",
     "crawlerrole985C99ED"
    ],

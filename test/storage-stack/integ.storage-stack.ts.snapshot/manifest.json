@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4d9652b4730d40722607574aecade8327377db189631010dc329d5a515bf6d47.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c5fb8492a2a1c52f5c9ec0fc12215de8837b8097478b9edadaece5da1269eaeb.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -65,16 +65,16 @@
             "data": "crawlerrole985C99ED"
           }
         ],
+        "/IntegrationTestStorageStack/crawler-role/crawler-policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "crawlerrolecrawlerpolicy8AFFD705"
+          }
+        ],
         "/IntegrationTestStorageStack/crawler-role/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "crawlerroleDefaultPolicyD657C666"
-          }
-        ],
-        "/IntegrationTestStorageStack/crawler-policy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "crawlerpolicyF36192F2"
           }
         ],
         "/IntegrationTestStorageStack/crawler-log-group/Resource": [
@@ -151,7 +151,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/35b97355ccaf41743d2267ed29566ae9ee625e26e4cc1977d20d930c68602fb7.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/0790b40e5296b7fbd3a89022b955020b7c82388b3d231cfbbf2cf4280a0c405f.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [

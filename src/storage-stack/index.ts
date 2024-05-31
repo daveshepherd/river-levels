@@ -2,16 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import {
-  ManagedPolicy,
-  PolicyStatement,
-  Role,
-  ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
 import { Architecture, LayerVersion, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
-import * as lambda from './crawler-function';
+import { CrawlerFunction } from './crawler-function';
+import { CrawlerRole } from './crawler.role';
 
 export interface StorageStackProps extends cdk.StackProps {
   replicaRegions?: Array<string>;
@@ -37,33 +32,9 @@ export class StorageStack extends cdk.Stack {
     });
     this.riverLevelsTableName = riverLevelsTable.tableName;
 
-    const executionRole = new Role(this, 'crawler-role', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-      description:
-        'The service role for running the river levels crawler lambda',
-      path: '/service-role/',
+    const executionRole = new CrawlerRole(this, 'crawler-role', {
+      dynamoDbTableArn: riverLevelsTable.tableArn,
     });
-    executionRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName(
-        'service-role/AWSLambdaBasicExecutionRole',
-      ),
-    );
-    executionRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName(
-        'CloudWatchLambdaInsightsExecutionRolePolicy',
-      ),
-    );
-    const dynmodbAccessPolicy = new ManagedPolicy(this, 'crawler-policy', {
-      description: 'Grant access to the river levels table',
-      path: '/service-policy/',
-      statements: [
-        new PolicyStatement({
-          actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:UpdateItem'],
-          resources: [riverLevelsTable.tableArn],
-        }),
-      ],
-    });
-    executionRole.addManagedPolicy(dynmodbAccessPolicy);
 
     const crawlerLogGroup = new LogGroup(this, 'crawler-log-group', {
       retention: RetentionDays.ONE_YEAR,
@@ -77,7 +48,7 @@ export class StorageStack extends cdk.Stack {
       'LayerFromArn',
       layerArn,
     );
-    const crawler = new lambda.CrawlerFunction(this, 'crawler-lambda', {
+    const crawler = new CrawlerFunction(this, 'crawler-lambda', {
       architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,

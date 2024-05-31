@@ -100,7 +100,7 @@
                             {
                               "Ref": "AWS::Partition"
                             },
-                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
                           ]
                         ]
                       },
@@ -112,12 +112,12 @@
                             {
                               "Ref": "AWS::Partition"
                             },
-                            ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
                           ]
                         ]
                       },
                       {
-                        "Ref": "crawlerpolicyF36192F2"
+                        "Ref": "crawlerrolecrawlerpolicy8AFFD705"
                       }
                     ],
                     "path": "/service-role/",
@@ -135,6 +135,58 @@
                 },
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.143.0"
+                }
+              },
+              "crawler-policy": {
+                "id": "crawler-policy",
+                "path": "IntegrationTestStorageStack/crawler-role/crawler-policy",
+                "children": {
+                  "Importedcrawler-policy": {
+                    "id": "Importedcrawler-policy",
+                    "path": "IntegrationTestStorageStack/crawler-role/crawler-policy/Importedcrawler-policy",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.143.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IntegrationTestStorageStack/crawler-role/crawler-policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::ManagedPolicy",
+                      "aws:cdk:cloudformation:props": {
+                        "description": "Grant access to the river levels table",
+                        "path": "/service-policy/",
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "dynamodb:Query",
+                                "dynamodb:Scan",
+                                "dynamodb:UpdateItem"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "riverlevelstableA1F25F33",
+                                  "Arn"
+                                ]
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnManagedPolicy",
+                      "version": "2.143.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.ManagedPolicy",
                   "version": "2.143.0"
                 }
               },
@@ -183,58 +235,6 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_iam.Role",
-              "version": "2.143.0"
-            }
-          },
-          "crawler-policy": {
-            "id": "crawler-policy",
-            "path": "IntegrationTestStorageStack/crawler-policy",
-            "children": {
-              "Importedcrawler-policy": {
-                "id": "Importedcrawler-policy",
-                "path": "IntegrationTestStorageStack/crawler-policy/Importedcrawler-policy",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.Resource",
-                  "version": "2.143.0"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "IntegrationTestStorageStack/crawler-policy/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::IAM::ManagedPolicy",
-                  "aws:cdk:cloudformation:props": {
-                    "description": "Grant access to the river levels table",
-                    "path": "/service-policy/",
-                    "policyDocument": {
-                      "Statement": [
-                        {
-                          "Action": [
-                            "dynamodb:Query",
-                            "dynamodb:Scan",
-                            "dynamodb:UpdateItem"
-                          ],
-                          "Effect": "Allow",
-                          "Resource": {
-                            "Fn::GetAtt": [
-                              "riverlevelstableA1F25F33",
-                              "Arn"
-                            ]
-                          }
-                        }
-                      ],
-                      "Version": "2012-10-17"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.CfnManagedPolicy",
-                  "version": "2.143.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_iam.ManagedPolicy",
               "version": "2.143.0"
             }
           },
