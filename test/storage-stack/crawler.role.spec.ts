@@ -12,7 +12,6 @@ describe('CrawlerRole', () => {
 
     const template = Template.fromStack(stack);
 
-    console.log(JSON.stringify(template));
     template.hasResource('AWS::IAM::Role', {});
     template.hasResourceProperties('AWS::IAM::Role', {
       AssumeRolePolicyDocument: {

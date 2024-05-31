@@ -44,9 +44,15 @@
                         "region": {
                           "Ref": "AWS::Region"
                         },
-                        "deletionProtectionEnabled": false
+                        "deletionProtectionEnabled": false,
+                        "pointInTimeRecoverySpecification": {
+                          "pointInTimeRecoveryEnabled": true
+                        }
                       }
-                    ]
+                    ],
+                    "streamSpecification": {
+                      "streamViewType": "NEW_AND_OLD_IMAGES"
+                    }
                   }
                 },
                 "constructInfo": {

@@ -48,11 +48,17 @@
     "Replicas": [
      {
       "DeletionProtectionEnabled": false,
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
       "Region": {
        "Ref": "AWS::Region"
       }
      }
-    ]
+    ],
+    "StreamSpecification": {
+     "StreamViewType": "NEW_AND_OLD_IMAGES"
+    }
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"

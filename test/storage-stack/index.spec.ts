@@ -1,10 +1,10 @@
-import * as cdk from 'aws-cdk-lib';
+import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { StorageStack } from '../../src/storage-stack';
 
 describe('StorageStack', () => {
   test('that default configuration is correct', () => {
-    const app = new cdk.App();
+    const app = new App();
 
     const storageStack = new StorageStack(app, 'StorageStack', {
       env: { region: 'eu-west-2' },
@@ -16,7 +16,14 @@ describe('StorageStack', () => {
       DeletionPolicy: 'Retain',
     });
     template.hasResourceProperties('AWS::DynamoDB::GlobalTable', {
-      Replicas: [{ Region: 'eu-west-2' }],
+      Replicas: [
+        {
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-2',
+        },
+      ],
       AttributeDefinitions: [
         { AttributeName: 'station', AttributeType: 'S' },
         { AttributeName: 'timestamp', AttributeType: 'N' },
@@ -25,6 +32,9 @@ describe('StorageStack', () => {
         { AttributeName: 'station', KeyType: 'HASH' },
         { AttributeName: 'timestamp', KeyType: 'RANGE' },
       ],
+      StreamSpecification: {
+        StreamViewType: 'NEW_AND_OLD_IMAGES',
+      },
     });
 
     template.hasResource('AWS::Lambda::Function', {});
@@ -42,11 +52,7 @@ describe('StorageStack', () => {
     template.hasResourceProperties('AWS::IAM::Role', {
       Description: Match.anyValue(),
       Path: '/service-role/',
-      ManagedPolicyArns: [
-        Match.anyValue(),
-        Match.anyValue(),
-        Match.anyValue(),
-      ],
+      ManagedPolicyArns: [Match.anyValue(), Match.anyValue(), Match.anyValue()],
     });
     template.hasResource('AWS::IAM::ManagedPolicy', {});
     template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
@@ -55,7 +61,7 @@ describe('StorageStack', () => {
     });
   });
   test('that a replica is created if specified', () => {
-    const app = new cdk.App();
+    const app = new App();
 
     const storageStack = new StorageStack(app, 'StorageStack', {
       env: { region: 'eu-west-2' },
@@ -66,13 +72,25 @@ describe('StorageStack', () => {
 
     template.hasResourceProperties('AWS::DynamoDB::GlobalTable', {
       Replicas: [
-        { DeletionProtectionEnabled: true, Region: 'eu-west-1' },
-        { DeletionProtectionEnabled: true, Region: 'eu-west-2' },
+        {
+          DeletionProtectionEnabled: true,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-1',
+        },
+        {
+          DeletionProtectionEnabled: true,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-2',
+        },
       ],
     });
   });
   test('that multiple replicas are created if specified', () => {
-    const app = new cdk.App();
+    const app = new App();
 
     const storageStack = new StorageStack(app, 'StorageStack', {
       env: { region: 'eu-west-2' },
@@ -83,14 +101,32 @@ describe('StorageStack', () => {
 
     template.hasResourceProperties('AWS::DynamoDB::GlobalTable', {
       Replicas: [
-        { DeletionProtectionEnabled: true, Region: 'eu-west-1' },
-        { DeletionProtectionEnabled: true, Region: 'us-west-1' },
-        { DeletionProtectionEnabled: true, Region: 'eu-west-2' },
+        {
+          DeletionProtectionEnabled: true,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-1',
+        },
+        {
+          DeletionProtectionEnabled: true,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'us-west-1',
+        },
+        {
+          DeletionProtectionEnabled: true,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-2',
+        },
       ],
     });
   });
   test('that storage is destroyed if setDestroyPolicyToAllResources is set', () => {
-    const app = new cdk.App();
+    const app = new App();
 
     const storageStack = new StorageStack(app, 'StorageStack', {
       env: { region: 'eu-west-2' },
@@ -105,8 +141,20 @@ describe('StorageStack', () => {
     });
     template.hasResourceProperties('AWS::DynamoDB::GlobalTable', {
       Replicas: [
-        { DeletionProtectionEnabled: false, Region: 'eu-west-1' },
-        { DeletionProtectionEnabled: false, Region: 'eu-west-2' },
+        {
+          DeletionProtectionEnabled: false,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-1',
+        },
+        {
+          DeletionProtectionEnabled: false,
+          PointInTimeRecoverySpecification: {
+            PointInTimeRecoveryEnabled: true,
+          },
+          Region: 'eu-west-2',
+        },
       ],
     });
   });

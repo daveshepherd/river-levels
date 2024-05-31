@@ -1,5 +1,18 @@
-import * as cdk from 'aws-cdk-lib';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import {
+  Aspects,
+  CfnOutput,
+  CfnResource,
+  Duration,
+  IAspect,
+  RemovalPolicy,
+  Stack,
+  StackProps,
+} from 'aws-cdk-lib';
+import {
+  AttributeType,
+  StreamViewType,
+  TableV2,
+} from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Architecture, LayerVersion, Tracing } from 'aws-cdk-lib/aws-lambda';
@@ -8,22 +21,24 @@ import { Construct, IConstruct } from 'constructs';
 import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
 
-export interface StorageStackProps extends cdk.StackProps {
+export interface StorageStackProps extends StackProps {
   replicaRegions?: Array<string>;
   setDestroyPolicyToAllResources?: boolean;
 }
 
-export class StorageStack extends cdk.Stack {
+export class StorageStack extends Stack {
   public readonly crawlerFunctionName: string;
   public readonly riverLevelsTableName: string;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
-    const riverLevelsTable = new dynamodb.TableV2(this, 'river-levels-table', {
+    const riverLevelsTable = new TableV2(this, 'river-levels-table', {
       deletionProtection: props?.setDestroyPolicyToAllResources ? false : true,
-      partitionKey: { name: 'station', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+      dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
+      partitionKey: { name: 'station', type: AttributeType.STRING },
+      pointInTimeRecovery: true,
+      sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
       replicas: props.replicaRegions
         ? props.replicaRegions.map(function (replicaRegion) {
           return { region: replicaRegion };
@@ -41,7 +56,7 @@ export class StorageStack extends cdk.Stack {
     });
     const layerArn =
       'arn:aws:lambda:' +
-      cdk.Stack.of(this).region +
+      Stack.of(this).region +
       ':580247275435:layer:LambdaInsightsExtension-Arm64:19';
     const layer = LayerVersion.fromLayerVersionArn(
       this,
@@ -57,14 +72,14 @@ export class StorageStack extends cdk.Stack {
       logGroup: crawlerLogGroup,
       memorySize: 256,
       role: executionRole,
-      timeout: cdk.Duration.seconds(60),
+      timeout: Duration.seconds(60),
       tracing: Tracing.ACTIVE,
     });
     this.crawlerFunctionName = crawler.functionName;
 
     new Rule(this, 'crawler-cron', {
       enabled: false,
-      schedule: Schedule.rate(cdk.Duration.minutes(10)),
+      schedule: Schedule.rate(Duration.minutes(10)),
       targets: [
         new LambdaFunction(crawler, {
           retryAttempts: 3,
@@ -74,17 +89,17 @@ export class StorageStack extends cdk.Stack {
 
     // If Destroy Policy Aspect is present:
     if (props?.setDestroyPolicyToAllResources) {
-      cdk.Aspects.of(this).add(new ApplyDestroyPolicyAspect());
+      Aspects.of(this).add(new ApplyDestroyPolicyAspect());
     }
-    new cdk.CfnOutput(this, 'RiverLevelsTable', {
+    new CfnOutput(this, 'RiverLevelsTable', {
       value: riverLevelsTable.tableArn,
     });
   }
 }
-class ApplyDestroyPolicyAspect implements cdk.IAspect {
+class ApplyDestroyPolicyAspect implements IAspect {
   public visit(node: IConstruct): void {
-    if (node instanceof cdk.CfnResource) {
-      node.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    if (node instanceof CfnResource) {
+      node.applyRemovalPolicy(RemovalPolicy.DESTROY);
     }
   }
 }
