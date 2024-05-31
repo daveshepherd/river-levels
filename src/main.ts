@@ -4,7 +4,7 @@ import { StorageStack } from './storage-stack';
 const app = new App();
 
 const storageStack = new StorageStack(app, 'RiverLevels-dev', {});
-Tags.of(storageStack).add('ManagedBy', 'CDK');
-Tags.of(storageStack).add('Stage', 'dev');
+Tags.of(storageStack).add('endor:ManagedBy', 'cdk');
+Tags.of(storageStack).add('endor:Stage', 'development');
 
 app.synth();

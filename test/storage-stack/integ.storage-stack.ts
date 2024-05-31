@@ -10,8 +10,8 @@ Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 const stackUnderTest = new StorageStack(app, 'IntegrationTestStorageStack', {
   setDestroyPolicyToAllResources: true,
 });
-Tags.of(stackUnderTest).add('ManagedBy', 'CDK');
-Tags.of(stackUnderTest).add('Stage', 'integ');
+Tags.of(stackUnderTest).add('endor:ManagedBy', 'cdk');
+Tags.of(stackUnderTest).add('endor:Stage', 'development');
 
 const integ = new IntegTest(app, 'DataStoreTest', {
   testCases: [stackUnderTest],

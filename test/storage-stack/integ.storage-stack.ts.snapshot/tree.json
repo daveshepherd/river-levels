@@ -123,12 +123,12 @@
                     "path": "/service-role/",
                     "tags": [
                       {
-                        "key": "ManagedBy",
-                        "value": "CDK"
+                        "key": "endor:ManagedBy",
+                        "value": "cdk"
                       },
                       {
-                        "key": "Stage",
-                        "value": "integ"
+                        "key": "endor:Stage",
+                        "value": "development"
                       }
                     ]
                   }
@@ -251,12 +251,12 @@
                     "retentionInDays": 365,
                     "tags": [
                       {
-                        "key": "ManagedBy",
-                        "value": "CDK"
+                        "key": "endor:ManagedBy",
+                        "value": "cdk"
                       },
                       {
-                        "key": "Stage",
-                        "value": "integ"
+                        "key": "endor:Stage",
+                        "value": "development"
                       }
                     ]
                   }
@@ -364,12 +364,12 @@
                     "runtime": "nodejs20.x",
                     "tags": [
                       {
-                        "key": "ManagedBy",
-                        "value": "CDK"
+                        "key": "endor:ManagedBy",
+                        "value": "cdk"
                       },
                       {
-                        "key": "Stage",
-                        "value": "integ"
+                        "key": "endor:Stage",
+                        "value": "development"
                       }
                     ],
                     "timeout": 60,
