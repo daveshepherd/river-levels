@@ -4,7 +4,18 @@
    "rules_to_suppress": [
     {
      "reason": "it is acceptable to use build in iam policies for basic lambda runtime",
-     "id": "AwsSolutions-IAM4"
+     "id": "AwsSolutions-IAM4",
+     "applies_to": [
+      "Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+      "Policy::arn:<AWS::Partition>:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+     ]
+    },
+    {
+     "reason": "the lambda tracing option creates a wildcard policy",
+     "id": "AwsSolutions-IAM5",
+     "applies_to": [
+      "Resource::*"
+     ]
     }
    ]
   }
@@ -88,18 +99,6 @@
       ]
      },
      {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":iam::aws:policy/AWSXRayDaemonWriteAccess"
-       ]
-      ]
-     },
-     {
       "Ref": "crawlerpolicyF36192F2"
      }
     ],
@@ -112,6 +111,32 @@
      {
       "Key": "Stage",
       "Value": "integ"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "crawlerroleDefaultPolicyD657C666": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "crawlerroleDefaultPolicyD657C666",
+    "Roles": [
+     {
+      "Ref": "crawlerrole985C99ED"
      }
     ]
    },
@@ -187,7 +212,18 @@
     },
     "Handler": "index.handler",
     "Layers": [
-     "arn:aws:lambda:eu-west-2:580247275435:layer:LambdaInsightsExtension-Arm64:19"
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:lambda:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":580247275435:layer:LambdaInsightsExtension-Arm64:19"
+       ]
+      ]
+     }
     ],
     "LoggingConfig": {
      "LogGroup": {
@@ -212,9 +248,13 @@
       "Value": "integ"
      }
     ],
-    "Timeout": 60
+    "Timeout": 60,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
    },
    "DependsOn": [
+    "crawlerroleDefaultPolicyD657C666",
     "crawlerrole985C99ED"
    ],
    "UpdateReplacePolicy": "Delete",
@@ -223,7 +263,7 @@
   "crawlercronD1309D29": {
    "Type": "AWS::Events::Rule",
    "Properties": {
-    "ScheduleExpression": "rate(5 minutes)",
+    "ScheduleExpression": "rate(10 minutes)",
     "State": "DISABLED",
     "Targets": [
      {

@@ -54,8 +54,17 @@ integ.assertions
 
 NagSuppressions.addStackSuppressions(stackUnderTest, [
   {
+    appliesTo: [
+      'Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+      'Policy::arn:<AWS::Partition>:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy',
+    ],
     id: 'AwsSolutions-IAM4',
     reason:
       'it is acceptable to use build in iam policies for basic lambda runtime',
+  },
+  {
+    appliesTo: ['Resource::*'],
+    id: 'AwsSolutions-IAM5',
+    reason: 'the lambda tracing option creates a wildcard policy',
   },
 ]);

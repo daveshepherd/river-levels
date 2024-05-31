@@ -46,7 +46,6 @@ describe('StorageStack', () => {
         Match.anyValue(),
         Match.anyValue(),
         Match.anyValue(),
-        Match.anyValue(),
       ],
     });
     template.hasResource('AWS::IAM::ManagedPolicy', {});

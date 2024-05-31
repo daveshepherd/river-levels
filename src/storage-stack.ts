@@ -8,7 +8,7 @@ import {
   Role,
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture, LayerVersion } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LayerVersion, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
 import * as lambda from './crawler-function';
@@ -53,9 +53,6 @@ export class StorageStack extends cdk.Stack {
         'CloudWatchLambdaInsightsExecutionRolePolicy',
       ),
     );
-    executionRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName('AWSXRayDaemonWriteAccess'),
-    );
     const dynmodbAccessPolicy = new ManagedPolicy(this, 'crawler-policy', {
       description: 'Grant access to the river levels table',
       path: '/service-policy/',
@@ -73,7 +70,7 @@ export class StorageStack extends cdk.Stack {
     });
     const layerArn =
       'arn:aws:lambda:' +
-      process.env.CDK_DEFAULT_REGION +
+      cdk.Stack.of(this).region +
       ':580247275435:layer:LambdaInsightsExtension-Arm64:19';
     const layer = LayerVersion.fromLayerVersionArn(
       this,
@@ -90,7 +87,7 @@ export class StorageStack extends cdk.Stack {
       memorySize: 256,
       role: executionRole,
       timeout: cdk.Duration.seconds(60),
-      // tracing: Tracing.ACTIVE,
+      tracing: Tracing.ACTIVE,
     });
     this.crawlerFunctionName = crawler.functionName;
 

@@ -117,18 +117,6 @@
                         ]
                       },
                       {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "arn:",
-                            {
-                              "Ref": "AWS::Partition"
-                            },
-                            ":iam::aws:policy/AWSXRayDaemonWriteAccess"
-                          ]
-                        ]
-                      },
-                      {
                         "Ref": "crawlerpolicyF36192F2"
                       }
                     ],
@@ -147,6 +135,48 @@
                 },
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.143.0"
+                }
+              },
+              "DefaultPolicy": {
+                "id": "DefaultPolicy",
+                "path": "IntegrationTestStorageStack/crawler-role/DefaultPolicy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IntegrationTestStorageStack/crawler-role/DefaultPolicy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "xray:PutTelemetryRecords",
+                                "xray:PutTraceSegments"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "policyName": "crawlerroleDefaultPolicyD657C666",
+                        "roles": [
+                          {
+                            "Ref": "crawlerrole985C99ED"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                      "version": "2.143.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Policy",
                   "version": "2.143.0"
                 }
               }
@@ -306,7 +336,18 @@
                     },
                     "handler": "index.handler",
                     "layers": [
-                      "arn:aws:lambda:eu-west-2:580247275435:layer:LambdaInsightsExtension-Arm64:19"
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:aws:lambda:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":580247275435:layer:LambdaInsightsExtension-Arm64:19"
+                          ]
+                        ]
+                      }
                     ],
                     "loggingConfig": {
                       "logGroup": {
@@ -331,7 +372,10 @@
                         "value": "integ"
                       }
                     ],
-                    "timeout": 60
+                    "timeout": 60,
+                    "tracingConfig": {
+                      "mode": "Active"
+                    }
                   }
                 },
                 "constructInfo": {
@@ -355,7 +399,7 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Events::Rule",
                   "aws:cdk:cloudformation:props": {
-                    "scheduleExpression": "rate(5 minutes)",
+                    "scheduleExpression": "rate(10 minutes)",
                     "state": "DISABLED",
                     "targets": [
                       {
