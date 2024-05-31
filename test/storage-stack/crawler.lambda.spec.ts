@@ -1,10 +1,10 @@
 import 'aws-sdk-client-mock-jest';
-import * as target from '../src/crawler.lambda';
-import * as floodApi from '../src/flood-api-client/readings';
-import * as readingStore from '../src/store/readings';
+import * as target from '../../src/storage-stack/crawler.lambda';
+import * as floodApi from '../../src/storage-stack/flood-api-client/readings';
+import * as readingStore from '../../src/storage-stack/store/readings';
 
-jest.mock('../src/flood-api-client/readings');
-jest.mock('../src/store/readings');
+jest.mock('../../src/storage-stack/flood-api-client/readings');
+jest.mock('../../src/storage-stack/store/readings');
 
 const floodApiMock = floodApi as jest.Mocked<typeof floodApi>;
 const readingStoreMock = readingStore as jest.Mocked<typeof readingStore>;

@@ -18152,7 +18152,7 @@ var require_follow_redirects = __commonJS({
   }
 });
 
-// src/crawler.lambda.ts
+// src/storage-stack/crawler.lambda.ts
 var crawler_lambda_exports = {};
 __export(crawler_lambda_exports, {
   handler: () => handler
@@ -22490,7 +22490,7 @@ var {
   mergeConfig: mergeConfig2
 } = axios_default;
 
-// src/flood-api-client/readings.ts
+// src/storage-stack/flood-api-client/readings.ts
 function mapResults(results) {
   return results.items.map((reading) => ({
     date: new Date(reading.dateTime),
@@ -22528,7 +22528,7 @@ async function getReadingsSince(queryDate = /* @__PURE__ */ new Date()) {
   return mapResults(response.data);
 }
 
-// src/store/readings.ts
+// src/storage-stack/store/readings.ts
 var import_client_dynamodb = require("@aws-sdk/client-dynamodb");
 async function getLatestReading(station = "kenilworth") {
   const dynamoDbClient = new import_client_dynamodb.DynamoDBClient({});
@@ -22584,7 +22584,7 @@ async function updateReadings(readings) {
   return Promise.all(readings.map((reading) => updateReading(reading)));
 }
 
-// src/crawler.lambda.ts
+// src/storage-stack/crawler.lambda.ts
 var tracer = new Tracer({ serviceName: "crawler" });
 async function handler() {
   const segment = tracer.getSegment();

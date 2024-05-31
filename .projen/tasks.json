@@ -46,25 +46,25 @@
       "description": "Prepare assets",
       "steps": [
         {
-          "spawn": "bundle:crawler.lambda"
+          "spawn": "bundle:storage-stack/crawler.lambda"
         }
       ]
     },
-    "bundle:crawler.lambda": {
-      "name": "bundle:crawler.lambda",
-      "description": "Create a JavaScript bundle from src/crawler.lambda.ts",
+    "bundle:storage-stack/crawler.lambda": {
+      "name": "bundle:storage-stack/crawler.lambda",
+      "description": "Create a JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
-    "bundle:crawler.lambda:watch": {
-      "name": "bundle:crawler.lambda:watch",
-      "description": "Continuously update the JavaScript bundle from src/crawler.lambda.ts",
+    "bundle:storage-stack/crawler.lambda:watch": {
+      "name": "bundle:storage-stack/crawler.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

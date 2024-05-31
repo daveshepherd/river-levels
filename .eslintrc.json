@@ -148,7 +148,7 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
-          "src/crawler.lambda.ts",
+          "src/storage-stack/crawler.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],

@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { StorageStack } from '../src/storage-stack';
+import { StorageStack } from '../../src/storage-stack';
 
 describe('StorageStack', () => {
   test('that default configuration is correct', () => {

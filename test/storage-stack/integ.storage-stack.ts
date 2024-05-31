@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import { ExpectedResult, IntegTest } from '@aws-cdk/integ-tests-alpha';
 import { App, Aspects, Duration, Tags } from 'aws-cdk-lib';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
-import { StorageStack } from '../src/storage-stack';
+import { StorageStack } from '../../src/storage-stack';
 
 const app = new App();
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));

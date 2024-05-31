@@ -16,7 +16,7 @@
     ".projen/tasks.json",
     "cdk.json",
     "LICENSE",
-    "src/crawler-function.ts",
+    "src/storage-stack/crawler-function.ts",
     "tsconfig.dev.json",
     "tsconfig.json"
   ],

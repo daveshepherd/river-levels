@@ -8,7 +8,7 @@ import 'aws-sdk-client-mock-jest';
 
 const dynamoDBClientMock = mockClient(DynamoDBClient);
 
-import * as target from '../../src/store/readings';
+import * as target from '../../../src/storage-stack/store/readings';
 
 beforeEach(() => {
   dynamoDBClientMock.reset();

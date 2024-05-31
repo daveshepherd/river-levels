@@ -323,9 +323,9 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
                       },
-                      "s3Key": "69a8c845d4bdd167f3f7ae55e271a09f215c8eda7921e0fe0285648b1032938c.zip"
+                      "s3Key": "ae5f340f254c435d58c7c2dc3e2cf6e0ccb92cf63bd08ee7a10e1bfc642e8f6a.zip"
                     },
-                    "description": "src/crawler.lambda.ts",
+                    "description": "src/storage-stack/crawler.lambda.ts",
                     "environment": {
                       "variables": {
                         "DYNAMODB_READINGS_TABLE": {

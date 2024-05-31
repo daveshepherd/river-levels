@@ -1,7 +1,7 @@
 import nock from 'nock';
 // import 'aws-sdk-client-mock-jest';
 
-import * as target from '../../src/flood-api-client/readings';
+import * as target from '../../../src/storage-stack/flood-api-client/readings';
 
 describe('crawler flood readings api client', () => {
   it('test the API records are returned successfully when queried by date', async () => {
