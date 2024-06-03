@@ -30,6 +30,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     runtime: LambdaRuntime.NODEJS_20_X,
   },
   license: 'MIT',
+  majorVersion: 1,
   name: 'river-levels',
   projenrcTs: true,
   release: true,
