@@ -78,7 +78,7 @@ export class StorageStack extends Stack {
     this.crawlerFunctionName = crawler.functionName;
 
     new Rule(this, 'crawler-cron', {
-      enabled: false,
+      enabled: true,
       schedule: Schedule.rate(Duration.minutes(10)),
       targets: [
         new LambdaFunction(crawler, {
