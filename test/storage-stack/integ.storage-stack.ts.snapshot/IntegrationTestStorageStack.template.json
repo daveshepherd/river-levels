@@ -205,7 +205,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "ae5f340f254c435d58c7c2dc3e2cf6e0ccb92cf63bd08ee7a10e1bfc642e8f6a.zip"
+     "S3Key": "a5819bb70702765c04c3db0ba26fbeb71ff25bf7cbff259bd30b74265d69d9ee.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -271,7 +271,7 @@
    "Type": "AWS::Events::Rule",
    "Properties": {
     "ScheduleExpression": "rate(10 minutes)",
-    "State": "DISABLED",
+    "State": "ENABLED",
     "Targets": [
      {
       "Arn": {
