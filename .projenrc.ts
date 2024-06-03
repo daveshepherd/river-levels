@@ -115,6 +115,7 @@ project.github?.tryFindWorkflow('release')?.addJob('deploy_development', {
 });
 project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
   name: 'Deploy to Production',
+  environment: 'production',
   needs: ['deploy_development'],
   ...deploymentJob,
 });

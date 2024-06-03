@@ -96,6 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+    environment: production
     if: needs.release.outputs.tag_exists != 'true'
     steps:
       - name: Checkout
