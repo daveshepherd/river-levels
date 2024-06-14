@@ -149,6 +149,7 @@
           "**/test/**",
           "**/build-tools/**",
           "src/storage-stack/crawler.lambda.ts",
+          "src/storage-stack/sns-publisher.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],

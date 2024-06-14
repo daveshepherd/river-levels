@@ -1012,6 +1012,8 @@ var require_trace_id = __commonJS({
         if (timestamp === "NaN") {
           logger.getLogger().error("Trace ID timestamp must be a hex-encoded value");
           return traceID;
+        } else {
+          timestamp = timestamp.padStart(8, "0");
         }
         traceID.version = version;
         traceID.timestamp = timestamp;
@@ -3132,7 +3134,7 @@ var require_package = __commonJS({
   "node_modules/aws-xray-sdk-core/package.json"(exports2, module2) {
     module2.exports = {
       name: "aws-xray-sdk-core",
-      version: "3.6.0",
+      version: "3.8.0",
       description: "AWS X-Ray SDK for Javascript",
       author: "Amazon Web Services",
       contributors: [
@@ -3187,7 +3189,7 @@ var require_package = __commonJS({
       ],
       license: "Apache-2.0",
       repository: "https://github.com/aws/aws-xray-sdk-node/tree/master/packages/core",
-      gitHead: "bda1629788e974b2a234f9c73686c2db13abbd39"
+      gitHead: "41a17d6a1b7e23279fa24061f0be757e3f5e5f18"
     };
   }
 });

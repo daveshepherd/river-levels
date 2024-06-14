@@ -53,4 +53,5 @@ junit.xml
 .cdk.staging/
 .parcel-cache/
 !/src/storage-stack/crawler-function.ts
+!/src/storage-stack/sns-publisher-function.ts
 !/.projenrc.ts

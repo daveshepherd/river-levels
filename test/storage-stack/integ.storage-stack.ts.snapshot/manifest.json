@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/90a852dae5e5fe99250348af6ea02b0ae9554fda3543e46a59352d3adffd4de8.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/bd8d09c59bfaa2f0817aa417e5d347637bed1fb7fcb9aecd25cb31cb8dc86488.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -101,6 +101,48 @@
             "data": "crawlercronAllowEventRuleIntegrationTestStorageStackcrawlerlambda8647373F5E009610"
           }
         ],
+        "/IntegrationTestStorageStack/river-levels-notifications/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "riverlevelsnotificationsACDAE605"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-group/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublishergroup0F35AF53"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublisherrole00E553A8"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-role/crawler-policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublisherrolecrawlerpolicyDDB1FCB4"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublisherroleDefaultPolicyE5B88FFE"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublisherlambda35C1A2D1"
+          }
+        ],
+        "/IntegrationTestStorageStack/sns-publisher-lambda/DynamoDBEventSource:IntegrationTestStorageStackriverlevelstableA4CFEE91/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "snspublisherlambdaDynamoDBEventSourceIntegrationTestStorageStackriverlevelstableA4CFEE911A99E01F"
+          }
+        ],
         "/IntegrationTestStorageStack/RiverLevelsTable": [
           {
             "type": "aws:cdk:logicalId",
@@ -151,7 +193,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/3e03f4d69df26b01b8be2aafa1d1f24bff06b2008e24578cbd651c26655422cd.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/d981574bd32a8461ae6ea96e5402c8270a864c1a900d30c770250b742f73e59a.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [

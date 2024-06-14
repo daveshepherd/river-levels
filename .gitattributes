@@ -19,6 +19,7 @@
 /LICENSE linguist-generated
 /package.json linguist-generated
 /src/storage-stack/crawler-function.ts linguist-generated
+/src/storage-stack/sns-publisher-function.ts linguist-generated
 /tsconfig.dev.json linguist-generated
 /tsconfig.json linguist-generated
 /yarn.lock linguist-generated

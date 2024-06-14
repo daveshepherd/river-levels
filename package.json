@@ -7,6 +7,8 @@
     "bundle": "npx projen bundle",
     "bundle:storage-stack/crawler.lambda": "npx projen bundle:storage-stack/crawler.lambda",
     "bundle:storage-stack/crawler.lambda:watch": "npx projen bundle:storage-stack/crawler.lambda:watch",
+    "bundle:storage-stack/sns-publisher.lambda": "npx projen bundle:storage-stack/sns-publisher.lambda",
+    "bundle:storage-stack/sns-publisher.lambda:watch": "npx projen bundle:storage-stack/sns-publisher.lambda:watch",
     "clobber": "npx projen clobber",
     "compile": "npx projen compile",
     "default": "npx projen default",
@@ -36,6 +38,7 @@
   "devDependencies": {
     "@aws-cdk/integ-runner": "latest",
     "@aws-cdk/integ-tests-alpha": "latest",
+    "@types/aws-lambda": "^8.10.138",
     "@types/jest": "^29.5.12",
     "@types/node": "^18",
     "@typescript-eslint/eslint-plugin": "^7",
@@ -61,6 +64,7 @@
   "dependencies": {
     "@aws-lambda-powertools/tracer": "^2.1.1",
     "@aws-sdk/client-dynamodb": "^3.592.0",
+    "@aws-sdk/client-sns": "^3.596.0",
     "aws-cdk-lib": "^2.1.0",
     "aws-lambda": "^1.0.7",
     "axios": "^1.7.2",
