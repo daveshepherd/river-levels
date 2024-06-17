@@ -8,6 +8,7 @@ import { Construct } from 'constructs';
 
 export interface SnsPublisherRoleProps {
   dynamoDbTableStreamArn: string;
+  snsTopicArn: string;
 }
 
 export class SnsPublisherRole extends Role {
@@ -28,7 +29,7 @@ export class SnsPublisherRole extends Role {
     });
     const dynamodbStreamAccessPolicy = new ManagedPolicy(
       this,
-      'crawler-policy',
+      'dynamodb-policy',
       {
         description: 'Grant access to the river levels table',
         path: '/service-policy/',
@@ -46,5 +47,16 @@ export class SnsPublisherRole extends Role {
       },
     );
     this.addManagedPolicy(dynamodbStreamAccessPolicy);
+    const snsTopicPublishPolicy = new ManagedPolicy(this, 'sns-policy', {
+      description: 'Grant access to publish to the SNS topic',
+      path: '/service-policy/',
+      statements: [
+        new PolicyStatement({
+          actions: ['sns:Publish'],
+          resources: [props.snsTopicArn],
+        }),
+      ],
+    });
+    this.addManagedPolicy(snsTopicPublishPolicy);
   }
 }

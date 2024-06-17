@@ -205,7 +205,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "a39e1589504019a0bbb24dba577beb893324047f3c8d4e0ea4bfda8eec0d0b7d.zip"
+     "S3Key": "9c9853ee413609ebdce4e07d94594809efd3cbfdc611d658eb9189383225ce47.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -410,7 +410,10 @@
       ]
      },
      {
-      "Ref": "snspublisherrolecrawlerpolicyDDB1FCB4"
+      "Ref": "snspublisherroledynamodbpolicy804FBAEB"
+     },
+     {
+      "Ref": "snspublisherrolesnspolicy6B97BC97"
      }
     ],
     "Path": "/service-role/",
@@ -428,7 +431,7 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
-  "snspublisherrolecrawlerpolicyDDB1FCB4": {
+  "snspublisherroledynamodbpolicy804FBAEB": {
    "Type": "AWS::IAM::ManagedPolicy",
    "Properties": {
     "Description": "Grant access to the river levels table",
@@ -448,6 +451,27 @@
          "riverlevelstableA1F25F33",
          "StreamArn"
         ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "snspublisherrolesnspolicy6B97BC97": {
+   "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "Description": "Grant access to publish to the SNS topic",
+    "Path": "/service-policy/",
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sns:Publish",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "riverlevelsnotificationsACDAE605"
        }
       }
      ],
@@ -508,7 +532,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "6b9ac0a2f70890f521f1c52ac9e5984a9796f35b5d5eed52c4e5bfc645702b1c.zip"
+     "S3Key": "cfeba0f013534c3b34d9feb00b7d483905ae8dca68b7457ed29db8a571dd8193.zip"
     },
     "Description": "src/storage-stack/sns-publisher.lambda.ts",
     "Environment": {
@@ -563,9 +587,10 @@
     }
    },
    "DependsOn": [
-    "snspublisherrolecrawlerpolicyDDB1FCB4",
     "snspublisherroleDefaultPolicyE5B88FFE",
-    "snspublisherrole00E553A8"
+    "snspublisherroledynamodbpolicy804FBAEB",
+    "snspublisherrole00E553A8",
+    "snspublisherrolesnspolicy6B97BC97"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -585,6 +610,159 @@
     },
     "StartingPosition": "LATEST"
    },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "testdlqE3F3EA6D": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "testdlqPolicy5921D4DA": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "testdlqE3F3EA6D",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "testdlqE3F3EA6D"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "testqueueA58C838B": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "testdlqE3F3EA6D",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 5
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "testqueuePolicyB9530952": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "testqueueA58C838B",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Ref": "riverlevelsnotificationsACDAE605"
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "testqueueA58C838B",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "testqueueA58C838B"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "testqueueIntegrationTestStorageStackriverlevelsnotifications526AEA1ED13E6843": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "testqueueA58C838B",
+      "Arn"
+     ]
+    },
+    "Protocol": "sqs",
+    "TopicArn": {
+     "Ref": "riverlevelsnotificationsACDAE605"
+    }
+   },
+   "DependsOn": [
+    "testqueuePolicyB9530952"
+   ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   }
@@ -612,6 +790,14 @@
    },
    "Export": {
     "Name": "IntegrationTestStorageStack:ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
+   }
+  },
+  "ExportsOutputReftestqueueA58C838B800488D5": {
+   "Value": {
+    "Ref": "testqueueA58C838B"
+   },
+   "Export": {
+    "Name": "IntegrationTestStorageStack:ExportsOutputReftestqueueA58C838B800488D5"
    }
   }
  },

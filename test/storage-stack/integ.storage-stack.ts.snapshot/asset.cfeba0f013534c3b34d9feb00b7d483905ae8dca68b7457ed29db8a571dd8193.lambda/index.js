@@ -26,21 +26,32 @@ module.exports = __toCommonJS(sns_publisher_lambda_exports);
 var import_client_sns = require("@aws-sdk/client-sns");
 var snsClient = new import_client_sns.SNSClient({});
 async function handler(event) {
-  event.Records.forEach(async (record) => {
-    console.log("Stream record: ", JSON.stringify(record, null, 2));
-    if (record.eventName === "INSERT") {
+  const insertRecords = event.Records.filter(
+    (record) => record.eventName === "INSERT" && record.dynamodb?.NewImage?.reading_depth?.N && record.dynamodb?.NewImage?.station?.S && record.dynamodb?.NewImage?.timestamp?.N
+  );
+  if (insertRecords.length > 0) {
+    const notificationMessages = insertRecords.map((record) => {
+      console.log("Stream record: ", JSON.stringify(record, null, 2));
       const message = {
-        reading_depth: parseFloat(record.dynamodb.NewImage.reading_depth.N),
-        station: record.dynamodb.NewImage.station.S,
-        timestamp: parseInt(record.dynamodb.NewImage.timestamp.N)
+        Id: `${record.dynamodb.NewImage.station.S}${record.dynamodb.NewImage.timestamp.N}`,
+        Message: JSON.stringify({
+          reading_depth: parseFloat(
+            record.dynamodb.NewImage.reading_depth.N
+          ),
+          station: record.dynamodb.NewImage.station.S,
+          timestamp: parseInt(record.dynamodb.NewImage.timestamp.N)
+        })
       };
-      const publishCommand = new import_client_sns.PublishCommand({
-        Message: JSON.stringify(message),
-        TopicArn: process.env.SNS_TOPIC_ARN
-      });
-      await snsClient.send(publishCommand);
-    }
-  });
+      console.log("Record to publish: ", message);
+      return message;
+    });
+    const publishBatchCommand = new import_client_sns.PublishBatchCommand({
+      PublishBatchRequestEntries: notificationMessages,
+      TopicArn: process.env.SNS_TOPIC_ARN
+    });
+    const response = await snsClient.send(publishBatchCommand);
+    console.log(`SNS response: ${JSON.stringify(response)}`);
+  }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

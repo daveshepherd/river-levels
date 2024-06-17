@@ -23,11 +23,8 @@ import {
   Tracing,
 } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import {
-  LogGroup,
-  RetentionDays,
-} from 'aws-cdk-lib/aws-logs';
-import { Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { ITopic, Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
 import { Construct, IConstruct } from 'constructs';
 import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
@@ -41,6 +38,7 @@ export interface StorageStackProps extends StackProps {
 
 export class StorageStack extends Stack {
   public readonly crawlerFunctionName: string;
+  public readonly riverLevelsNotificationsTopic: ITopic;
   public readonly riverLevelsTableName: string;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
@@ -115,6 +113,7 @@ export class StorageStack extends Stack {
         tracingConfig: TracingConfig.ACTIVE,
       },
     );
+    this.riverLevelsNotificationsTopic = riverLevelsNotificationsTopic;
     // TODO: x ray tracing policy?
 
     const snsPublisherLogGroup = new LogGroup(this, 'sns-publisher-group', {
@@ -125,6 +124,7 @@ export class StorageStack extends Stack {
       'sns-publisher-role',
       {
         dynamoDbTableStreamArn: riverLevelsTable.tableStreamArn!,
+        snsTopicArn: riverLevelsNotificationsTopic.topicArn,
       },
     );
 

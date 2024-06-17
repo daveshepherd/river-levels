@@ -1160,6 +1160,9 @@ var require_utils = __commonJS({
           if (!traceData) {
             traceData = {};
             logger.getLogger().error("_X_AMZN_TRACE_ID is empty or has an invalid format");
+          } else if (traceData.root && !traceData.parent && !traceData.sampled) {
+            segment.noOp = true;
+            valid = true;
           } else if (!traceData.root || !traceData.parent || !traceData.sampled) {
             logger.getLogger().error("_X_AMZN_TRACE_ID is missing required information");
           } else {
@@ -1404,6 +1407,7 @@ var require_subsegment = __commonJS({
       subsegment.segment = this.segment;
       subsegment.parent = this;
       subsegment.notTraced = subsegment.parent.notTraced;
+      subsegment.noOp = subsegment.parent.noOp;
       if (subsegment.end_time === void 0) {
         this.incrementCounter(subsegment.counter);
       }
@@ -1752,6 +1756,7 @@ var require_segment = __commonJS({
       subsegment.segment = this;
       subsegment.parent = this;
       subsegment.notTraced = subsegment.parent.notTraced;
+      subsegment.noOp = subsegment.parent.noOp;
       this.subsegments.push(subsegment);
       if (!subsegment.end_time) {
         this.incrementCounter(subsegment.counter);
@@ -2437,7 +2442,7 @@ var require_service_connector = __commonJS({
     var SamplingRule = require_sampling_rule();
     var DaemonConfig = require_daemon_config();
     var util2 = require("util");
-    var http2 = require("http");
+    var http3 = require("http");
     var ServiceConnector = {
       // client_id is a 12 byte cryptographically secure random hex
       // identifying the SDK instance and is generated during SDK initialization/
@@ -2446,7 +2451,7 @@ var require_service_connector = __commonJS({
       samplingRulesPath: "/GetSamplingRules",
       samplingTargetsPath: "/SamplingTargets",
       logger,
-      httpClient: http2,
+      httpClient: http3,
       fetchSamplingRules: function fetchSamplingRules(callback) {
         const body = "{}";
         const options = getOptions(this.samplingRulesPath, body.length);
@@ -3134,7 +3139,7 @@ var require_package = __commonJS({
   "node_modules/aws-xray-sdk-core/package.json"(exports2, module2) {
     module2.exports = {
       name: "aws-xray-sdk-core",
-      version: "3.8.0",
+      version: "3.9.0",
       description: "AWS X-Ray SDK for Javascript",
       author: "Amazon Web Services",
       contributors: [
@@ -3189,7 +3194,7 @@ var require_package = __commonJS({
       ],
       license: "Apache-2.0",
       repository: "https://github.com/aws/aws-xray-sdk-node/tree/master/packages/core",
-      gitHead: "41a17d6a1b7e23279fa24061f0be757e3f5e5f18"
+      gitHead: "994c2733a1d6e9269a5cc80384036201770d4f37"
     };
   }
 });
@@ -3198,7 +3203,7 @@ var require_package = __commonJS({
 var require_plugin = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/segments/plugins/plugin.js"(exports2, module2) {
     "use strict";
-    var http2 = require("http");
+    var http3 = require("http");
     var Plugin = {
       METADATA_TIMEOUT: 1e3,
       /**
@@ -3212,7 +3217,7 @@ var require_plugin = __commonJS({
         const METADATA_RETRIES = 5;
         var retries = METADATA_RETRIES;
         var getMetadata = function() {
-          var httpReq = http2.__request ? http2.__request : http2.request;
+          var httpReq = http3.__request ? http3.__request : http3.request;
           var req = httpReq(options, function(res) {
             var body = "";
             res.on("data", function(chunk) {
@@ -3257,7 +3262,7 @@ var require_ec2_plugin = __commonJS({
     "use strict";
     var Plugin = require_plugin();
     var logger = require_logger();
-    var http2 = require("http");
+    var http3 = require("http");
     var EC2Plugin = {
       /**
        * A function to get the instance data from the EC2 metadata service.
@@ -3294,7 +3299,7 @@ var require_ec2_plugin = __commonJS({
       originName: "AWS::EC2::Instance"
     };
     function getToken(callback) {
-      const httpReq = http2.__request ? http2.__request : http2.request;
+      const httpReq = http3.__request ? http3.__request : http3.request;
       const TTL = 60;
       const TOKEN_PATH = "/latest/api/token";
       const options = getOptions(TOKEN_PATH, "PUT", {
@@ -6546,6 +6551,9 @@ var require_aws_p = __commonJS({
       var traceId = parent.segment ? parent.segment.trace_id : parent.trace_id;
       const data = parent.segment ? parent.segment.additionalTraceData : parent.additionalTraceData;
       var buildListener = function(req2) {
+        if (parent.noOp) {
+          return;
+        }
         let traceHeader = "Root=" + traceId + ";Parent=" + subsegment.id + ";Sampled=" + (subsegment.notTraced ? "0" : "1");
         if (data != null) {
           for (const [key, value] of Object.entries(data)) {
@@ -6745,27 +6753,27 @@ var require_aws3_p = __commonJS({
           }
         }
       }, service);
-      const http2 = {};
+      const http3 = {};
       if (statusCode) {
-        http2.response = {};
-        http2.response.status = statusCode;
+        http3.response = {};
+        http3.response.status = statusCode;
       }
       if (((_b = res === null || res === void 0 ? void 0 : res.response) === null || _b === void 0 ? void 0 : _b.headers) && ((_c = res === null || res === void 0 ? void 0 : res.response) === null || _c === void 0 ? void 0 : _c.headers["content-length"]) !== void 0) {
-        if (!http2.response) {
-          http2.response = {};
+        if (!http3.response) {
+          http3.response = {};
         }
-        http2.response.content_length = safeParseInt(res.response.headers["content-length"]);
+        http3.response.content_length = safeParseInt(res.response.headers["content-length"]);
       }
-      return [aws, http2];
+      return [aws, http3];
     };
-    function addFlags(http2, subsegment, err) {
+    function addFlags(http3, subsegment, err) {
       var _a, _b, _c;
       if (err && (0, service_error_classification_1.isThrottlingError)(err)) {
         subsegment.addThrottleFlag();
-      } else if (safeParseInt((_a = http2.response) === null || _a === void 0 ? void 0 : _a.status) === 429 || safeParseInt((_b = err === null || err === void 0 ? void 0 : err.$metadata) === null || _b === void 0 ? void 0 : _b.httpStatusCode) === 429) {
+      } else if (safeParseInt((_a = http3.response) === null || _a === void 0 ? void 0 : _a.status) === 429 || safeParseInt((_b = err === null || err === void 0 ? void 0 : err.$metadata) === null || _b === void 0 ? void 0 : _b.httpStatusCode) === 429) {
         subsegment.addThrottleFlag();
       }
-      const cause = (0, utils_1.getCauseTypeFromHttpStatus)(safeParseInt((_c = http2.response) === null || _c === void 0 ? void 0 : _c.status));
+      const cause = (0, utils_1.getCauseTypeFromHttpStatus)(safeParseInt((_c = http3.response) === null || _c === void 0 ? void 0 : _c.status));
       if (cause === "fault") {
         subsegment.addFaultFlag();
       } else if (cause === "error") {
@@ -6808,25 +6816,27 @@ var require_aws3_p = __commonJS({
           traceHeader += ";" + key + "=" + value;
         }
       }
-      args.request.headers["X-Amzn-Trace-Id"] = traceHeader;
+      if (!segment.noOp) {
+        args.request.headers["X-Amzn-Trace-Id"] = traceHeader;
+      }
       let res;
       try {
         res = await next(args);
         if (!res) {
           throw new Error("Failed to get response from instrumented AWS Client.");
         }
-        const [aws, http2] = await buildAttributesFromMetadata(service, operation, await config.region(), commandInput, res, null);
+        const [aws, http3] = await buildAttributesFromMetadata(service, operation, await config.region(), commandInput, res, null);
         subsegment.addAttribute("aws", aws);
-        subsegment.addAttribute("http", http2);
-        addFlags(http2, subsegment);
+        subsegment.addAttribute("http", http3);
+        addFlags(http3, subsegment);
         subsegment.close();
         return res;
       } catch (err) {
         if (err.$metadata) {
-          const [aws, http2] = await buildAttributesFromMetadata(service, operation, await config.region(), commandInput, null, err);
+          const [aws, http3] = await buildAttributesFromMetadata(service, operation, await config.region(), commandInput, null, err);
           subsegment.addAttribute("aws", aws);
-          subsegment.addAttribute("http", http2);
-          addFlags(http2, subsegment, err);
+          subsegment.addAttribute("http", http3);
+          addFlags(http3, subsegment, err);
         }
         const errObj = { message: err.message, name: err.name, stack: err.stack || new Error().stack };
         subsegment.close(errObj, true);
@@ -6925,7 +6935,9 @@ var require_http_p = __commonJS({
         if (!options.headers) {
           options.headers = {};
         }
-        options.headers["X-Amzn-Trace-Id"] = "Root=" + root.trace_id + ";Parent=" + subsegment.id + ";Sampled=" + (subsegment.notTraced ? "0" : "1");
+        if (!parent.noOp) {
+          options.headers["X-Amzn-Trace-Id"] = "Root=" + root.trace_id + ";Parent=" + subsegment.id + ";Sampled=" + (subsegment.notTraced ? "0" : "1");
+        }
         const errorCapturer = function errorCapturer2(e) {
           if (subsegmentCallback) {
             subsegmentCallback(subsegment, this, null, e);
@@ -16515,8 +16527,8 @@ var require_form_data = __commonJS({
     var CombinedStream = require_combined_stream();
     var util2 = require("util");
     var path = require("path");
-    var http2 = require("http");
-    var https2 = require("https");
+    var http3 = require("http");
+    var https3 = require("https");
     var parseUrl = require("url").parse;
     var fs = require("fs");
     var Stream = require("stream").Stream;
@@ -16783,9 +16795,9 @@ var require_form_data = __commonJS({
       }
       options.headers = this.getHeaders(params.headers);
       if (options.protocol == "https:") {
-        request = https2.request(options);
+        request = https3.request(options);
       } else {
-        request = http2.request(options);
+        request = http3.request(options);
       }
       this.getLength(function(err, length) {
         if (err && err !== "Unknown stream") {
@@ -17673,8 +17685,8 @@ var require_follow_redirects = __commonJS({
     "use strict";
     var url2 = require("url");
     var URL3 = url2.URL;
-    var http2 = require("http");
-    var https2 = require("https");
+    var http3 = require("http");
+    var https3 = require("https");
     var Writable = require("stream").Writable;
     var assert = require("assert");
     var debug = require_debug2();
@@ -18149,7 +18161,7 @@ var require_follow_redirects = __commonJS({
     function isURL(value) {
       return URL3 && value instanceof URL3;
     }
-    module2.exports = wrap({ http: http2, https: https2 });
+    module2.exports = wrap({ http: http3, https: https3 });
     module2.exports.wrap = wrap;
   }
 });
@@ -18301,7 +18313,7 @@ var EnvironmentVariablesService = class {
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.1.1";
+var PT_VERSION = "2.2.0";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -18440,6 +18452,8 @@ var getOriginURL = (origin2) => {
 };
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/ProviderService.js
+var import_node_http = __toESM(require("node:http"), 1);
+var import_node_https = __toESM(require("node:https"), 1);
 var { captureAWS, captureAWSClient, captureAWSv3Client, captureAsyncFunc, captureFunc, captureHTTPsGlobal, getNamespace, getSegment, setSegment, Segment: XraySegment, setContextMissingStrategy, setDaemonAddress, setLogger } = import_aws_xray_sdk_core.default;
 var ProviderService = class {
   /**
@@ -18465,8 +18479,8 @@ var ProviderService = class {
     return captureFunc(name, fcn);
   }
   captureHTTPsGlobal() {
-    captureHTTPsGlobal(require("http"));
-    captureHTTPsGlobal(require("https"));
+    captureHTTPsGlobal(import_node_http.default);
+    captureHTTPsGlobal(import_node_https.default);
   }
   getNamespace() {
     return getNamespace();
@@ -22588,7 +22602,8 @@ async function updateReadings(readings) {
 
 // src/storage-stack/crawler.lambda.ts
 var tracer = new Tracer({ serviceName: "crawler" });
-async function handler() {
+async function handler(params) {
+  const readingsLimit = params?.readingsLimit ? params?.readingsLimit : 96;
   const segment = tracer.getSegment();
   console.log("Running function");
   const getLatestReadingSubsegment = segment.addNewSubsegment("get latest reading");
@@ -22608,7 +22623,7 @@ async function handler() {
   } else {
     console.log("There are no recent readings in the database");
     const getReadingsLimitSubsegment = segment.addNewSubsegment("get readings limit");
-    newReadings = await getReadings(96);
+    newReadings = await getReadings(readingsLimit);
     getReadingsLimitSubsegment.close();
   }
   console.log(`Retrieved readings: ${JSON.stringify(newReadings)}`);

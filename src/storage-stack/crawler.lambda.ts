@@ -5,7 +5,8 @@ import * as readingStore from './store/readings';
 
 const tracer = new Tracer({ serviceName: 'crawler' });
 
-export async function handler() {
+export async function handler(params?: { readingsLimit: any | undefined }) {
+  const readingsLimit = params?.readingsLimit ? params?.readingsLimit : 96;
   const segment = tracer.getSegment();
   console.log('Running function');
 
@@ -36,7 +37,7 @@ export async function handler() {
     console.log('There are no recent readings in the database');
     const getReadingsLimitSubsegment =
       segment!.addNewSubsegment('get readings limit');
-    newReadings = await floodApi.getReadings(96);
+    newReadings = await floodApi.getReadings(readingsLimit);
     getReadingsLimitSubsegment.close();
   }
 
