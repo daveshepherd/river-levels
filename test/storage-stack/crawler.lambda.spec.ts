@@ -35,8 +35,8 @@ describe('crawler', () => {
 
     await target.handler();
 
-    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledWith([
       {
@@ -54,7 +54,7 @@ describe('crawler', () => {
     ]);
   });
 
-  it('test that we drop anomylous values when only multiple new readings are returned', async () => {
+  it('test that we drop anomalous values when only multiple new readings are returned', async () => {
     floodApiMock.getReadingsSince.mockResolvedValue([
       {
         date: new Date('2020-01-01T11:45:00Z'),
@@ -79,8 +79,8 @@ describe('crawler', () => {
 
     await target.handler();
 
-    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledWith([
       {
@@ -94,7 +94,7 @@ describe('crawler', () => {
     ]);
   });
 
-  it('test that we drop anomylous value when only one new reading is returned', async () => {
+  it('test that we drop anomalous value when only one new reading is returned', async () => {
     floodApiMock.getReadingsSince.mockResolvedValue([
       {
         date: new Date('2022-10-11T01:00:00Z'),
@@ -111,8 +111,8 @@ describe('crawler', () => {
 
     await target.handler();
 
-    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
   });
@@ -129,8 +129,8 @@ describe('crawler', () => {
 
     await target.handler();
 
-    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadingsSince).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledWith([]);
   });
@@ -158,8 +158,51 @@ describe('crawler', () => {
 
     await target.handler();
 
-    expect(floodApi.getReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadings).toHaveBeenCalledTimes(1);
+    expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadings).toHaveBeenCalledWith(96);
+    expect(readingStore.updateReadings).toHaveBeenCalledWith([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+      {
+        date: new Date('2020-01-01T11:15:00Z'),
+        depth: 0.831,
+      },
+    ]);
+  });
+
+  it('should only retrieve the number of readings passed into the request', async () => {
+    floodApiMock.getReadings.mockResolvedValue([
+      {
+        date: new Date('2020-01-01T11:45:00Z'),
+        depth: 0.83,
+      },
+      {
+        date: new Date('2020-01-01T11:30:00Z'),
+        depth: 0.831,
+      },
+      {
+        date: new Date('2020-01-01T11:15:00Z'),
+        depth: 0.831,
+      },
+    ]);
+
+    readingStoreMock.getLatestReading.mockResolvedValue(null);
+
+    await target.handler({
+      readingsLimit: 1,
+    });
+
+    expect(readingStore.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadings).toHaveBeenCalledTimes(1);
+    expect(floodApi.getReadings).toHaveBeenCalledWith(1);
     expect(readingStore.updateReadings).toHaveBeenCalledTimes(1);
     expect(readingStore.updateReadings).toHaveBeenCalledWith([
       {

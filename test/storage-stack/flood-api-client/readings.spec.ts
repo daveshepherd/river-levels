@@ -1,5 +1,4 @@
 import nock from 'nock';
-// import 'aws-sdk-client-mock-jest';
 
 import * as target from '../../../src/storage-stack/flood-api-client/readings';
 

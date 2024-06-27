@@ -9,6 +9,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   deps: [
     '@aws-lambda-powertools/tracer',
     '@aws-sdk/client-dynamodb',
+    '@aws-sdk/client-sns',
     'aws-lambda',
     'axios',
   ],
@@ -16,6 +17,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'A scraper and APIs for getting river readings from the Environment Agency',
   devDeps: [
     '@aws-cdk/integ-tests-alpha',
+    '@types/aws-lambda',
     'aws-sdk-client-mock-jest',
     'aws-sdk-client-mock',
     'cdk-nag',

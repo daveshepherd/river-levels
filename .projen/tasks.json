@@ -47,6 +47,9 @@
       "steps": [
         {
           "spawn": "bundle:storage-stack/crawler.lambda"
+        },
+        {
+          "spawn": "bundle:storage-stack/sns-publisher.lambda"
         }
       ]
     },
@@ -65,6 +68,24 @@
       "steps": [
         {
           "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
+    },
+    "bundle:storage-stack/sns-publisher.lambda": {
+      "name": "bundle:storage-stack/sns-publisher.lambda",
+      "description": "Create a JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:storage-stack/sns-publisher.lambda:watch": {
+      "name": "bundle:storage-stack/sns-publisher.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -335,13 +356,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@aws-cdk/integ-tests-alpha,@types/jest,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,nock,projen,source-map-support,ts-jest,ts-node,typescript,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,aws-lambda,axios"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@aws-cdk/integ-tests-alpha,@types/aws-lambda,@types/jest,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,nock,projen,source-map-support,ts-jest,ts-node,typescript,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-sns,aws-lambda,axios"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @aws-cdk/integ-tests-alpha @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock aws-sdk-client-mock-jest cdk-nag esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nock projen source-map-support standard-version ts-jest ts-node typescript @aws-cdk/integ-runner @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb aws-cdk-lib aws-lambda axios constructs"
+          "exec": "yarn upgrade @aws-cdk/integ-tests-alpha @types/aws-lambda @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock aws-sdk-client-mock-jest cdk-nag esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nock projen source-map-support standard-version ts-jest ts-node typescript @aws-cdk/integ-runner @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-sns aws-cdk-lib aws-lambda axios constructs"
         },
         {
           "exec": "npx projen"

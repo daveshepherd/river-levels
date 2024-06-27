@@ -16,6 +16,7 @@
     "cdk.json",
     "LICENSE",
     "src/storage-stack/crawler-function.ts",
+    "src/storage-stack/sns-publisher-function.ts",
     "tsconfig.dev.json",
     "tsconfig.json"
   ],

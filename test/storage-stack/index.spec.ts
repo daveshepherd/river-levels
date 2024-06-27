@@ -59,6 +59,11 @@ describe('StorageStack', () => {
       Description: Match.anyValue(),
       Path: '/service-policy/',
     });
+    template.hasResource('AWS::SNS::Topic', {});
+    template.hasResourceProperties('AWS::SNS::Topic', {
+      DisplayName: 'river-levels-notifications',
+      KmsMasterKeyId: Match.anyValue(),
+    });
   });
   test('that a replica is created if specified', () => {
     const app = new App();
