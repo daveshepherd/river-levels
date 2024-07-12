@@ -62,7 +62,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/tracer": "^2.3.0",
+    "@aws-lambda-powertools/tracer": "^2.4.0",
     "@aws-sdk/client-dynamodb": "^3.614.0",
     "@aws-sdk/client-sns": "^3.614.0",
     "aws-cdk-lib": "^2.1.0",
