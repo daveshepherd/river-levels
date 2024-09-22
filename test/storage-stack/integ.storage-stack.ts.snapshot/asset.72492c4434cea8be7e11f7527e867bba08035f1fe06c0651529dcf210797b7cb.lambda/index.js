@@ -3139,7 +3139,7 @@ var require_package = __commonJS({
   "node_modules/aws-xray-sdk-core/package.json"(exports2, module2) {
     module2.exports = {
       name: "aws-xray-sdk-core",
-      version: "3.9.0",
+      version: "3.10.1",
       description: "AWS X-Ray SDK for Javascript",
       author: "Amazon Web Services",
       contributors: [
@@ -3194,7 +3194,7 @@ var require_package = __commonJS({
       ],
       license: "Apache-2.0",
       repository: "https://github.com/aws/aws-xray-sdk-node/tree/master/packages/core",
-      gitHead: "994c2733a1d6e9269a5cc80384036201770d4f37"
+      gitHead: "5539f1ab3a33f8df7b8add9e450b536886250a3a"
     };
   }
 });
@@ -4965,6 +4965,8 @@ var require_semver = __commonJS({
             this.inc("patch", identifier, identifierBase);
             this.inc("pre", identifier, identifierBase);
             break;
+          // If the input is a non-prerelease version, this acts the same as
+          // prepatch.
           case "prerelease":
             if (this.prerelease.length === 0) {
               this.inc("patch", identifier, identifierBase);
@@ -4992,6 +4994,8 @@ var require_semver = __commonJS({
             }
             this.prerelease = [];
             break;
+          // This probably shouldn't be used publicly.
+          // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
           case "pre": {
             const base = Number(identifierBase) ? 1 : 0;
             if (!identifier && identifierBase === false) {
@@ -5465,6 +5469,7 @@ var require_lrucache = __commonJS({
 var require_range = __commonJS({
   "node_modules/semver/classes/range.js"(exports2, module2) {
     "use strict";
+    var SPACE_CHARACTERS = /\s+/g;
     var Range = class _Range {
       constructor(range, options) {
         options = parseOptions(options);
@@ -5478,13 +5483,13 @@ var require_range = __commonJS({
         if (range instanceof Comparator) {
           this.raw = range.value;
           this.set = [[range]];
-          this.format();
+          this.formatted = void 0;
           return this;
         }
         this.options = options;
         this.loose = !!options.loose;
         this.includePrerelease = !!options.includePrerelease;
-        this.raw = range.trim().split(/\s+/).join(" ");
+        this.raw = range.trim().replace(SPACE_CHARACTERS, " ");
         this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
         if (!this.set.length) {
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
@@ -5503,10 +5508,27 @@ var require_range = __commonJS({
             }
           }
         }
-        this.format();
+        this.formatted = void 0;
+      }
+      get range() {
+        if (this.formatted === void 0) {
+          this.formatted = "";
+          for (let i = 0; i < this.set.length; i++) {
+            if (i > 0) {
+              this.formatted += "||";
+            }
+            const comps = this.set[i];
+            for (let k = 0; k < comps.length; k++) {
+              if (k > 0) {
+                this.formatted += " ";
+              }
+              this.formatted += comps[k].toString().trim();
+            }
+          }
+        }
+        return this.formatted;
       }
       format() {
-        this.range = this.set.map((comps) => comps.join(" ").trim()).join("||").trim();
         return this.range;
       }
       toString() {
@@ -6048,6 +6070,7 @@ var require_min_version = __commonJS({
                 compver.prerelease.push(0);
               }
               compver.raw = compver.format();
+            /* fallthrough */
             case "":
             case ">=":
               if (!setMin || gt(compver, setMin)) {
@@ -6057,6 +6080,7 @@ var require_min_version = __commonJS({
             case "<":
             case "<=":
               break;
+            /* istanbul ignore next */
             default:
               throw new Error(`Unexpected operation: ${comparator.operator}`);
           }
@@ -17289,10 +17313,11 @@ var require_browser = __commonJS({
       if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
         return false;
       }
+      let m;
       return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
       typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
       // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
       typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
     function formatArgs(args) {
@@ -17690,9 +17715,17 @@ var require_follow_redirects = __commonJS({
     var Writable = require("stream").Writable;
     var assert = require("assert");
     var debug = require_debug2();
+    (function detectUnsupportedEnvironment() {
+      var looksLikeNode = typeof process !== "undefined";
+      var looksLikeBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+      var looksLikeV8 = isFunction2(Error.captureStackTrace);
+      if (!looksLikeNode && (looksLikeBrowser || !looksLikeV8)) {
+        console.warn("The follow-redirects package should be excluded from browser builds.");
+      }
+    })();
     var useNativeURL = false;
     try {
-      assert(new URL3());
+      assert(new URL3(""));
     } catch (error) {
       useNativeURL = error.code === "ERR_INVALID_URL";
     }
@@ -18119,7 +18152,9 @@ var require_follow_redirects = __commonJS({
     }
     function createErrorType(code, message, baseClass) {
       function CustomError(properties) {
-        Error.captureStackTrace(this, this.constructor);
+        if (isFunction2(Error.captureStackTrace)) {
+          Error.captureStackTrace(this, this.constructor);
+        }
         Object.assign(this, properties || {});
         this.code = code;
         this.message = this.cause ? message + ": " + this.cause.message : message;
@@ -18175,10 +18210,8 @@ module.exports = __toCommonJS(crawler_lambda_exports);
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/Utility.js
 var Utility = class {
-  constructor() {
-    this.coldStart = true;
-    this.defaultServiceName = "service_undefined";
-  }
+  coldStart = true;
+  defaultServiceName = "service_undefined";
   /**
    * Get the cold start status of the current execution environment.
    *
@@ -18236,11 +18269,19 @@ var Utility = class {
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/config/EnvironmentVariablesService.js
 var EnvironmentVariablesService = class {
-  constructor() {
-    this.devModeVariable = "POWERTOOLS_DEV";
-    this.serviceNameVariable = "POWERTOOLS_SERVICE_NAME";
-    this.xRayTraceIdVariable = "_X_AMZN_TRACE_ID";
-  }
+  /**
+   * Increase JSON indentation for Logger to ease debugging when running functions locally or in a non-production environment
+   */
+  devModeVariable = "POWERTOOLS_DEV";
+  /**
+   * Set service name used for tracing namespace, metrics dimension and structured logging
+   */
+  serviceNameVariable = "POWERTOOLS_SERVICE_NAME";
+  /**
+   * AWS X-Ray Trace ID environment variable
+   * @private
+   */
+  xRayTraceIdVariable = "_X_AMZN_TRACE_ID";
   /**
    * Get the value of an environment variable by name.
    *
@@ -18304,16 +18345,16 @@ var EnvironmentVariablesService = class {
     if (!xRayTraceEnv.includes("="))
       return { Root: xRayTraceEnv };
     const xRayTraceData = {};
-    xRayTraceEnv.split(";").forEach((field) => {
+    for (const field of xRayTraceEnv.split(";")) {
       const [key, value] = field.split("=");
       xRayTraceData[key] = value;
-    });
+    }
     return xRayTraceData;
   }
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.2.0";
+var PT_VERSION = "2.8.0";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -18348,7 +18389,7 @@ var addUserAgentMiddleware = (client, feature) => {
       }
       client.middlewareStack.addRelativeTo(customUserAgentMiddleware(feature), middlewareOptions);
     } else {
-      throw new Error(`The client provided does not match the expected interface`);
+      throw new Error("The client provided does not match the expected interface");
     }
   } catch (error) {
     console.warn("Failed to add user agent middleware", error);
@@ -18362,17 +18403,18 @@ var METRICS_KEY = `${PREFIX}.metrics`;
 var LOGGER_KEY = `${PREFIX}.logger`;
 var IDEMPOTENCY_KEY = `${PREFIX}.idempotency`;
 
+// node_modules/@aws-lambda-powertools/tracer/lib/esm/Tracer.js
+var import_aws_xray_sdk_core2 = __toESM(require_lib(), 1);
+
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/config/EnvironmentVariablesService.js
 var EnvironmentVariablesService2 = class extends EnvironmentVariablesService {
-  constructor() {
-    super(...arguments);
-    this.awsExecutionEnv = "AWS_EXECUTION_ENV";
-    this.samLocalVariable = "AWS_SAM_LOCAL";
-    this.tracerCaptureErrorVariable = "POWERTOOLS_TRACER_CAPTURE_ERROR";
-    this.tracerCaptureHTTPsRequestsVariable = "POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS";
-    this.tracerCaptureResponseVariable = "POWERTOOLS_TRACER_CAPTURE_RESPONSE";
-    this.tracingEnabledVariable = "POWERTOOLS_TRACE_ENABLED";
-  }
+  // Environment variables
+  awsExecutionEnv = "AWS_EXECUTION_ENV";
+  samLocalVariable = "AWS_SAM_LOCAL";
+  tracerCaptureErrorVariable = "POWERTOOLS_TRACER_CAPTURE_ERROR";
+  tracerCaptureHTTPsRequestsVariable = "POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS";
+  tracerCaptureResponseVariable = "POWERTOOLS_TRACER_CAPTURE_RESPONSE";
+  tracingEnabledVariable = "POWERTOOLS_TRACE_ENABLED";
   /**
    * It returns the value of the AWS_EXECUTION_ENV environment variable.
    *
@@ -18426,6 +18468,8 @@ var EnvironmentVariablesService2 = class extends EnvironmentVariablesService {
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/ProviderService.js
 var import_aws_xray_sdk_core = __toESM(require_lib(), 1);
 var import_node_diagnostics_channel = require("node:diagnostics_channel");
+var import_node_http = __toESM(require("node:http"), 1);
+var import_node_https = __toESM(require("node:https"), 1);
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/utilities.js
 var import_node_url = require("node:url");
@@ -18447,13 +18491,18 @@ var findHeaderAndDecode = (encodedHeaders, key) => {
 var isHttpSubsegment = (subsegment) => {
   return subsegment !== void 0 && "http" in subsegment && "parent" in subsegment && "namespace" in subsegment && subsegment.namespace === "remote";
 };
-var getOriginURL = (origin2) => {
-  return origin2 instanceof import_node_url.URL ? origin2 : new import_node_url.URL(origin2);
+var getRequestURL = (request) => {
+  if (typeof request.origin === "string") {
+    return new import_node_url.URL(`${request.origin}${request.path || ""}`);
+  }
+  if (request.origin instanceof import_node_url.URL) {
+    request.origin.pathname = request.path || "";
+    return request.origin;
+  }
+  return void 0;
 };
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/ProviderService.js
-var import_node_http = __toESM(require("node:http"), 1);
-var import_node_https = __toESM(require("node:https"), 1);
 var { captureAWS, captureAWSClient, captureAWSv3Client, captureAsyncFunc, captureFunc, captureHTTPsGlobal, getNamespace, getSegment, setSegment, Segment: XraySegment, setContextMissingStrategy, setDaemonAddress, setLogger } = import_aws_xray_sdk_core.default;
 var ProviderService = class {
   /**
@@ -18504,14 +18553,14 @@ var ProviderService = class {
     const onRequestStart = (message) => {
       const { request } = message;
       const parentSubsegment = this.getSegment();
-      if (parentSubsegment && request.origin) {
-        const origin2 = getOriginURL(request.origin);
+      const requestURL = getRequestURL(request);
+      if (parentSubsegment && requestURL) {
         const method = request.method;
-        const subsegment = parentSubsegment.addNewSubsegment(origin2.hostname);
+        const subsegment = parentSubsegment.addNewSubsegment(requestURL.hostname);
         subsegment.addAttribute("namespace", "remote");
         subsegment.http = {
           request: {
-            url: origin2.hostname,
+            url: `${requestURL.protocol}//${requestURL.hostname}${requestURL.pathname}`,
             method
           }
         };
@@ -18529,7 +18578,7 @@ var ProviderService = class {
           response: {
             status,
             ...contentLenght && {
-              content_length: parseInt(contentLenght)
+              content_length: Number.parseInt(contentLenght)
             }
           }
         };
@@ -18598,15 +18647,53 @@ var ProviderService = class {
 };
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/Tracer.js
-var import_aws_xray_sdk_core2 = __toESM(require_lib(), 1);
+if (process.env.AWS_XRAY_CONTEXT_MISSING === "" || process.env.AWS_XRAY_CONTEXT_MISSING === void 0) {
+  process.env.AWS_XRAY_CONTEXT_MISSING = "IGNORE_ERROR";
+}
 var { Subsegment: XraySubsegment } = import_aws_xray_sdk_core2.default;
 var Tracer = class extends Utility {
+  /**
+   * The provider service interface used by the Tracer.
+   * This interface defines the methods and properties that a provider service must implement.
+   */
+  provider;
+  /**
+   * Flag indicating whether to capture errors.
+   * This is used to determine if errors should be added to the trace as metadata.
+   *
+   * @default true
+   */
+  captureError = true;
+  /**
+   * Flag indicating whether to capture HTTP(s) requests.
+   * @default true
+   */
+  captureHTTPsRequests = true;
+  /**
+   * Flag indicating whether to capture response data.
+   * @default true
+   */
+  captureResponse = true;
+  /**
+   * The custom configuration service used by the Tracer.
+   */
+  customConfigService;
+  /**
+   * The environment variables service used by the Tracer, is always initialized in the constructor in setOptions().
+   */
+  envVarsService;
+  // serviceName is always initialized in the constructor in setOptions()
+  /**
+   * The name of the service, is always initialized in the constructor in setOptions().
+   */
+  serviceName;
+  /**
+   * Flag indicating whether tracing is enabled.
+   * @default true
+   */
+  tracingEnabled = true;
   constructor(options = {}) {
     super();
-    this.captureError = true;
-    this.captureHTTPsRequests = true;
-    this.captureResponse = true;
-    this.tracingEnabled = true;
     this.setOptions(options);
     this.provider = new ProviderService();
     if (this.isTracingEnabled() && this.captureHTTPsRequests) {
@@ -18655,7 +18742,6 @@ var Tracer = class extends Utility {
   }
   /**
    * Add service name to the current segment or subsegment as annotation.
-   *
    */
   addServiceNameAnnotation() {
     if (!this.isTracingEnabled()) {
@@ -18698,7 +18784,6 @@ var Tracer = class extends Utility {
    *
    * @deprecated Use {@link captureAWSv3Client} instead.
    * @param aws - AWS SDK v2 import
-   * @returns AWS - Instrumented AWS SDK
    */
   captureAWS(aws) {
     if (!this.isTracingEnabled())
@@ -18726,7 +18811,6 @@ var Tracer = class extends Utility {
    * ```
    * @deprecated Use {@link captureAWSv3Client} instead.
    * @param service - AWS SDK v2 client
-   * @returns service - Instrumented AWS SDK v2 client
    */
   captureAWSClient(service) {
     if (!this.isTracingEnabled())
@@ -18764,7 +18848,6 @@ var Tracer = class extends Utility {
    * ```
    *
    * @param service - AWS SDK v3 client
-   * @returns service - Instrumented AWS SDK v3 client
    */
   captureAWSv3Client(service) {
     if (!this.isTracingEnabled())
@@ -18801,7 +18884,6 @@ var Tracer = class extends Utility {
    * export const handler = handlerClass.handler.bind(handlerClass);
    * ```
    *
-   * @decorator Class
    * @param options - (_optional_) Options for the decorator
    */
   captureLambdaHandler(options) {
@@ -18809,16 +18891,15 @@ var Tracer = class extends Utility {
       const originalMethod = descriptor.value;
       const tracerRef = this;
       descriptor.value = function(event, context, callback) {
-        const handlerRef = this;
         if (!tracerRef.isTracingEnabled()) {
-          return originalMethod.apply(handlerRef, [event, context, callback]);
+          return originalMethod.apply(this, [event, context, callback]);
         }
         return tracerRef.provider.captureAsyncFunc(`## ${process.env._HANDLER}`, async (subsegment) => {
           tracerRef.annotateColdStart();
           tracerRef.addServiceNameAnnotation();
           let result;
           try {
-            result = await originalMethod.apply(handlerRef, [
+            result = await originalMethod.apply(this, [
               event,
               context,
               callback
@@ -18833,7 +18914,7 @@ var Tracer = class extends Utility {
             try {
               subsegment?.close();
             } catch (error) {
-              console.warn(`Failed to close or serialize segment %s. We are catching the error but data might be lost.`, subsegment?.name, error);
+              console.warn("Failed to close or serialize segment %s. We are catching the error but data might be lost.", subsegment?.name, error);
             }
           }
           return result;
@@ -18875,7 +18956,6 @@ var Tracer = class extends Utility {
    * export const handler = handlerClass.handler.bind(handlerClass);;
    * ```
    *
-   * @decorator Class
    * @param options - (_optional_) Options for the decorator
    */
   captureMethod(options) {
@@ -18902,7 +18982,7 @@ var Tracer = class extends Utility {
             try {
               subsegment?.close();
             } catch (error) {
-              console.warn(`Failed to close or serialize segment %s. We are catching the error but data might be lost.`, subsegment?.name, error);
+              console.warn("Failed to close or serialize segment %s. We are catching the error but data might be lost.", subsegment?.name, error);
             }
           }
           return result;
@@ -18941,8 +19021,6 @@ var Tracer = class extends Utility {
    *   }
    * }
    * ```
-   *
-   * @returns string - The root X-Ray trace id.
    */
   getRootXrayTraceId() {
     return this.envVarsService.getXrayTraceId();
@@ -18966,8 +19044,6 @@ var Tracer = class extends Utility {
    *   ... // Do something with segment
    * }
    * ```
-   *
-   * @returns The active segment or subsegment in the current scope. Will log a warning and return `undefined` if no segment is found.
    */
   getSegment() {
     if (!this.isTracingEnabled()) {
@@ -18985,8 +19061,6 @@ var Tracer = class extends Utility {
    * Utility method that returns the current AWS X-Ray Sampled flag.
    *
    * @see https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-traces
-   *
-   * @returns boolean - `true` if the trace is sampled, `false` if tracing is disabled or the trace is not sampled.
    */
   isTraceSampled() {
     if (!this.isTracingEnabled())
@@ -18998,14 +19072,12 @@ var Tracer = class extends Utility {
    *
    * You can use this method during manual instrumentation to determine
    * if tracer is currently enabled.
-   *
-   * @returns tracingEnabled - `true` if tracing is enabled, `false` otherwise.
    */
   isTracingEnabled() {
     return this.tracingEnabled;
   }
   /**
-   * Adds annotation to existing segment or subsegment.
+   * Add annotation to existing segment or subsegment.
    *
    * @see https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-nodejs-segment.html#xray-sdk-nodejs-segment-annotations
    *
@@ -19029,7 +19101,7 @@ var Tracer = class extends Utility {
     this.provider.putAnnotation(key, value);
   }
   /**
-   * Adds metadata to existing segment or subsegment.
+   * Add metadata to existing segment or subsegment.
    *
    * @see https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-nodejs-segment.html#xray-sdk-nodejs-segment-metadata
    *
@@ -19055,7 +19127,7 @@ var Tracer = class extends Utility {
     this.provider.putMetadata(key, value, namespace || this.serviceName);
   }
   /**
-   * Sets the passed subsegment as the current active subsegment.
+   * Set the passed subsegment as the current active subsegment.
    *
    * If you are using a middleware or a decorator this is done automatically for you.
    *
@@ -19079,7 +19151,7 @@ var Tracer = class extends Utility {
   setSegment(segment) {
     if (!this.isTracingEnabled())
       return;
-    return this.provider.setSegment(segment);
+    this.provider.setSegment(segment);
   }
   /**
    * Getter for `customConfigService`.
@@ -19089,7 +19161,7 @@ var Tracer = class extends Utility {
     return this.customConfigService;
   }
   /**
-   * Getter for `envVarsService`.
+   * Get for `envVarsService`.
    * Used internally during initialization.
    */
   getEnvVarsService() {
@@ -19117,7 +19189,7 @@ var Tracer = class extends Utility {
     return this.getEnvVarsService().getSamLocal() !== "";
   }
   /**
-   * Setter for `captureError` based on configuration passed and environment variables.
+   * Set `captureError` based on configuration passed and environment variables.
    * Used internally during initialization.
    */
   setCaptureError() {
@@ -19141,7 +19213,6 @@ var Tracer = class extends Utility {
    * @see https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-nodejs-httpclients.html
    *
    * @param enabled - Whether or not to patch all HTTP clients
-   * @returns void
    */
   setCaptureHTTPsRequests(enabled) {
     if (enabled !== void 0 && !enabled) {
@@ -19160,7 +19231,7 @@ var Tracer = class extends Utility {
     }
   }
   /**
-   * Setter for `captureResponse` based on configuration passed and environment variables.
+   * Set `captureResponse` based on configuration passed and environment variables.
    * Used internally during initialization.
    */
   setCaptureResponse() {
@@ -19176,7 +19247,7 @@ var Tracer = class extends Utility {
     }
   }
   /**
-   * Setter for `customConfigService` based on configuration passed.
+   * Set `customConfigService` based on configuration passed.
    * Used internally during initialization.
    *
    * @param customConfigService - Custom configuration service to use
@@ -19185,7 +19256,7 @@ var Tracer = class extends Utility {
     this.customConfigService = customConfigService ? customConfigService : void 0;
   }
   /**
-   * Setter and initializer for `envVarsService`.
+   * Set and initialize `envVarsService`.
    * Used internally during initialization.
    */
   setEnvVarsService() {
@@ -19209,7 +19280,7 @@ var Tracer = class extends Utility {
     return this;
   }
   /**
-   * Setter for `customConfigService` based on configurations passed and environment variables.
+   * Set `customConfigService` based on configurations passed and environment variables.
    * Used internally during initialization.
    *
    * @param serviceName - Name of the service to use
@@ -19232,7 +19303,7 @@ var Tracer = class extends Utility {
     this.serviceName = this.getDefaultServiceName();
   }
   /**
-   * Setter for `tracingEnabled` based on configurations passed and environment variables.
+   * Set `tracingEnabled` based on configurations passed and environment variables.
    * Used internally during initialization.
    *
    * @param enabled - Whether or not tracing is enabled
@@ -19563,6 +19634,26 @@ var toJSONObject = (obj) => {
 };
 var isAsyncFn = kindOfTest("AsyncFunction");
 var isThenable = (thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
+var _setImmediate = ((setImmediateSupported, postMessageSupported) => {
+  if (setImmediateSupported) {
+    return setImmediate;
+  }
+  return postMessageSupported ? ((token, callbacks) => {
+    _global.addEventListener("message", ({ source, data }) => {
+      if (source === _global && data === token) {
+        callbacks.length && callbacks.shift()();
+      }
+    }, false);
+    return (cb) => {
+      callbacks.push(cb);
+      _global.postMessage(token, "*");
+    };
+  })(`axios@${Math.random()}`, []) : (cb) => setTimeout(cb);
+})(
+  typeof setImmediate === "function",
+  isFunction(_global.postMessage)
+);
+var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
 var utils_default = {
   isArray,
   isArrayBuffer,
@@ -19619,7 +19710,9 @@ var utils_default = {
   isSpecCompliantForm,
   toJSONObject,
   isAsyncFn,
-  isThenable
+  isThenable,
+  setImmediate: _setImmediate,
+  asap
 };
 
 // node_modules/axios/lib/core/AxiosError.js
@@ -19635,7 +19728,10 @@ function AxiosError(message, code, config, request, response) {
   code && (this.code = code);
   config && (this.config = config);
   request && (this.request = request);
-  response && (this.response = response);
+  if (response) {
+    this.response = response;
+    this.status = response.status ? response.status : null;
+  }
 }
 utils_default.inherits(AxiosError, Error, {
   toJSON: function toJSON() {
@@ -19654,7 +19750,7 @@ utils_default.inherits(AxiosError, Error, {
       // Axios
       config: utils_default.toJSONObject(this.config),
       code: this.code,
-      status: this.response && this.response.status ? this.response.status : null
+      status: this.status
     };
   }
 });
@@ -19961,12 +20057,12 @@ __export(utils_exports, {
   hasBrowserEnv: () => hasBrowserEnv,
   hasStandardBrowserEnv: () => hasStandardBrowserEnv,
   hasStandardBrowserWebWorkerEnv: () => hasStandardBrowserWebWorkerEnv,
+  navigator: () => _navigator,
   origin: () => origin
 });
 var hasBrowserEnv = typeof window !== "undefined" && typeof document !== "undefined";
-var hasStandardBrowserEnv = ((product) => {
-  return hasBrowserEnv && ["ReactNative", "NativeScript", "NS"].indexOf(product) < 0;
-})(typeof navigator !== "undefined" && navigator.product);
+var _navigator = typeof navigator === "object" && navigator || void 0;
+var hasStandardBrowserEnv = hasBrowserEnv && (!_navigator || ["ReactNative", "NativeScript", "NS"].indexOf(_navigator.product) < 0);
 var hasStandardBrowserWebWorkerEnv = (() => {
   return typeof WorkerGlobalScope !== "undefined" && // eslint-disable-next-line no-undef
   self instanceof WorkerGlobalScope && typeof self.importScripts === "function";
@@ -20491,7 +20587,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.7.2";
+var VERSION = "1.7.7";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -20533,71 +20629,6 @@ var import_stream4 = __toESM(require("stream"), 1);
 
 // node_modules/axios/lib/helpers/AxiosTransformStream.js
 var import_stream = __toESM(require("stream"), 1);
-
-// node_modules/axios/lib/helpers/throttle.js
-function throttle(fn, freq) {
-  let timestamp = 0;
-  const threshold = 1e3 / freq;
-  let timer = null;
-  return function throttled() {
-    const force = this === true;
-    const now = Date.now();
-    if (force || now - timestamp > threshold) {
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      timestamp = now;
-      return fn.apply(null, arguments);
-    }
-    if (!timer) {
-      timer = setTimeout(() => {
-        timer = null;
-        timestamp = Date.now();
-        return fn.apply(null, arguments);
-      }, threshold - (now - timestamp));
-    }
-  };
-}
-var throttle_default = throttle;
-
-// node_modules/axios/lib/helpers/speedometer.js
-function speedometer(samplesCount, min) {
-  samplesCount = samplesCount || 10;
-  const bytes = new Array(samplesCount);
-  const timestamps = new Array(samplesCount);
-  let head = 0;
-  let tail = 0;
-  let firstSampleTS;
-  min = min !== void 0 ? min : 1e3;
-  return function push(chunkLength) {
-    const now = Date.now();
-    const startedAt = timestamps[tail];
-    if (!firstSampleTS) {
-      firstSampleTS = now;
-    }
-    bytes[head] = chunkLength;
-    timestamps[head] = now;
-    let i = tail;
-    let bytesCount = 0;
-    while (i !== head) {
-      bytesCount += bytes[i++];
-      i = i % samplesCount;
-    }
-    head = (head + 1) % samplesCount;
-    if (head === tail) {
-      tail = (tail + 1) % samplesCount;
-    }
-    if (now - firstSampleTS < min) {
-      return;
-    }
-    const passed = startedAt && now - startedAt;
-    return passed ? Math.round(bytesCount * 1e3 / passed) : void 0;
-  };
-}
-var speedometer_default = speedometer;
-
-// node_modules/axios/lib/helpers/AxiosTransformStream.js
 var kInternals = Symbol("internals");
 var AxiosTransformStream = class extends import_stream.default.Transform {
   constructor(options) {
@@ -20614,11 +20645,8 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
     super({
       readableHighWaterMark: options.chunkSize
     });
-    const self2 = this;
     const internals = this[kInternals] = {
-      length: options.length,
       timeWindow: options.timeWindow,
-      ticksRate: options.ticksRate,
       chunkSize: options.chunkSize,
       maxRate: options.maxRate,
       minChunkSize: options.minChunkSize,
@@ -20629,7 +20657,6 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
       bytes: 0,
       onReadCallback: null
     };
-    const _speedometer = speedometer_default(internals.ticksRate * options.samplesCount, internals.timeWindow);
     this.on("newListener", (event) => {
       if (event === "progress") {
         if (!internals.isCaptured) {
@@ -20637,31 +20664,6 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
         }
       }
     });
-    let bytesNotified = 0;
-    internals.updateProgress = throttle_default(function throttledHandler() {
-      const totalBytes = internals.length;
-      const bytesTransferred = internals.bytesSeen;
-      const progressBytes = bytesTransferred - bytesNotified;
-      if (!progressBytes || self2.destroyed) return;
-      const rate = _speedometer(progressBytes);
-      bytesNotified = bytesTransferred;
-      process.nextTick(() => {
-        self2.emit("progress", {
-          loaded: bytesTransferred,
-          total: totalBytes,
-          progress: totalBytes ? bytesTransferred / totalBytes : void 0,
-          bytes: progressBytes,
-          rate: rate ? rate : void 0,
-          estimated: rate && totalBytes && bytesTransferred <= totalBytes ? (totalBytes - bytesTransferred) / rate : void 0,
-          lengthComputable: totalBytes != null
-        });
-      });
-    }, internals.ticksRate);
-    const onFinish = () => {
-      internals.updateProgress.call(true);
-    };
-    this.once("end", onFinish);
-    this.once("error", onFinish);
   }
   _read(size) {
     const internals = this[kInternals];
@@ -20671,7 +20673,6 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
     return super._read(size);
   }
   _transform(chunk, encoding, callback) {
-    const self2 = this;
     const internals = this[kInternals];
     const maxRate = internals.maxRate;
     const readableHighWaterMark = this.readableHighWaterMark;
@@ -20679,14 +20680,12 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
     const divider = 1e3 / timeWindow;
     const bytesThreshold = maxRate / divider;
     const minChunkSize = internals.minChunkSize !== false ? Math.max(internals.minChunkSize, bytesThreshold * 0.01) : 0;
-    function pushChunk(_chunk, _callback) {
+    const pushChunk = (_chunk, _callback) => {
       const bytes = Buffer.byteLength(_chunk);
       internals.bytesSeen += bytes;
       internals.bytes += bytes;
-      if (internals.isCaptured) {
-        internals.updateProgress();
-      }
-      if (self2.push(_chunk)) {
+      internals.isCaptured && this.emit("progress", internals.bytesSeen);
+      if (this.push(_chunk)) {
         process.nextTick(_callback);
       } else {
         internals.onReadCallback = () => {
@@ -20694,7 +20693,7 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
           process.nextTick(_callback);
         };
       }
-    }
+    };
     const transformChunk = (_chunk, _callback) => {
       const chunkSize = Buffer.byteLength(_chunk);
       let chunkRemainder = null;
@@ -20739,10 +20738,6 @@ var AxiosTransformStream = class extends import_stream.default.Transform {
         callback(null);
       }
     });
-  }
-  setLength(length) {
-    this[kInternals].length = +length;
-    return this;
   }
 };
 var AxiosTransformStream_default = AxiosTransformStream;
@@ -20885,6 +20880,112 @@ var callbackify = (fn, reducer) => {
 };
 var callbackify_default = callbackify;
 
+// node_modules/axios/lib/helpers/speedometer.js
+function speedometer(samplesCount, min) {
+  samplesCount = samplesCount || 10;
+  const bytes = new Array(samplesCount);
+  const timestamps = new Array(samplesCount);
+  let head = 0;
+  let tail = 0;
+  let firstSampleTS;
+  min = min !== void 0 ? min : 1e3;
+  return function push(chunkLength) {
+    const now = Date.now();
+    const startedAt = timestamps[tail];
+    if (!firstSampleTS) {
+      firstSampleTS = now;
+    }
+    bytes[head] = chunkLength;
+    timestamps[head] = now;
+    let i = tail;
+    let bytesCount = 0;
+    while (i !== head) {
+      bytesCount += bytes[i++];
+      i = i % samplesCount;
+    }
+    head = (head + 1) % samplesCount;
+    if (head === tail) {
+      tail = (tail + 1) % samplesCount;
+    }
+    if (now - firstSampleTS < min) {
+      return;
+    }
+    const passed = startedAt && now - startedAt;
+    return passed ? Math.round(bytesCount * 1e3 / passed) : void 0;
+  };
+}
+var speedometer_default = speedometer;
+
+// node_modules/axios/lib/helpers/throttle.js
+function throttle(fn, freq) {
+  let timestamp = 0;
+  let threshold = 1e3 / freq;
+  let lastArgs;
+  let timer;
+  const invoke = (args, now = Date.now()) => {
+    timestamp = now;
+    lastArgs = null;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    fn.apply(null, args);
+  };
+  const throttled = (...args) => {
+    const now = Date.now();
+    const passed = now - timestamp;
+    if (passed >= threshold) {
+      invoke(args, now);
+    } else {
+      lastArgs = args;
+      if (!timer) {
+        timer = setTimeout(() => {
+          timer = null;
+          invoke(lastArgs);
+        }, threshold - passed);
+      }
+    }
+  };
+  const flush = () => lastArgs && invoke(lastArgs);
+  return [throttled, flush];
+}
+var throttle_default = throttle;
+
+// node_modules/axios/lib/helpers/progressEventReducer.js
+var progressEventReducer = (listener, isDownloadStream, freq = 3) => {
+  let bytesNotified = 0;
+  const _speedometer = speedometer_default(50, 250);
+  return throttle_default((e) => {
+    const loaded = e.loaded;
+    const total = e.lengthComputable ? e.total : void 0;
+    const progressBytes = loaded - bytesNotified;
+    const rate = _speedometer(progressBytes);
+    const inRange = loaded <= total;
+    bytesNotified = loaded;
+    const data = {
+      loaded,
+      total,
+      progress: total ? loaded / total : void 0,
+      bytes: progressBytes,
+      rate: rate ? rate : void 0,
+      estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
+      event: e,
+      lengthComputable: total != null,
+      [isDownloadStream ? "download" : "upload"]: true
+    };
+    listener(data);
+  }, freq);
+};
+var progressEventDecorator = (total, throttled) => {
+  const lengthComputable = total != null;
+  return [(loaded) => throttled[0]({
+    lengthComputable,
+    total,
+    loaded
+  }), throttled[1]];
+};
+var asyncDecorator = (fn) => (...args) => utils_default.asap(() => fn(...args));
+
 // node_modules/axios/lib/adapters/http.js
 var zlibOptions = {
   flush: import_zlib.default.constants.Z_SYNC_FLUSH,
@@ -20900,6 +21001,10 @@ var isHttps = /https:?/;
 var supportedProtocols = platform_default.protocols.map((protocol) => {
   return protocol + ":";
 });
+var flushOnFinish = (stream4, [throttled, flush]) => {
+  stream4.on("end", flush).on("error", flush);
+  return throttled;
+};
 function dispatchBeforeRedirect(options, responseDetails) {
   if (options.beforeRedirects.proxy) {
     options.beforeRedirects.proxy(options);
@@ -21020,7 +21125,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
       }
     }
     const fullPath = buildFullPath(config.baseURL, config.url);
-    const parsed = new URL(fullPath, "http://localhost");
+    const parsed = new URL(fullPath, platform_default.hasBrowserEnv ? platform_default.origin : void 0);
     const protocol = parsed.protocol || supportedProtocols[0];
     if (protocol === "data:") {
       let convertedData;
@@ -21064,8 +21169,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
     }
     const headers = AxiosHeaders_default.from(config.headers).normalize();
     headers.set("User-Agent", "axios/" + VERSION, false);
-    const onDownloadProgress = config.onDownloadProgress;
-    const onUploadProgress = config.onUploadProgress;
+    const { onUploadProgress, onDownloadProgress } = config;
     const maxRate = config.maxRate;
     let maxUploadRate = void 0;
     let maxDownloadRate = void 0;
@@ -21124,14 +21228,15 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
         data = import_stream4.default.Readable.from(data, { objectMode: false });
       }
       data = import_stream4.default.pipeline([data, new AxiosTransformStream_default({
-        length: contentLength,
         maxRate: utils_default.toFiniteNumber(maxUploadRate)
       })], utils_default.noop);
-      onUploadProgress && data.on("progress", (progress) => {
-        onUploadProgress(Object.assign(progress, {
-          upload: true
-        }));
-      });
+      onUploadProgress && data.on("progress", flushOnFinish(
+        data,
+        progressEventDecorator(
+          contentLength,
+          progressEventReducer(asyncDecorator(onUploadProgress), false, 3)
+        )
+      ));
     }
     let auth = void 0;
     if (config.auth) {
@@ -21179,7 +21284,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
     if (config.socketPath) {
       options.socketPath = config.socketPath;
     } else {
-      options.hostname = parsed.hostname;
+      options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
       options.port = parsed.port;
       setProxy(options, config.proxy, protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options.path);
     }
@@ -21211,16 +21316,17 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
       if (req.destroyed) return;
       const streams = [res];
       const responseLength = +res.headers["content-length"];
-      if (onDownloadProgress) {
+      if (onDownloadProgress || maxDownloadRate) {
         const transformStream = new AxiosTransformStream_default({
-          length: utils_default.toFiniteNumber(responseLength),
           maxRate: utils_default.toFiniteNumber(maxDownloadRate)
         });
-        onDownloadProgress && transformStream.on("progress", (progress) => {
-          onDownloadProgress(Object.assign(progress, {
-            download: true
-          }));
-        });
+        onDownloadProgress && transformStream.on("progress", flushOnFinish(
+          transformStream,
+          progressEventDecorator(
+            responseLength,
+            progressEventReducer(asyncDecorator(onDownloadProgress), true, 3)
+          )
+        ));
         streams.push(transformStream);
       }
       let responseStream = res;
@@ -21230,6 +21336,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
           delete res.headers["content-encoding"];
         }
         switch ((res.headers["content-encoding"] || "").toLowerCase()) {
+          /*eslint default-case:0*/
           case "gzip":
           case "x-gzip":
           case "compress":
@@ -21380,38 +21487,12 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
   });
 };
 
-// node_modules/axios/lib/helpers/progressEventReducer.js
-var progressEventReducer_default = (listener, isDownloadStream, freq = 3) => {
-  let bytesNotified = 0;
-  const _speedometer = speedometer_default(50, 250);
-  return throttle_default((e) => {
-    const loaded = e.loaded;
-    const total = e.lengthComputable ? e.total : void 0;
-    const progressBytes = loaded - bytesNotified;
-    const rate = _speedometer(progressBytes);
-    const inRange = loaded <= total;
-    bytesNotified = loaded;
-    const data = {
-      loaded,
-      total,
-      progress: total ? loaded / total : void 0,
-      bytes: progressBytes,
-      rate: rate ? rate : void 0,
-      estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
-      event: e,
-      lengthComputable: total != null
-    };
-    data[isDownloadStream ? "download" : "upload"] = true;
-    listener(data);
-  }, freq);
-};
-
 // node_modules/axios/lib/helpers/isURLSameOrigin.js
 var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? (
   // Standard browser envs have full support of the APIs needed to test
   // whether the request URL is of the same origin as current location.
   function standardBrowserEnv() {
-    const msie = /(msie|trident)/i.test(navigator.userAgent);
+    const msie = platform_default.navigator && /(msie|trident)/i.test(platform_default.navigator.userAgent);
     const urlParsingNode = document.createElement("a");
     let originURL;
     function resolveURL(url2) {
@@ -21600,15 +21681,15 @@ var xhr_default = isXHRAdapterSupported && function(config) {
     const _config = resolveConfig_default(config);
     let requestData = _config.data;
     const requestHeaders = AxiosHeaders_default.from(_config.headers).normalize();
-    let { responseType } = _config;
+    let { responseType, onUploadProgress, onDownloadProgress } = _config;
     let onCanceled;
+    let uploadThrottled, downloadThrottled;
+    let flushUpload, flushDownload;
     function done() {
-      if (_config.cancelToken) {
-        _config.cancelToken.unsubscribe(onCanceled);
-      }
-      if (_config.signal) {
-        _config.signal.removeEventListener("abort", onCanceled);
-      }
+      flushUpload && flushUpload();
+      flushDownload && flushDownload();
+      _config.cancelToken && _config.cancelToken.unsubscribe(onCanceled);
+      _config.signal && _config.signal.removeEventListener("abort", onCanceled);
     }
     let request = new XMLHttpRequest();
     request.open(_config.method.toUpperCase(), _config.url, true);
@@ -21655,11 +21736,11 @@ var xhr_default = isXHRAdapterSupported && function(config) {
       if (!request) {
         return;
       }
-      reject(new AxiosError_default("Request aborted", AxiosError_default.ECONNABORTED, _config, request));
+      reject(new AxiosError_default("Request aborted", AxiosError_default.ECONNABORTED, config, request));
       request = null;
     };
     request.onerror = function handleError() {
-      reject(new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, _config, request));
+      reject(new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config, request));
       request = null;
     };
     request.ontimeout = function handleTimeout() {
@@ -21671,7 +21752,7 @@ var xhr_default = isXHRAdapterSupported && function(config) {
       reject(new AxiosError_default(
         timeoutErrorMessage,
         transitional2.clarifyTimeoutError ? AxiosError_default.ETIMEDOUT : AxiosError_default.ECONNABORTED,
-        _config,
+        config,
         request
       ));
       request = null;
@@ -21688,11 +21769,14 @@ var xhr_default = isXHRAdapterSupported && function(config) {
     if (responseType && responseType !== "json") {
       request.responseType = _config.responseType;
     }
-    if (typeof _config.onDownloadProgress === "function") {
-      request.addEventListener("progress", progressEventReducer_default(_config.onDownloadProgress, true));
+    if (onDownloadProgress) {
+      [downloadThrottled, flushDownload] = progressEventReducer(onDownloadProgress, true);
+      request.addEventListener("progress", downloadThrottled);
     }
-    if (typeof _config.onUploadProgress === "function" && request.upload) {
-      request.upload.addEventListener("progress", progressEventReducer_default(_config.onUploadProgress));
+    if (onUploadProgress && request.upload) {
+      [uploadThrottled, flushUpload] = progressEventReducer(onUploadProgress);
+      request.upload.addEventListener("progress", uploadThrottled);
+      request.upload.addEventListener("loadend", flushUpload);
     }
     if (_config.cancelToken || _config.signal) {
       onCanceled = (cancel) => {
@@ -21719,36 +21803,37 @@ var xhr_default = isXHRAdapterSupported && function(config) {
 
 // node_modules/axios/lib/helpers/composeSignals.js
 var composeSignals = (signals, timeout) => {
-  let controller = new AbortController();
-  let aborted;
-  const onabort = function(cancel) {
-    if (!aborted) {
-      aborted = true;
-      unsubscribe();
-      const err = cancel instanceof Error ? cancel : this.reason;
-      controller.abort(err instanceof AxiosError_default ? err : new CanceledError_default(err instanceof Error ? err.message : err));
-    }
-  };
-  let timer = timeout && setTimeout(() => {
-    onabort(new AxiosError_default(`timeout ${timeout} of ms exceeded`, AxiosError_default.ETIMEDOUT));
-  }, timeout);
-  const unsubscribe = () => {
-    if (signals) {
-      timer && clearTimeout(timer);
+  const { length } = signals = signals ? signals.filter(Boolean) : [];
+  if (timeout || length) {
+    let controller = new AbortController();
+    let aborted;
+    const onabort = function(reason) {
+      if (!aborted) {
+        aborted = true;
+        unsubscribe();
+        const err = reason instanceof Error ? reason : this.reason;
+        controller.abort(err instanceof AxiosError_default ? err : new CanceledError_default(err instanceof Error ? err.message : err));
+      }
+    };
+    let timer = timeout && setTimeout(() => {
       timer = null;
-      signals.forEach((signal2) => {
-        signal2 && (signal2.removeEventListener ? signal2.removeEventListener("abort", onabort) : signal2.unsubscribe(onabort));
-      });
-      signals = null;
-    }
-  };
-  signals.forEach((signal2) => signal2 && signal2.addEventListener && signal2.addEventListener("abort", onabort));
-  const { signal } = controller;
-  signal.unsubscribe = unsubscribe;
-  return [signal, () => {
-    timer && clearTimeout(timer);
-    timer = null;
-  }];
+      onabort(new AxiosError_default(`timeout ${timeout} of ms exceeded`, AxiosError_default.ETIMEDOUT));
+    }, timeout);
+    const unsubscribe = () => {
+      if (signals) {
+        timer && clearTimeout(timer);
+        timer = null;
+        signals.forEach((signal2) => {
+          signal2.unsubscribe ? signal2.unsubscribe(onabort) : signal2.removeEventListener("abort", onabort);
+        });
+        signals = null;
+      }
+    };
+    signals.forEach((signal2) => signal2.addEventListener("abort", onabort));
+    const { signal } = controller;
+    signal.unsubscribe = () => utils_default.asap(unsubscribe);
+    return signal;
+  }
 };
 var composeSignals_default = composeSignals;
 
@@ -21767,29 +21852,61 @@ var streamChunk = function* (chunk, chunkSize) {
     pos = end;
   }
 };
-var readBytes = async function* (iterable, chunkSize, encode3) {
-  for await (const chunk of iterable) {
-    yield* streamChunk(ArrayBuffer.isView(chunk) ? chunk : await encode3(String(chunk)), chunkSize);
+var readBytes = async function* (iterable, chunkSize) {
+  for await (const chunk of readStream(iterable)) {
+    yield* streamChunk(chunk, chunkSize);
   }
 };
-var trackStream = (stream4, chunkSize, onProgress, onFinish, encode3) => {
-  const iterator = readBytes(stream4, chunkSize, encode3);
-  let bytes = 0;
-  return new ReadableStream({
-    type: "bytes",
-    async pull(controller) {
-      const { done, value } = await iterator.next();
+var readStream = async function* (stream4) {
+  if (stream4[Symbol.asyncIterator]) {
+    yield* stream4;
+    return;
+  }
+  const reader = stream4.getReader();
+  try {
+    for (; ; ) {
+      const { done, value } = await reader.read();
       if (done) {
-        controller.close();
-        onFinish();
-        return;
+        break;
       }
-      let len = value.byteLength;
-      onProgress && onProgress(bytes += len);
-      controller.enqueue(new Uint8Array(value));
+      yield value;
+    }
+  } finally {
+    await reader.cancel();
+  }
+};
+var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
+  const iterator = readBytes(stream4, chunkSize);
+  let bytes = 0;
+  let done;
+  let _onFinish = (e) => {
+    if (!done) {
+      done = true;
+      onFinish && onFinish(e);
+    }
+  };
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done: done2, value } = await iterator.next();
+        if (done2) {
+          _onFinish();
+          controller.close();
+          return;
+        }
+        let len = value.byteLength;
+        if (onProgress) {
+          let loadedBytes = bytes += len;
+          onProgress(loadedBytes);
+        }
+        controller.enqueue(new Uint8Array(value));
+      } catch (err) {
+        _onFinish(err);
+        throw err;
+      }
     },
     cancel(reason) {
-      onFinish(reason);
+      _onFinish(reason);
       return iterator.return();
     }
   }, {
@@ -21798,18 +21915,17 @@ var trackStream = (stream4, chunkSize, onProgress, onFinish, encode3) => {
 };
 
 // node_modules/axios/lib/adapters/fetch.js
-var fetchProgressDecorator = (total, fn) => {
-  const lengthComputable = total != null;
-  return (loaded) => setTimeout(() => fn({
-    lengthComputable,
-    total,
-    loaded
-  }));
-};
 var isFetchSupported = typeof fetch === "function" && typeof Request === "function" && typeof Response === "function";
 var isReadableStreamSupported = isFetchSupported && typeof ReadableStream === "function";
 var encodeText = isFetchSupported && (typeof TextEncoder === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder()) : async (str) => new Uint8Array(await new Response(str).arrayBuffer()));
-var supportsRequestStream = isReadableStreamSupported && (() => {
+var test = (fn, ...args) => {
+  try {
+    return !!fn(...args);
+  } catch (e) {
+    return false;
+  }
+};
+var supportsRequestStream = isReadableStreamSupported && test(() => {
   let duplexAccessed = false;
   const hasContentType = new Request(platform_default.origin, {
     body: new ReadableStream(),
@@ -21820,14 +21936,9 @@ var supportsRequestStream = isReadableStreamSupported && (() => {
     }
   }).headers.has("Content-Type");
   return duplexAccessed && !hasContentType;
-})();
+});
 var DEFAULT_CHUNK_SIZE = 64 * 1024;
-var supportsResponseStream = isReadableStreamSupported && !!(() => {
-  try {
-    return utils_default.isReadableStream(new Response("").body);
-  } catch (err) {
-  }
-})();
+var supportsResponseStream = isReadableStreamSupported && test(() => utils_default.isReadableStream(new Response("").body));
 var resolvers = {
   stream: supportsResponseStream && ((res) => res.body)
 };
@@ -21846,9 +21957,13 @@ var getBodyLength = async (body) => {
     return body.size;
   }
   if (utils_default.isSpecCompliantForm(body)) {
-    return (await new Request(body).arrayBuffer()).byteLength;
+    const _request = new Request(platform_default.origin, {
+      method: "POST",
+      body
+    });
+    return (await _request.arrayBuffer()).byteLength;
   }
-  if (utils_default.isArrayBufferView(body)) {
+  if (utils_default.isArrayBufferView(body) || utils_default.isArrayBuffer(body)) {
     return body.byteLength;
   }
   if (utils_default.isURLSearchParams(body)) {
@@ -21878,14 +21993,11 @@ var fetch_default = isFetchSupported && (async (config) => {
     fetchOptions
   } = resolveConfig_default(config);
   responseType = responseType ? (responseType + "").toLowerCase() : "text";
-  let [composedSignal, stopTimeout] = signal || cancelToken || timeout ? composeSignals_default([signal, cancelToken], timeout) : [];
-  let finished, request;
-  const onFinish = () => {
-    !finished && setTimeout(() => {
-      composedSignal && composedSignal.unsubscribe();
-    });
-    finished = true;
-  };
+  let composedSignal = composeSignals_default([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+  let request;
+  const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+    composedSignal.unsubscribe();
+  });
   let requestContentLength;
   try {
     if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
@@ -21899,15 +22011,17 @@ var fetch_default = isFetchSupported && (async (config) => {
         headers.setContentType(contentTypeHeader);
       }
       if (_request.body) {
-        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, fetchProgressDecorator(
+        const [onProgress, flush] = progressEventDecorator(
           requestContentLength,
-          progressEventReducer_default(onUploadProgress)
-        ), null, encodeText);
+          progressEventReducer(asyncDecorator(onUploadProgress))
+        );
+        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
       }
     }
     if (!utils_default.isString(withCredentials)) {
-      withCredentials = withCredentials ? "cors" : "omit";
+      withCredentials = withCredentials ? "include" : "omit";
     }
+    const isCredentialsSupported = "credentials" in Request.prototype;
     request = new Request(url2, {
       ...fetchOptions,
       signal: composedSignal,
@@ -21915,28 +22029,31 @@ var fetch_default = isFetchSupported && (async (config) => {
       headers: headers.normalize().toJSON(),
       body: data,
       duplex: "half",
-      withCredentials
+      credentials: isCredentialsSupported ? withCredentials : void 0
     });
     let response = await fetch(request);
     const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
-    if (supportsResponseStream && (onDownloadProgress || isStreamResponse)) {
+    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
       const options = {};
       ["status", "statusText", "headers"].forEach((prop) => {
         options[prop] = response[prop];
       });
       const responseContentLength = utils_default.toFiniteNumber(response.headers.get("content-length"));
+      const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
+        responseContentLength,
+        progressEventReducer(asyncDecorator(onDownloadProgress), true)
+      ) || [];
       response = new Response(
-        trackStream(response.body, DEFAULT_CHUNK_SIZE, onDownloadProgress && fetchProgressDecorator(
-          responseContentLength,
-          progressEventReducer_default(onDownloadProgress, true)
-        ), isStreamResponse && onFinish, encodeText),
+        trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+          flush && flush();
+          unsubscribe && unsubscribe();
+        }),
         options
       );
     }
     responseType = responseType || "text";
     let responseData = await resolvers[utils_default.findKey(resolvers, responseType) || "text"](response, config);
-    !isStreamResponse && onFinish();
-    stopTimeout && stopTimeout();
+    !isStreamResponse && unsubscribe && unsubscribe();
     return await new Promise((resolve, reject) => {
       settle(resolve, reject, {
         data: responseData,
@@ -21948,7 +22065,7 @@ var fetch_default = isFetchSupported && (async (config) => {
       });
     });
   } catch (err) {
-    onFinish();
+    unsubscribe && unsubscribe();
     if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
       throw Object.assign(
         new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config, request),
@@ -22352,6 +22469,15 @@ var CancelToken = class _CancelToken {
     if (index !== -1) {
       this._listeners.splice(index, 1);
     }
+  }
+  toAbortSignal() {
+    const controller = new AbortController();
+    const abort = (err) => {
+      controller.abort(err);
+    };
+    this.subscribe(abort);
+    controller.signal.unsubscribe = () => this.unsubscribe(abort);
+    return controller.signal;
   }
   /**
    * Returns an object that contains a new `CancelToken` and a function that, when called,

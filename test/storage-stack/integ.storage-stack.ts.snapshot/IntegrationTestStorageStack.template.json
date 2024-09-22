@@ -205,7 +205,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "9c9853ee413609ebdce4e07d94594809efd3cbfdc611d658eb9189383225ce47.zip"
+     "S3Key": "72492c4434cea8be7e11f7527e867bba08035f1fe06c0651529dcf210797b7cb.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -608,7 +608,17 @@
     "FunctionName": {
      "Ref": "snspublisherlambda35C1A2D1"
     },
-    "StartingPosition": "LATEST"
+    "StartingPosition": "LATEST",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
