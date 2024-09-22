@@ -27,7 +27,7 @@
      "Payload": "\"{\\\"readingsLimit\\\":1}\""
     },
     "flattenResponse": "false",
-    "salt": "1719409445703"
+    "salt": "1727007412784"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -180,7 +180,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "eafc02f6925151c95ac6a6ae81a3e36d4cf4e77db52eec8e467ce2a69454a41a.zip"
+     "S3Key": "358df072f638d226bc60515a98fa15305e91193108367a0fa01dc626fb9b07d6.zip"
     },
     "Timeout": 120,
     "Handler": "index.handler",
@@ -226,7 +226,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1719409445703"
+    "salt": "1727007412785"
    },
    "DependsOn": [
     "LambdaInvoke65d9b14047bbf63b418a533e51656c7d",
@@ -432,7 +432,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "eafc02f6925151c95ac6a6ae81a3e36d4cf4e77db52eec8e467ce2a69454a41a.zip"
+     "S3Key": "358df072f638d226bc60515a98fa15305e91193108367a0fa01dc626fb9b07d6.zip"
     },
     "Timeout": 120,
     "Handler": "index.isComplete",
@@ -482,7 +482,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "eafc02f6925151c95ac6a6ae81a3e36d4cf4e77db52eec8e467ce2a69454a41a.zip"
+     "S3Key": "358df072f638d226bc60515a98fa15305e91193108367a0fa01dc626fb9b07d6.zip"
     },
     "Timeout": 120,
     "Handler": "index.onTimeout",
@@ -494,7 +494,7 @@
     }
    }
   },
-  "AwsApiCallawssdkclientdynamodbPutItemCommand3c1d228b1e8fa2fff148aae59cf16a25": {
+  "AwsApiCallawssdkclientdynamodbPutItemCommand5b2dc1aaa5118624de03d04283349eaf": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbPutItemC",
    "Properties": {
     "ServiceToken": {
@@ -506,7 +506,7 @@
     "service": "@aws-sdk/client-dynamodb",
     "api": "PutItemCommand",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1719409445704\"},\"reading_depth\":{\"N\":\"1.1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1727007412785\"},\"reading_depth\":{\"N\":\"1.1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -521,7 +521,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1719409445704"
+    "salt": "1727007412786"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -537,7 +537,7 @@
     },
     "service": "@aws-sdk/client-sqs",
     "api": "ReceiveMessageCommand",
-    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1719409445704}\"}}}}}]}}}",
+    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1727007412785}\"}}}}}]}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallawssdkclientsqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dcWaitFor82F86A45"
     },
@@ -556,7 +556,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1719409445704"
+    "salt": "1727007412786"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -714,7 +714,16 @@
    "ap-southeast-4": {
     "value": "nodejs20.x"
    },
+   "ap-southeast-5": {
+    "value": "nodejs20.x"
+   },
+   "ap-southeast-7": {
+    "value": "nodejs20.x"
+   },
    "ca-central-1": {
+    "value": "nodejs20.x"
+   },
+   "ca-west-1": {
     "value": "nodejs20.x"
    },
    "cn-north-1": {
@@ -728,6 +737,9 @@
    },
    "eu-central-2": {
     "value": "nodejs20.x"
+   },
+   "eu-isoe-west-1": {
+    "value": "nodejs18.x"
    },
    "eu-north-1": {
     "value": "nodejs20.x"
@@ -754,6 +766,9 @@
     "value": "nodejs20.x"
    },
    "me-south-1": {
+    "value": "nodejs20.x"
+   },
+   "mx-central-1": {
     "value": "nodejs20.x"
    },
    "sa-east-1": {
