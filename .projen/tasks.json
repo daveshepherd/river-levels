@@ -366,7 +366,7 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@aws-cdk/integ-tests-alpha,@types/aws-lambda,@types/jest,@types/node,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,nock,projen,source-map-support,ts-jest,ts-node,typescript,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-sns,aws-lambda,axios"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@aws-cdk/integ-tests-alpha,@types/aws-lambda,@types/jest,@types/node,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,nock,projen,source-map-support,ts-jest,ts-node,typescript,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-sns,aws-lambda,axios"
         },
         {
           "exec": "yarn install --check-files"
