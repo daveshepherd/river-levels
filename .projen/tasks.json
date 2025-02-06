@@ -59,7 +59,7 @@
       "description": "Create a JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -68,7 +68,7 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -77,7 +77,7 @@
       "description": "Create a JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -86,7 +86,7 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -179,6 +179,9 @@
     "eslint": {
       "name": "eslint",
       "description": "Runs eslint against the codebase",
+      "env": {
+        "ESLINT_USE_FLAT_CONFIG": "false"
+      },
       "steps": [
         {
           "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern $@ src test build-tools projenrc .projenrc.ts",
@@ -372,7 +375,7 @@
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @aws-cdk/integ-tests-alpha @types/aws-lambda @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock aws-sdk-client-mock-jest cdk-nag commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nock projen source-map-support ts-jest ts-node typescript @aws-cdk/integ-runner @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-sns aws-cdk-lib aws-lambda axios constructs"
+          "exec": "yarn upgrade @aws-cdk/integ-tests-alpha @stylistic/eslint-plugin @types/aws-lambda @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock aws-sdk-client-mock-jest cdk-nag commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit nock projen source-map-support ts-jest ts-node typescript @aws-cdk/integ-runner @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-sns aws-cdk-lib aws-lambda axios constructs"
         },
         {
           "exec": "npx projen"

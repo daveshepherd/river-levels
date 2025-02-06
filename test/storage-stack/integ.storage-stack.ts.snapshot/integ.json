@@ -1,12 +1,12 @@
 {
-  "version": "36.3.0",
+  "version": "39.0.0",
   "testCases": {
     "DataStoreTest/DefaultTest": {
       "stacks": [
         "IntegrationTestStorageStack"
       ],
       "regions": [
-        "${Token[AWS.Region.12]}"
+        "${Token[AWS.Region.7]}"
       ],
       "cdkCommandOptions": {
         "destroy": {
