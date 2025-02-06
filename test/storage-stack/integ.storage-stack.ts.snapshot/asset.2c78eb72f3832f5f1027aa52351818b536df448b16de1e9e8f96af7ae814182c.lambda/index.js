@@ -267,7 +267,7 @@ var require_listener = __commonJS({
 var require_context = __commonJS({
   "node_modules/cls-hooked/context.js"(exports2, module2) {
     "use strict";
-    var util2 = require("util");
+    var util3 = require("util");
     var assert = require("assert");
     var wrapEmitter = require_listener();
     var async_hooks = require("async_hooks");
@@ -297,7 +297,7 @@ var require_context = __commonJS({
       this.active[key] = value;
       if (DEBUG_CLS_HOOKED) {
         const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-        debug2(indentStr + "CONTEXT-SET KEY:" + key + "=" + value + " in ns:" + this.name + " currentUid:" + currentUid + " active:" + util2.inspect(this.active, { showHidden: true, depth: 2, colors: true }));
+        debug2(indentStr + "CONTEXT-SET KEY:" + key + "=" + value + " in ns:" + this.name + " currentUid:" + currentUid + " active:" + util3.inspect(this.active, { showHidden: true, depth: 2, colors: true }));
       }
       return value;
     };
@@ -315,8 +315,8 @@ var require_context = __commonJS({
         const asyncHooksCurrentId = async_hooks.executionAsyncId();
         const triggerId = async_hooks.triggerAsyncId();
         const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-        debug2(indentStr + "CONTEXT-GETTING KEY:" + key + "=" + this.active[key] + " (" + this.name + ") currentUid:" + currentUid + " active:" + util2.inspect(this.active, { showHidden: true, depth: 2, colors: true }));
-        debug2(`${indentStr}CONTEXT-GETTING KEY: (${this.name}) ${key}=${this.active[key]} currentUid:${currentUid} asyncHooksCurrentId:${asyncHooksCurrentId} triggerId:${triggerId} len:${this._set.length} active:${util2.inspect(this.active)}`);
+        debug2(indentStr + "CONTEXT-GETTING KEY:" + key + "=" + this.active[key] + " (" + this.name + ") currentUid:" + currentUid + " active:" + util3.inspect(this.active, { showHidden: true, depth: 2, colors: true }));
+        debug2(`${indentStr}CONTEXT-GETTING KEY: (${this.name}) ${key}=${this.active[key]} currentUid:${currentUid} asyncHooksCurrentId:${asyncHooksCurrentId} triggerId:${triggerId} len:${this._set.length} active:${util3.inspect(this.active)}`);
       }
       return this.active[key];
     };
@@ -328,7 +328,7 @@ var require_context = __commonJS({
         const asyncHooksCurrentId = async_hooks.executionAsyncId();
         const triggerId = async_hooks.triggerAsyncId();
         const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-        debug2(`${indentStr}CONTEXT-CREATED Context: (${this.name}) currentUid:${currentUid} asyncHooksCurrentId:${asyncHooksCurrentId} triggerId:${triggerId} len:${this._set.length} context:${util2.inspect(context, { showHidden: true, depth: 2, colors: true })}`);
+        debug2(`${indentStr}CONTEXT-CREATED Context: (${this.name}) currentUid:${currentUid} asyncHooksCurrentId:${asyncHooksCurrentId} triggerId:${triggerId} len:${this._set.length} context:${util3.inspect(context, { showHidden: true, depth: 2, colors: true })}`);
       }
       return context;
     };
@@ -340,7 +340,7 @@ var require_context = __commonJS({
           const triggerId = async_hooks.triggerAsyncId();
           const asyncHooksCurrentId = async_hooks.executionAsyncId();
           const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-          debug2(`${indentStr}CONTEXT-RUN BEGIN: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} context:${util2.inspect(context)}`);
+          debug2(`${indentStr}CONTEXT-RUN BEGIN: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} context:${util3.inspect(context)}`);
         }
         fn(context);
         return context;
@@ -354,7 +354,7 @@ var require_context = __commonJS({
           const triggerId = async_hooks.triggerAsyncId();
           const asyncHooksCurrentId = async_hooks.executionAsyncId();
           const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-          debug2(`${indentStr}CONTEXT-RUN END: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util2.inspect(context)}`);
+          debug2(`${indentStr}CONTEXT-RUN END: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util3.inspect(context)}`);
         }
         this.exit(context);
       }
@@ -374,18 +374,18 @@ var require_context = __commonJS({
         throw new Error("fn must return a promise.");
       }
       if (DEBUG_CLS_HOOKED) {
-        debug2("CONTEXT-runPromise BEFORE: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util2.inspect(context));
+        debug2("CONTEXT-runPromise BEFORE: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util3.inspect(context));
       }
       return promise.then((result) => {
         if (DEBUG_CLS_HOOKED) {
-          debug2("CONTEXT-runPromise AFTER then: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util2.inspect(context));
+          debug2("CONTEXT-runPromise AFTER then: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util3.inspect(context));
         }
         this.exit(context);
         return result;
       }).catch((err) => {
         err[ERROR_SYMBOL] = context;
         if (DEBUG_CLS_HOOKED) {
-          debug2("CONTEXT-runPromise AFTER catch: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util2.inspect(context));
+          debug2("CONTEXT-runPromise AFTER catch: (" + this.name + ") currentUid:" + currentUid + " len:" + this._set.length + " " + util3.inspect(context));
         }
         this.exit(context);
         throw err;
@@ -420,7 +420,7 @@ var require_context = __commonJS({
         const asyncHooksCurrentId = async_hooks.executionAsyncId();
         const triggerId = async_hooks.triggerAsyncId();
         const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-        debug2(`${indentStr}CONTEXT-ENTER: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util2.inspect(context)}`);
+        debug2(`${indentStr}CONTEXT-ENTER: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util3.inspect(context)}`);
       }
       this._set.push(this.active);
       this.active = context;
@@ -431,7 +431,7 @@ var require_context = __commonJS({
         const asyncHooksCurrentId = async_hooks.executionAsyncId();
         const triggerId = async_hooks.triggerAsyncId();
         const indentStr = " ".repeat(this._indent < 0 ? 0 : this._indent);
-        debug2(`${indentStr}CONTEXT-EXIT: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util2.inspect(context)}`);
+        debug2(`${indentStr}CONTEXT-EXIT: (${this.name}) currentUid:${currentUid} triggerId:${triggerId} asyncHooksCurrentId:${asyncHooksCurrentId} len:${this._set.length} ${util3.inspect(context)}`);
       }
       if (this.active === context) {
         assert.ok(this._set.length, "can't remove top context");
@@ -441,9 +441,9 @@ var require_context = __commonJS({
       let index = this._set.lastIndexOf(context);
       if (index < 0) {
         if (DEBUG_CLS_HOOKED) {
-          debug2("??ERROR?? context exiting but not entered - ignoring: " + util2.inspect(context));
+          debug2("??ERROR?? context exiting but not entered - ignoring: " + util3.inspect(context));
         }
-        assert.ok(index >= 0, "context not currently entered; can't exit. \n" + util2.inspect(this) + "\n" + util2.inspect(context));
+        assert.ok(index >= 0, "context not currently entered; can't exit. \n" + util3.inspect(this) + "\n" + util3.inspect(context));
       } else {
         assert.ok(index, "can't remove top context");
         this._set.splice(index, 1);
@@ -499,7 +499,7 @@ var require_context = __commonJS({
             namespace._contexts.set(asyncId, namespace.active);
             if (DEBUG_CLS_HOOKED) {
               const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-              debug2(`${indentStr}INIT [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
+              debug2(`${indentStr}INIT [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
             }
           } else if (currentUid === 0) {
             const triggerId2 = async_hooks.triggerAsyncId();
@@ -508,18 +508,18 @@ var require_context = __commonJS({
               namespace._contexts.set(asyncId, triggerIdContext);
               if (DEBUG_CLS_HOOKED) {
                 const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-                debug2(`${indentStr}INIT USING CONTEXT FROM TRIGGERID [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId2} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
+                debug2(`${indentStr}INIT USING CONTEXT FROM TRIGGERID [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId2} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
               }
             } else if (DEBUG_CLS_HOOKED) {
               const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-              debug2(`${indentStr}INIT MISSING CONTEXT [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId2} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
+              debug2(`${indentStr}INIT MISSING CONTEXT [${type}] (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId2} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
             }
           }
           if (DEBUG_CLS_HOOKED && type === "PROMISE") {
-            debug2(util2.inspect(resource, { showHidden: true }));
+            debug2(util3.inspect(resource, { showHidden: true }));
             const parentId = resource.parentId;
             const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-            debug2(`${indentStr}INIT RESOURCE-PROMISE [${type}] (${name}) parentId:${parentId} asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
+            debug2(`${indentStr}INIT RESOURCE-PROMISE [${type}] (${name}) parentId:${parentId} asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} resource:${resource}`);
           }
         },
         before(asyncId) {
@@ -530,14 +530,14 @@ var require_context = __commonJS({
             if (DEBUG_CLS_HOOKED) {
               const triggerId = async_hooks.triggerAsyncId();
               const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-              debug2(`${indentStr}BEFORE (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util2.inspect(context)}`);
+              debug2(`${indentStr}BEFORE (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util3.inspect(context)}`);
               namespace._indent += 2;
             }
             namespace.enter(context);
           } else if (DEBUG_CLS_HOOKED) {
             const triggerId = async_hooks.triggerAsyncId();
             const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-            debug2(`${indentStr}BEFORE MISSING CONTEXT (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} namespace._contexts:${util2.inspect(namespace._contexts, { showHidden: true, depth: 2, colors: true })}`);
+            debug2(`${indentStr}BEFORE MISSING CONTEXT (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} namespace._contexts:${util3.inspect(namespace._contexts, { showHidden: true, depth: 2, colors: true })}`);
             namespace._indent += 2;
           }
         },
@@ -550,14 +550,14 @@ var require_context = __commonJS({
               const triggerId = async_hooks.triggerAsyncId();
               namespace._indent -= 2;
               const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-              debug2(`${indentStr}AFTER (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util2.inspect(context)}`);
+              debug2(`${indentStr}AFTER (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util3.inspect(context)}`);
             }
             namespace.exit(context);
           } else if (DEBUG_CLS_HOOKED) {
             const triggerId = async_hooks.triggerAsyncId();
             namespace._indent -= 2;
             const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-            debug2(`${indentStr}AFTER MISSING CONTEXT (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util2.inspect(context)}`);
+            debug2(`${indentStr}AFTER MISSING CONTEXT (${name}) asyncId:${asyncId} currentUid:${currentUid} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util3.inspect(context)}`);
           }
         },
         destroy(asyncId) {
@@ -565,7 +565,7 @@ var require_context = __commonJS({
           if (DEBUG_CLS_HOOKED) {
             const triggerId = async_hooks.triggerAsyncId();
             const indentStr = " ".repeat(namespace._indent < 0 ? 0 : namespace._indent);
-            debug2(`${indentStr}DESTROY (${name}) currentUid:${currentUid} asyncId:${asyncId} triggerId:${triggerId} active:${util2.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util2.inspect(namespace._contexts.get(currentUid))}`);
+            debug2(`${indentStr}DESTROY (${name}) currentUid:${currentUid} asyncId:${asyncId} triggerId:${triggerId} active:${util3.inspect(namespace.active, { showHidden: true, depth: 2, colors: true })} context:${util3.inspect(namespace._contexts.get(currentUid))}`);
           }
           namespace._contexts.delete(asyncId);
         }
@@ -577,7 +577,7 @@ var require_context = __commonJS({
     function destroyNamespace(name) {
       let namespace = getNamespace2(name);
       assert.ok(namespace, `can't delete nonexistent namespace! "` + name + '"');
-      assert.ok(namespace.id, "don't assign to process.namespaces directly! " + util2.inspect(namespace));
+      assert.ok(namespace.id, "don't assign to process.namespaces directly! " + util3.inspect(namespace));
       process.namespaces[name] = null;
     }
     function reset() {
@@ -591,7 +591,7 @@ var require_context = __commonJS({
     process.namespaces = {};
     function debug2(...args) {
       if (DEBUG_CLS_HOOKED) {
-        process._rawDebug(`${util2.format(...args)}`);
+        process._rawDebug(`${util3.format(...args)}`);
       }
     }
   }
@@ -2441,7 +2441,7 @@ var require_service_connector = __commonJS({
     var logger = require_logger();
     var SamplingRule = require_sampling_rule();
     var DaemonConfig = require_daemon_config();
-    var util2 = require("util");
+    var util3 = require("util");
     var http3 = require("http");
     var ServiceConnector = {
       // client_id is a 12 byte cryptographically secure random hex
@@ -2580,7 +2580,7 @@ var require_service_connector = __commonJS({
         headers: {
           "Content-Type": "application/json",
           "Content-Length": contentLength,
-          "Host": util2.format("%s:%d", DaemonConfig.tcp_ip, DaemonConfig.tcp_port)
+          "Host": util3.format("%s:%d", DaemonConfig.tcp_ip, DaemonConfig.tcp_port)
         }
       };
       return options;
@@ -2799,7 +2799,7 @@ var require_default_sampler = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/middleware/sampling/default_sampler.js"(exports2, module2) {
     "use strict";
     var logger = require_logger();
-    var util2 = require("util");
+    var util3 = require("util");
     var SegmentUtils = require_segment_utils();
     var DefaultSampler = {
       localSampler: require_local_sampler(),
@@ -2824,7 +2824,7 @@ var require_default_sampler = __commonJS({
           var now = Math.floor((/* @__PURE__ */ new Date()).getTime() / 1e3);
           var matchedRule = this.ruleCache.getMatchedRule(sampleRequest, now);
           if (matchedRule) {
-            logger.getLogger().debug(util2.format("Rule %s is matched.", matchedRule.getName()));
+            logger.getLogger().debug(util3.format("Rule %s is matched.", matchedRule.getName()));
             return processMatchedRule(matchedRule, now);
           } else {
             logger.getLogger().info("No effective centralized sampling rule match. Fallback to local rules.");
@@ -2963,8 +2963,8 @@ var require_mw_utils = __commonJS({
             isSampled = true;
           }
         }
-        if (amznTraceHeader.sampled === "?") {
-          res.header[XRAY_HEADER] = "Root=" + amznTraceHeader.root + ";Sampled=" + (isSampled ? "1" : "0");
+        if (amznTraceHeader.sampled === "?" && res.header) {
+          res.header(XRAY_HEADER, "Root=" + amznTraceHeader.root + ";Sampled=" + (isSampled ? "1" : "0"));
         }
         if (!isSampled) {
           segment.notTraced = true;
@@ -3018,8 +3018,10 @@ var require_mw_utils = __commonJS({
         var amznTraceHeader = this.processHeaders(req);
         var name = this.resolveName(req.headers.host);
         var segment = new Segment(name, amznTraceHeader.root, amznTraceHeader.parent);
-        var responseWithEmbeddedRequest = Object.assign({}, res, { req });
-        this.resolveSampling(amznTraceHeader, segment, responseWithEmbeddedRequest);
+        if (!res.req) {
+          res.req = req;
+        }
+        this.resolveSampling(amznTraceHeader, segment, res);
         segment.addIncomingRequestData(new IncomingRequestData(req));
         this.middlewareLog("Starting middleware segment", req.url, segment);
         var middlewareLog = this.middlewareLog;
@@ -3139,7 +3141,7 @@ var require_package = __commonJS({
   "node_modules/aws-xray-sdk-core/package.json"(exports2, module2) {
     module2.exports = {
       name: "aws-xray-sdk-core",
-      version: "3.10.1",
+      version: "3.10.3",
       description: "AWS X-Ray SDK for Javascript",
       author: "Amazon Web Services",
       contributors: [
@@ -3181,7 +3183,7 @@ var require_package = __commonJS({
         "test-async": "npm run compile && mocha --recursive ./dist/test_async/ -R spec",
         clean: "rm -rf dist && rm -rf node_modules",
         testcov: "nyc npm run test",
-        reportcov: "nyc report --reporter=text-lcov > coverage.lcov && codecov"
+        reportcov: "nyc report --reporter=text-lcov > coverage.lcov"
       },
       keywords: [
         "amazon",
@@ -3194,7 +3196,7 @@ var require_package = __commonJS({
       ],
       license: "Apache-2.0",
       repository: "https://github.com/aws/aws-xray-sdk-node/tree/master/packages/core",
-      gitHead: "5539f1ab3a33f8df7b8add9e450b536886250a3a"
+      gitHead: "f838200543af28912291e2bf309991366cd9abea"
     };
   }
 });
@@ -4687,6 +4689,7 @@ var require_re = __commonJS({
     var re = exports2.re = [];
     var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
+    var safeSrc = exports2.safeSrc = [];
     var t = exports2.t = {};
     var R = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
@@ -4707,6 +4710,7 @@ var require_re = __commonJS({
       debug(name, index, value);
       t[name] = index;
       src[index] = value;
+      safeSrc[index] = safe;
       re[index] = new RegExp(value, isGlobal ? "g" : void 0);
       safeRe[index] = new RegExp(safe, isGlobal ? "g" : void 0);
     };
@@ -4806,7 +4810,7 @@ var require_semver = __commonJS({
     "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
-    var { safeRe: re, t } = require_re();
+    var { safeRe: re, safeSrc: src, t } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer = class _SemVer {
@@ -4946,6 +4950,18 @@ var require_semver = __commonJS({
       // preminor will bump the version up to the next minor release, and immediately
       // down to pre-release. premajor and prepatch work the same way.
       inc(release, identifier, identifierBase) {
+        if (release.startsWith("pre")) {
+          if (!identifier && identifierBase === false) {
+            throw new Error("invalid increment argument: identifier is empty");
+          }
+          if (identifier) {
+            const r = new RegExp(`^${this.options.loose ? src[t.PRERELEASELOOSE] : src[t.PRERELEASE]}$`);
+            const match = `-${identifier}`.match(r);
+            if (!match || match[1] !== identifier) {
+              throw new Error(`invalid identifier: ${identifier}`);
+            }
+          }
+        }
         switch (release) {
           case "premajor":
             this.prerelease.length = 0;
@@ -4973,6 +4989,12 @@ var require_semver = __commonJS({
             }
             this.inc("pre", identifier, identifierBase);
             break;
+          case "release":
+            if (this.prerelease.length === 0) {
+              throw new Error(`version ${this.raw} is not a prerelease`);
+            }
+            this.prerelease.length = 0;
+            break;
           case "major":
             if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0) {
               this.major++;
@@ -4998,9 +5020,6 @@ var require_semver = __commonJS({
           // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
           case "pre": {
             const base = Number(identifierBase) ? 1 : 0;
-            if (!identifier && identifierBase === false) {
-              throw new Error("invalid increment argument: identifier is empty");
-            }
             if (this.prerelease.length === 0) {
               this.prerelease = [base];
             } else {
@@ -5140,13 +5159,12 @@ var require_diff = __commonJS({
         if (!lowVersion.patch && !lowVersion.minor) {
           return "major";
         }
-        if (highVersion.patch) {
+        if (lowVersion.compareMain(highVersion) === 0) {
+          if (lowVersion.minor && !lowVersion.patch) {
+            return "minor";
+          }
           return "patch";
         }
-        if (highVersion.minor) {
-          return "minor";
-        }
-        return "major";
       }
       const prefix = highHasPre ? "pre" : "";
       if (v1.major !== v2.major) {
@@ -7432,7 +7450,7 @@ var require_delayed_stream = __commonJS({
   "node_modules/delayed-stream/lib/delayed_stream.js"(exports2, module2) {
     "use strict";
     var Stream = require("stream").Stream;
-    var util2 = require("util");
+    var util3 = require("util");
     module2.exports = DelayedStream;
     function DelayedStream() {
       this.source = null;
@@ -7443,7 +7461,7 @@ var require_delayed_stream = __commonJS({
       this._released = false;
       this._bufferedEvents = [];
     }
-    util2.inherits(DelayedStream, Stream);
+    util3.inherits(DelayedStream, Stream);
     DelayedStream.create = function(source, options) {
       var delayedStream = new this();
       options = options || {};
@@ -7523,7 +7541,7 @@ var require_delayed_stream = __commonJS({
 var require_combined_stream = __commonJS({
   "node_modules/combined-stream/lib/combined_stream.js"(exports2, module2) {
     "use strict";
-    var util2 = require("util");
+    var util3 = require("util");
     var Stream = require("stream").Stream;
     var DelayedStream = require_delayed_stream();
     module2.exports = CombinedStream;
@@ -7539,7 +7557,7 @@ var require_combined_stream = __commonJS({
       this._insideLoop = false;
       this._pendingNext = false;
     }
-    util2.inherits(CombinedStream, Stream);
+    util3.inherits(CombinedStream, Stream);
     CombinedStream.create = function(options) {
       var combinedStream = new this();
       options = options || {};
@@ -16549,7 +16567,7 @@ var require_form_data = __commonJS({
   "node_modules/form-data/lib/form_data.js"(exports2, module2) {
     "use strict";
     var CombinedStream = require_combined_stream();
-    var util2 = require("util");
+    var util3 = require("util");
     var path = require("path");
     var http3 = require("http");
     var https3 = require("https");
@@ -16560,7 +16578,7 @@ var require_form_data = __commonJS({
     var asynckit = require_asynckit();
     var populate = require_populate();
     module2.exports = FormData3;
-    util2.inherits(FormData3, CombinedStream);
+    util3.inherits(FormData3, CombinedStream);
     function FormData3(options) {
       if (!(this instanceof FormData3)) {
         return new FormData3(options);
@@ -16585,7 +16603,7 @@ var require_form_data = __commonJS({
       if (typeof value == "number") {
         value = "" + value;
       }
-      if (util2.isArray(value)) {
+      if (Array.isArray(value)) {
         this._error(new Error("Arrays are not supported."));
         return;
       }
@@ -16875,7 +16893,7 @@ var require_proxy_from_env = __commonJS({
     var stringEndsWith = String.prototype.endsWith || function(s) {
       return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
     };
-    function getProxyForUrl2(url2) {
+    function getProxyForUrl(url2) {
       var parsedUrl = typeof url2 === "string" ? parseUrl(url2) : url2 || {};
       var proto = parsedUrl.protocol;
       var hostname = parsedUrl.host;
@@ -16925,7 +16943,7 @@ var require_proxy_from_env = __commonJS({
     function getEnv(key) {
       return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
     }
-    exports2.getProxyForUrl = getProxyForUrl2;
+    exports2.getProxyForUrl = getProxyForUrl;
   }
 });
 
@@ -17150,49 +17168,63 @@ var require_common = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(" ", ",").split(",").filter(Boolean);
+        for (const ns of split) {
+          if (ns[0] === "-") {
+            createDebug.skips.push(ns.slice(1));
           } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
+            createDebug.names.push(ns);
           }
         }
       }
+      function matchesTemplate(search, template) {
+        let searchIndex = 0;
+        let templateIndex = 0;
+        let starIndex = -1;
+        let matchIndex = 0;
+        while (searchIndex < search.length) {
+          if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === "*")) {
+            if (template[templateIndex] === "*") {
+              starIndex = templateIndex;
+              matchIndex = searchIndex;
+              templateIndex++;
+            } else {
+              searchIndex++;
+              templateIndex++;
+            }
+          } else if (starIndex !== -1) {
+            templateIndex = starIndex + 1;
+            matchIndex++;
+            searchIndex = matchIndex;
+          } else {
+            return false;
+          }
+        }
+        while (templateIndex < template.length && template[templateIndex] === "*") {
+          templateIndex++;
+        }
+        return templateIndex === template.length;
+      }
       function disable() {
         const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
+          ...createDebug.names,
+          ...createDebug.skips.map((namespace) => "-" + namespace)
         ].join(",");
         createDebug.enable("");
         return namespaces;
       }
       function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
+        for (const skip of createDebug.skips) {
+          if (matchesTemplate(name, skip)) {
             return false;
           }
         }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
+        for (const ns of createDebug.names) {
+          if (matchesTemplate(name, ns)) {
             return true;
           }
         }
         return false;
-      }
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
       }
       function coerce(val) {
         if (val instanceof Error) {
@@ -17501,14 +17533,14 @@ var require_node = __commonJS({
   "node_modules/debug/src/node.js"(exports2, module2) {
     "use strict";
     var tty = require("tty");
-    var util2 = require("util");
+    var util3 = require("util");
     exports2.init = init;
     exports2.log = log;
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
     exports2.useColors = useColors;
-    exports2.destroy = util2.deprecate(
+    exports2.destroy = util3.deprecate(
       () => {
       },
       "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
@@ -17639,7 +17671,7 @@ var require_node = __commonJS({
       return (/* @__PURE__ */ new Date()).toISOString() + " ";
     }
     function log(...args) {
-      return process.stderr.write(util2.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
+      return process.stderr.write(util3.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
     }
     function save(namespaces) {
       if (namespaces) {
@@ -17662,11 +17694,11 @@ var require_node = __commonJS({
     var { formatters } = module2.exports;
     formatters.o = function(v) {
       this.inspectOpts.colors = this.useColors;
-      return util2.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+      return util3.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
     };
     formatters.O = function(v) {
       this.inspectOpts.colors = this.useColors;
-      return util2.inspect(v, this.inspectOpts);
+      return util3.inspect(v, this.inspectOpts);
     };
   }
 });
@@ -18334,6 +18366,15 @@ var EnvironmentVariablesService = class {
     return truthyValues.includes(value.toLowerCase());
   }
   /**
+   * Helper function to determine if a value is considered falsy.
+   *
+   * @param value The value to check for falsiness.
+   */
+  isValueFalse(value) {
+    const falsyValues = ["0", "n", "no", "f", "false", "off"];
+    return falsyValues.includes(value.toLowerCase());
+  }
+  /**
    * Get the AWS X-Ray Trace data from the environment variable.
    *
    * The method parses the environment variable `_X_AMZN_TRACE_ID` and returns an object with the key-value pairs.
@@ -18354,7 +18395,7 @@ var EnvironmentVariablesService = class {
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.8.0";
+var PT_VERSION = "2.13.1";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -18464,6 +18505,7 @@ var EnvironmentVariablesService2 = class extends EnvironmentVariablesService {
     return this.get(this.tracingEnabledVariable);
   }
 };
+var environmentVariablesService = new EnvironmentVariablesService2();
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/ProviderService.js
 var import_aws_xray_sdk_core = __toESM(require_lib(), 1);
@@ -18558,6 +18600,7 @@ var ProviderService = class {
         const method = request.method;
         const subsegment = parentSubsegment.addNewSubsegment(requestURL.hostname);
         subsegment.addAttribute("namespace", "remote");
+        request.addHeader("X-Amzn-Trace-Id", `Root=${environmentVariablesService.getXrayTraceId()};Parent=${subsegment.id};Sampled=${subsegment.notTraced ? "0" : "1"}`);
         subsegment.http = {
           request: {
             url: `${requestURL.protocol}//${requestURL.hostname}${requestURL.pathname}`,
@@ -18812,6 +18855,7 @@ var Tracer = class extends Utility {
    * @deprecated Use {@link captureAWSv3Client} instead.
    * @param service - AWS SDK v2 client
    */
+  /* v8 ignore start */
   captureAWSClient(service) {
     if (!this.isTracingEnabled())
       return service;
@@ -18826,6 +18870,7 @@ var Tracer = class extends Utility {
       }
     }
   }
+  /* v8 ignore stop */
   /**
    * Patch an AWS SDK v3 client and create traces when your application makes calls to that AWS service.
    *
@@ -19256,13 +19301,6 @@ var Tracer = class extends Utility {
     this.customConfigService = customConfigService ? customConfigService : void 0;
   }
   /**
-   * Set and initialize `envVarsService`.
-   * Used internally during initialization.
-   */
-  setEnvVarsService() {
-    this.envVarsService = new EnvironmentVariablesService2();
-  }
-  /**
    * Method that reconciles the configuration passed with the environment variables.
    * Used internally during initialization.
    *
@@ -19270,7 +19308,7 @@ var Tracer = class extends Utility {
    */
   setOptions(options) {
     const { enabled, serviceName, captureHTTPsRequests, customConfigService } = options;
-    this.setEnvVarsService();
+    this.envVarsService = environmentVariablesService;
     this.setCustomConfigService(customConfigService);
     this.setTracingEnabled(enabled);
     this.setCaptureResponse();
@@ -19948,6 +19986,11 @@ function buildURL(url2, params, options) {
     return url2;
   }
   const _encode = options && options.encode || encode2;
+  if (utils_default.isFunction(options)) {
+    options = {
+      serialize: options
+    };
+  }
   const serializeFn = options && options.serialize;
   let serializedParams;
   if (serializeFn) {
@@ -20587,7 +20630,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.7.7";
+var VERSION = "1.7.9";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -20746,7 +20789,7 @@ var AxiosTransformStream_default = AxiosTransformStream;
 var import_events = require("events");
 
 // node_modules/axios/lib/helpers/formDataToStream.js
-var import_util = require("util");
+var import_util = __toESM(require("util"), 1);
 var import_stream2 = require("stream");
 
 // node_modules/axios/lib/helpers/readBlob.js
@@ -20766,7 +20809,7 @@ var readBlob_default = readBlob;
 
 // node_modules/axios/lib/helpers/formDataToStream.js
 var BOUNDARY_ALPHABET = utils_default.ALPHABET.ALPHA_DIGIT + "-_";
-var textEncoder = new import_util.TextEncoder();
+var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new import_util.default.TextEncoder();
 var CRLF = "\r\n";
 var CRLF_BYTES = textEncoder.encode(CRLF);
 var CRLF_BYTES_COUNT = 2;
@@ -21016,7 +21059,7 @@ function dispatchBeforeRedirect(options, responseDetails) {
 function setProxy(options, configProxy, location) {
   let proxy = configProxy;
   if (!proxy && proxy !== false) {
-    const proxyUrl = (0, import_proxy_from_env.getProxyForUrl)(location);
+    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
     if (proxyUrl) {
       proxy = new URL(proxyUrl);
     }
@@ -21190,7 +21233,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
         } catch (e) {
         }
       }
-    } else if (utils_default.isBlob(data)) {
+    } else if (utils_default.isBlob(data) || utils_default.isFile(data)) {
       data.size && headers.setContentType(data.type || "application/octet-stream");
       headers.setContentLength(data.size || 0);
       data = import_stream4.default.Readable.from(readBlob_default(data));
@@ -21393,7 +21436,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
             return;
           }
           const err = new AxiosError_default(
-            "maxContentLength size of " + config.maxContentLength + " exceeded",
+            "stream has been aborted",
             AxiosError_default.ERR_BAD_RESPONSE,
             config,
             lastRequest
@@ -21488,45 +21531,13 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
 };
 
 // node_modules/axios/lib/helpers/isURLSameOrigin.js
-var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? (
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-  function standardBrowserEnv() {
-    const msie = platform_default.navigator && /(msie|trident)/i.test(platform_default.navigator.userAgent);
-    const urlParsingNode = document.createElement("a");
-    let originURL;
-    function resolveURL(url2) {
-      let href = url2;
-      if (msie) {
-        urlParsingNode.setAttribute("href", href);
-        href = urlParsingNode.href;
-      }
-      urlParsingNode.setAttribute("href", href);
-      return {
-        href: urlParsingNode.href,
-        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
-        host: urlParsingNode.host,
-        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
-        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
-        hostname: urlParsingNode.hostname,
-        port: urlParsingNode.port,
-        pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
-      };
-    }
-    originURL = resolveURL(window.location.href);
-    return function isURLSameOrigin(requestURL) {
-      const parsed = utils_default.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-      return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-    };
-  }()
-) : (
-  // Non standard browser envs (web workers, react-native) lack needed support.
-  /* @__PURE__ */ function nonStandardBrowserEnv() {
-    return function isURLSameOrigin() {
-      return true;
-    };
-  }()
-);
+var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2, isMSIE) => (url2) => {
+  url2 = new URL(url2, platform_default.origin);
+  return origin2.protocol === url2.protocol && origin2.host === url2.host && (isMSIE || origin2.port === url2.port);
+})(
+  new URL(platform_default.origin),
+  platform_default.navigator && /(msie|trident)/i.test(platform_default.navigator.userAgent)
+) : () => true;
 
 // node_modules/axios/lib/helpers/cookies.js
 var cookies_default = platform_default.hasStandardBrowserEnv ? (
@@ -21566,7 +21577,7 @@ var headersToObject = (thing) => thing instanceof AxiosHeaders_default ? { ...th
 function mergeConfig(config1, config2) {
   config2 = config2 || {};
   const config = {};
-  function getMergedValue(target, source, caseless) {
+  function getMergedValue(target, source, prop, caseless) {
     if (utils_default.isPlainObject(target) && utils_default.isPlainObject(source)) {
       return utils_default.merge.call({ caseless }, target, source);
     } else if (utils_default.isPlainObject(source)) {
@@ -21576,11 +21587,11 @@ function mergeConfig(config1, config2) {
     }
     return source;
   }
-  function mergeDeepProperties(a, b, caseless) {
+  function mergeDeepProperties(a, b, prop, caseless) {
     if (!utils_default.isUndefined(b)) {
-      return getMergedValue(a, b, caseless);
+      return getMergedValue(a, b, prop, caseless);
     } else if (!utils_default.isUndefined(a)) {
-      return getMergedValue(void 0, a, caseless);
+      return getMergedValue(void 0, a, prop, caseless);
     }
   }
   function valueFromConfig2(a, b) {
@@ -21631,7 +21642,7 @@ function mergeConfig(config1, config2) {
     socketPath: defaultToConfig2,
     responseEncoding: defaultToConfig2,
     validateStatus: mergeDirectKeys,
-    headers: (a, b) => mergeDeepProperties(headersToObject(a), headersToObject(b), true)
+    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
   };
   utils_default.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
     const merge2 = mergeMap[prop] || mergeDeepProperties;
@@ -22208,6 +22219,12 @@ validators.transitional = function transitional(validator, version, message) {
     return validator ? validator(value, opt, opts) : true;
   };
 };
+validators.spelling = function spelling(correctSpelling) {
+  return (value, opt) => {
+    console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
+    return true;
+  };
+};
 function assertOptions(options, schema, allowUnknown) {
   if (typeof options !== "object") {
     throw new AxiosError_default("options must be an object", AxiosError_default.ERR_BAD_OPTION_VALUE);
@@ -22258,8 +22275,8 @@ var Axios = class {
       return await this._request(configOrUrl, config);
     } catch (err) {
       if (err instanceof Error) {
-        let dummy;
-        Error.captureStackTrace ? Error.captureStackTrace(dummy = {}) : dummy = new Error();
+        let dummy = {};
+        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
         const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
         try {
           if (!err.stack) {
@@ -22301,6 +22318,10 @@ var Axios = class {
         }, true);
       }
     }
+    validator_default.assertOptions(config, {
+      baseUrl: validators2.spelling("baseURL"),
+      withXsrfToken: validators2.spelling("withXSRFToken")
+    }, true);
     config.method = (config.method || this.defaults.method || "get").toLowerCase();
     let contextHeaders = headers && utils_default.merge(
       headers.common,

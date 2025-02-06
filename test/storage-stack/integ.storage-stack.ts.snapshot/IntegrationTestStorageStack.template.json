@@ -53,7 +53,17 @@
       },
       "Region": {
        "Ref": "AWS::Region"
-      }
+      },
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
      }
     ],
     "StreamSpecification": {
@@ -205,7 +215,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "72492c4434cea8be7e11f7527e867bba08035f1fe06c0651529dcf210797b7cb.zip"
+     "S3Key": "2c78eb72f3832f5f1027aa52351818b536df448b16de1e9e8f96af7ae814182c.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -243,7 +253,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs20.x",
+    "Runtime": "nodejs22.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",
@@ -570,7 +580,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs20.x",
+    "Runtime": "nodejs22.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",

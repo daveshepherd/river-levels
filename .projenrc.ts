@@ -29,7 +29,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
   lambdaOptions: {
-    runtime: LambdaRuntime.NODEJS_20_X,
+    runtime: LambdaRuntime.NODEJS_22_X,
   },
   license: 'MIT',
   majorVersion: 1,
