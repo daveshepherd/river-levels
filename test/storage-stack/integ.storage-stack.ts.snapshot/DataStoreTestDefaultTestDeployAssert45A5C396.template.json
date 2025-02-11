@@ -27,7 +27,7 @@
      "Payload": "\"{\\\"readingsLimit\\\":1}\""
     },
     "flattenResponse": "false",
-    "salt": "1738851585218"
+    "salt": "1739286012531"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -180,7 +180,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f692c9f68e4daba2abc99103efd3518bced1e9d7a2a89847b9b5d5473c64f1bd.zip"
+     "S3Key": "50cc710fdaff3ff8ce06bf73945fa958504d45c5f63a093feddbc4e349dbac93.zip"
     },
     "Timeout": 120,
     "Handler": "index.handler",
@@ -226,7 +226,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1738851585218"
+    "salt": "1739286012531"
    },
    "DependsOn": [
     "LambdaInvoke65d9b14047bbf63b418a533e51656c7d",
@@ -432,7 +432,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f692c9f68e4daba2abc99103efd3518bced1e9d7a2a89847b9b5d5473c64f1bd.zip"
+     "S3Key": "50cc710fdaff3ff8ce06bf73945fa958504d45c5f63a093feddbc4e349dbac93.zip"
     },
     "Timeout": 120,
     "Handler": "index.isComplete",
@@ -482,7 +482,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f692c9f68e4daba2abc99103efd3518bced1e9d7a2a89847b9b5d5473c64f1bd.zip"
+     "S3Key": "50cc710fdaff3ff8ce06bf73945fa958504d45c5f63a093feddbc4e349dbac93.zip"
     },
     "Timeout": 120,
     "Handler": "index.onTimeout",
@@ -494,7 +494,7 @@
     }
    }
   },
-  "AwsApiCallawssdkclientdynamodbPutItemCommandfa82ed129b34dcc1bf10a029aa934b52": {
+  "AwsApiCallawssdkclientdynamodbPutItemCommand795f01974ddb37627c099358919e13d7": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbPutItemC",
    "Properties": {
     "ServiceToken": {
@@ -506,7 +506,7 @@
     "service": "@aws-sdk/client-dynamodb",
     "api": "PutItemCommand",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1738851585219\"},\"reading_depth\":{\"N\":\"1.1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1739286012532\"},\"reading_depth\":{\"N\":\"1.1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -521,7 +521,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1738851585219"
+    "salt": "1739286012532"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -537,7 +537,7 @@
     },
     "service": "@aws-sdk/client-sqs",
     "api": "ReceiveMessageCommand",
-    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1738851585219}\"}}}}}]}}}",
+    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1739286012532}\"}}}}}]}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallawssdkclientsqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dcWaitFor82F86A45"
     },
@@ -556,7 +556,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1738851585220"
+    "salt": "1739286012533"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -727,10 +727,10 @@
     "value": "nodejs20.x"
    },
    "cn-north-1": {
-    "value": "nodejs18.x"
+    "value": "nodejs20.x"
    },
    "cn-northwest-1": {
-    "value": "nodejs18.x"
+    "value": "nodejs20.x"
    },
    "eu-central-1": {
     "value": "nodejs20.x"
@@ -781,10 +781,10 @@
     "value": "nodejs20.x"
    },
    "us-gov-east-1": {
-    "value": "nodejs18.x"
+    "value": "nodejs20.x"
    },
    "us-gov-west-1": {
-    "value": "nodejs18.x"
+    "value": "nodejs20.x"
    },
    "us-iso-east-1": {
     "value": "nodejs18.x"
