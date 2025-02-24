@@ -49,7 +49,8 @@
      {
       "DeletionProtectionEnabled": false,
       "PointInTimeRecoverySpecification": {
-       "PointInTimeRecoveryEnabled": true
+       "PointInTimeRecoveryEnabled": true,
+       "RecoveryPeriodInDays": 35
       },
       "Region": {
        "Ref": "AWS::Region"
@@ -161,32 +162,6 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
-  "crawlerroleDefaultPolicyD657C666": {
-   "Type": "AWS::IAM::Policy",
-   "Properties": {
-    "PolicyDocument": {
-     "Statement": [
-      {
-       "Action": [
-        "xray:PutTelemetryRecords",
-        "xray:PutTraceSegments"
-       ],
-       "Effect": "Allow",
-       "Resource": "*"
-      }
-     ],
-     "Version": "2012-10-17"
-    },
-    "PolicyName": "crawlerroleDefaultPolicyD657C666",
-    "Roles": [
-     {
-      "Ref": "crawlerrole985C99ED"
-     }
-    ]
-   },
-   "UpdateReplacePolicy": "Delete",
-   "DeletionPolicy": "Delete"
-  },
   "crawlerloggroup6A20A1A3": {
    "Type": "AWS::Logs::LogGroup",
    "Properties": {
@@ -215,7 +190,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "2c78eb72f3832f5f1027aa52351818b536df448b16de1e9e8f96af7ae814182c.zip"
+     "S3Key": "ac3ac3c5f6e5836004705ab51392d79f4ec97c2631d32773fe923af65b3995a4.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -271,9 +246,34 @@
    },
    "DependsOn": [
     "crawlerrolecrawlerpolicy8AFFD705",
-    "crawlerroleDefaultPolicyD657C666",
     "crawlerrole985C99ED"
    ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "crawlerlambdainlinePolicyAddedToExecutionRole0ED894F46": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "crawlerlambdainlinePolicyAddedToExecutionRole0ED894F46",
+    "Roles": [
+     {
+      "Ref": "crawlerrole985C99ED"
+     }
+    ]
+   },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
@@ -529,14 +529,6 @@
      "Statement": [
       {
        "Action": [
-        "xray:PutTelemetryRecords",
-        "xray:PutTraceSegments"
-       ],
-       "Effect": "Allow",
-       "Resource": "*"
-      },
-      {
-       "Action": [
         "dynamodb:DescribeStream",
         "dynamodb:GetRecords",
         "dynamodb:GetShardIterator",
@@ -633,6 +625,32 @@
     "snspublisherrole00E553A8",
     "snspublisherrolesnspolicy6B97BC97"
    ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "snspublisherlambdainlinePolicyAddedToExecutionRole0790DF1FF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "snspublisherlambdainlinePolicyAddedToExecutionRole0790DF1FF",
+    "Roles": [
+     {
+      "Ref": "snspublisherrole00E553A8"
+     }
+    ]
+   },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
