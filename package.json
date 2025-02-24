@@ -47,7 +47,7 @@
     "aws-cdk": "^2",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "cdk-nag": "^2.35.26",
+    "cdk-nag": "^2.35.29",
     "commit-and-tag-version": "^12",
     "esbuild": "^0.25.0",
     "eslint": "^9",
@@ -58,7 +58,7 @@
     "nock": "^13.5.6",
     "projen": "^0.91.13",
     "source-map-support": "^0.5.21",
-    "ts-jest": "^29.2.5",
+    "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },

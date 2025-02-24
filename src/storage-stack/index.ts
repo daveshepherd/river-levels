@@ -48,7 +48,10 @@ export class StorageStack extends Stack {
       deletionProtection: !props?.setDestroyPolicyToAllResources,
       dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
       partitionKey: { name: 'station', type: AttributeType.STRING },
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+        recoveryPeriodInDays: 35,
+      },
       sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
       replicas: props.replicaRegions
         ? props.replicaRegions.map(function (replicaRegion) {
