@@ -22,3 +22,18 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - -label~=(do-not-merge)
       - status-success=build
+  - name: Automatic approval for projen upgrade pull requests
+    conditions:
+      - author=endor-projen[bot]
+      - status-success=build
+    actions:
+      review:
+        type: APPROVE
+        message: Automatically approving projen upgrade
+  - name: Assign PR when check fails
+    conditions:
+      - "#check-failure > 0"
+    actions:
+      assign:
+        add_users:
+          - daveshepherd

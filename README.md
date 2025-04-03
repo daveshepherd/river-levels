@@ -1,6 +1,13 @@
-# River Levels
+# river-levels
 
-# Getting started
+## Getting Started
+
+```sh
+yarn install
+npx projen build
+```
+
+## CDK
 
 On first run of a CDK installation:
 
@@ -17,5 +24,3 @@ Deploy the CDK stack
 ```sh
 npx projen deploy
 ```
-
-Example change

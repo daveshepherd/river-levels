@@ -30,6 +30,8 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
+.npmrc
+.vscode
 /test-reports/
 junit.xml
 /coverage/
@@ -54,4 +56,6 @@ junit.xml
 .parcel-cache/
 !/src/storage-stack/crawler-function.ts
 !/src/storage-stack/sns-publisher-function.ts
+!/CODEOWNERS
+!/README.md
 !/.projenrc.ts
