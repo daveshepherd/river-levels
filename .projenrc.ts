@@ -4,7 +4,7 @@ import { JobPermission } from 'projen/lib/github/workflows-model';
 import { CdkTypeScriptApp } from 'projen-modules';
 
 const project = new CdkTypeScriptApp({
-  cdkVersion: '2.1.0',
+  cdkVersion: '2.187.0',
   codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
   defaultReleaseBranch: 'main',

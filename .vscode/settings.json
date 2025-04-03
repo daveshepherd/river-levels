@@ -1,9 +1,0 @@
-{
-    "conventionalCommits.scopes": [
-        "storage-stack",
-        "readings-store",
-        "crawler",
-        "integ-tests",
-        "workflows"
-    ]
-}
