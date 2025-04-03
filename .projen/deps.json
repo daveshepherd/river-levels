@@ -88,6 +88,10 @@
       "type": "build"
     },
     {
+      "name": "projen-modules",
+      "type": "build"
+    },
+    {
       "name": "source-map-support",
       "type": "build"
     },

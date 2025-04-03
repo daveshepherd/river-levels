@@ -1,9 +1,11 @@
-import { awscdk, github } from 'projen';
+import { github } from 'projen';
 import { LambdaRuntime } from 'projen/lib/awscdk';
 import { JobPermission } from 'projen/lib/github/workflows-model';
+import { CdkTypeScriptApp } from 'projen-modules';
 
-const project = new awscdk.AwsCdkTypeScriptApp({
+const project = new CdkTypeScriptApp({
   cdkVersion: '2.1.0',
+  codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
   defaultReleaseBranch: 'main',
   deps: [
@@ -22,6 +24,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'aws-sdk-client-mock',
     'cdk-nag',
     'nock',
+    'projen-modules',
     'source-map-support',
   ],
   experimentalIntegRunner: true,
@@ -122,4 +125,19 @@ project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
   needs: ['deploy_development'],
   ...deploymentJob,
 });
+project.readme?.addSection('CDK', `On first run of a CDK installation:
+
+\`\`\`sh
+npx cdk bootstrap
+\`\`\`
+
+Build the project
+\`\`\`sh
+npx projen build
+\`\`\`
+
+Deploy the CDK stack
+\`\`\`sh
+npx projen deploy
+\`\`\``);
 project.synth();

@@ -17,8 +17,10 @@
 /.projen/files.json linguist-generated
 /.projen/tasks.json linguist-generated
 /cdk.json linguist-generated
+/CODEOWNERS linguist-generated
 /LICENSE linguist-generated
 /package.json linguist-generated
+/README.md linguist-generated
 /src/storage-stack/crawler-function.ts linguist-generated
 /src/storage-stack/sns-publisher-function.ts linguist-generated
 /tsconfig.dev.json linguist-generated
