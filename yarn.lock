@@ -107,17 +107,17 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-lambda-powertools/commons@^2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.17.0.tgz#82ebb9e8b00acd0dd188ec3266eb9f0d2688f1d5"
-  integrity sha512-NeBZxDem23RoAnQruEB/Y6WJdqn43pC42y+dyGuJOg2u/oMQsClFF4332gReVUiajItItA2vTZ2ZS5wNBkZfbg==
+"@aws-lambda-powertools/commons@^2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.18.0.tgz#242b5faf794fd96e58d1c409b7dad00192b67505"
+  integrity sha512-B0TkjRymVeYMD2EnX64mGdnrm0sJczggYonWJoyVt/j7IzlbJnbYQX3aG9Ok5yvTrIx+iZdYPjZuH0xoyDLVAQ==
 
-"@aws-lambda-powertools/tracer@^2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.17.0.tgz#ead0f5a39b6b4f765c886b4fec1d2bacd90859cb"
-  integrity sha512-AHdnZyA4VoqXpCipIDegSJ/TgchGVSK32vN4e/X6u8BMTyZX4kqw/KuT68ZLzc/Ch9pNwdUk9NeCybr4DtRcPg==
+"@aws-lambda-powertools/tracer@^2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.18.0.tgz#d8bc5aed69181e84a31b540350bb76d363e25e7d"
+  integrity sha512-HgnWl40ZdbwDOE9Cmv47TPeNTObQuMTyjrue/QY3fpwyOpGZUkDFKlupUDwiz/b6SAEQcC9zdT0QHw68tn47Hw==
   dependencies:
-    "@aws-lambda-powertools/commons" "^2.17.0"
+    "@aws-lambda-powertools/commons" "^2.18.0"
     aws-xray-sdk-core "^3.10.3"
 
 "@aws-sdk/client-dynamodb@^3.782.0":
@@ -5890,10 +5890,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.6.tgz#b535591fc4849c3a245d4f3f605a390f26ec5197"
-  integrity sha512-Bv/eTIVJmJrxdGx/qyHFaAJchAF4/y+EtOF6pT4nHw7X+hCBtehOPkHl6I/TFF348Z5OnhFdXiHRXHOex6FiUA==
+projen-modules@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.7.tgz#cf8518a0d7a02c3696b27c9a933ee7460d88be0a"
+  integrity sha512-ulAqdV5p05LrYs4msSXsOmKO+GCaBFZ59FFHm/EWoxwrS3TxcN8TV2W3eAMWDcZFcAkM4DJen51F4uPtCIhPRg==
 
 projen@^0.91.20:
   version "0.91.20"
