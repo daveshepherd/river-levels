@@ -1,5 +1,5 @@
 {
-  "version": "39.0.0",
+  "version": "43.0.0",
   "artifacts": {
     "IntegrationTestStorageStack.assets": {
       "type": "cdk:asset-manifest",
@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/b6fc278ef557072879f51464908a7ccb9bcd44d390ba478b90c21d713ba301c2.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/16553b3111a804644f66aed1b15fd2ee79bebe34f097078ca8e9c14017fa68ef.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -267,7 +267,10 @@
         "/IntegrationTestStorageStack/crawler-lambda/inlinePolicyAddedToExecutionRole-0/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "crawlerlambdainlinePolicyAddedToExecutionRole0ED894F46"
+            "data": "crawlerlambdainlinePolicyAddedToExecutionRole0ED894F46",
+            "trace": [
+              "!!DESTRUCTIVE_CHANGES: WILL_DESTROY"
+            ]
           }
         ],
         "/IntegrationTestStorageStack/crawler-cron": [
@@ -636,7 +639,10 @@
         "/IntegrationTestStorageStack/sns-publisher-lambda/inlinePolicyAddedToExecutionRole-0/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "snspublisherlambdainlinePolicyAddedToExecutionRole0790DF1FF"
+            "data": "snspublisherlambdainlinePolicyAddedToExecutionRole0790DF1FF",
+            "trace": [
+              "!!DESTRUCTIVE_CHANGES: WILL_DESTROY"
+            ]
           }
         ],
         "/IntegrationTestStorageStack/sns-publisher-lambda/DynamoDBEventSource:IntegrationTestStorageStackriverlevelstableA4CFEE91": [
@@ -646,6 +652,7 @@
               "target": "*",
               "eventSourceArn": "*",
               "metricsConfig": "*",
+              "supportS3OnFailureDestination": true,
               "batchSize": "*",
               "bisectBatchOnError": "*",
               "startingPosition": "LATEST",
@@ -788,15 +795,6 @@
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
-        ],
-        "crawlerroleDefaultPolicyD657C666": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "crawlerroleDefaultPolicyD657C666",
-            "trace": [
-              "!!DESTRUCTIVE_CHANGES: WILL_DESTROY"
-            ]
-          }
         ]
       },
       "displayName": "IntegrationTestStorageStack"
@@ -818,7 +816,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8895e802871154fde41214c0127966707c6aae320dbc493b519a4264c34307f4.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/60c74cd0126aeef528e7483c5beff531feda34f4c762ed906340d111b9b7e999.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -945,16 +943,16 @@
             "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
           }
         ],
-        "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommande72b52040aebbcb47ce9b41514df9a89/Default": [
+        "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommandc435c69fe1f1754fad816f207ce0a643/Default": [
           {
             "type": "aws:cdk:analytics:construct",
             "data": "*"
           }
         ],
-        "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommande72b52040aebbcb47ce9b41514df9a89/Default/Default": [
+        "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommandc435c69fe1f1754fad816f207ce0a643/Default/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AwsApiCallawssdkclientdynamodbPutItemCommande72b52040aebbcb47ce9b41514df9a89"
+            "data": "AwsApiCallawssdkclientdynamodbPutItemCommandc435c69fe1f1754fad816f207ce0a643"
           }
         ],
         "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-sqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dc/Default": [
@@ -1028,5 +1026,6 @@
         "file": "tree.json"
       }
     }
-  }
+  },
+  "minimumCliVersion": "2.1014.0"
 }
