@@ -1,12 +1,15 @@
 {
-  "version": "39.0.0",
+  "version": "45.0.0",
   "testCases": {
     "DataStoreTest/DefaultTest": {
       "stacks": [
         "IntegrationTestStorageStack"
       ],
       "regions": [
-        "${Token[AWS.Region.11]}"
+        "${Token[AWS.Region.7]}"
+      ],
+      "allowDestroy": [
+        "AWS::IAM::Policy"
       ],
       "cdkCommandOptions": {
         "destroy": {
@@ -18,5 +21,6 @@
       "assertionStack": "DataStoreTest/DefaultTest/DeployAssert",
       "assertionStackName": "DataStoreTestDefaultTestDeployAssert45A5C396"
     }
-  }
+  },
+  "minimumCliVersion": "2.1020.2"
 }

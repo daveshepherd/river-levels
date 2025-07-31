@@ -678,7 +678,7 @@ var require_logger = __commonJS({
 var require_captured_exception = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/segments/attributes/captured_exception.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     function CapturedException(err, remote) {
       this.init(err, remote);
     }
@@ -688,7 +688,7 @@ var require_captured_exception = __commonJS({
       this.type = e.name;
       this.stack = [];
       this.remote = !!remote;
-      this.id = crypto.randomBytes(8).toString("hex");
+      this.id = crypto2.randomBytes(8).toString("hex");
       if (e.stack) {
         var stack = e.stack.split("\n");
         stack.shift();
@@ -965,7 +965,7 @@ var require_segment_emitter = __commonJS({
 var require_trace_id = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/segments/attributes/trace_id.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var logger = require_logger();
     var TraceID = class _TraceID {
       /**
@@ -977,7 +977,7 @@ var require_trace_id = __commonJS({
       constructor(tsHex, numberhex) {
         this.version = 1;
         this.timestamp = tsHex || Math.round((/* @__PURE__ */ new Date()).getTime() / 1e3).toString(16);
-        this.id = numberhex || crypto.randomBytes(12).toString("hex");
+        this.id = numberhex || crypto2.randomBytes(12).toString("hex");
       }
       /**
        * @returns {TraceID} - a hardcoded trace ID using zeroed timestamp and random ID
@@ -1036,7 +1036,7 @@ var require_trace_id = __commonJS({
 var require_utils = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/utils.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var logger = require_logger();
     var TraceID = require_trace_id();
     var utils = {
@@ -1169,7 +1169,7 @@ var require_utils = __commonJS({
             valid = true;
           }
           segment.trace_id = TraceID.FromString(traceData.root).toString();
-          segment.id = traceData.parent || crypto.randomBytes(8).toString("hex");
+          segment.id = traceData.parent || crypto2.randomBytes(8).toString("hex");
           if (traceData.root && segment.trace_id !== traceData.root) {
             logger.getLogger().error("_X_AMZN_TRACE_ID contains invalid trace ID");
             valid = false;
@@ -1361,7 +1361,7 @@ var require_remote_request_data = __commonJS({
 var require_subsegment = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/segments/attributes/subsegment.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var CapturedException = require_captured_exception();
     var RemoteRequestData = require_remote_request_data();
     var SegmentEmitter = require_segment_emitter();
@@ -1375,7 +1375,7 @@ var require_subsegment = __commonJS({
       if (typeof name != "string") {
         throw new Error("Subsegment name must be of type string.");
       }
-      this.id = crypto.randomBytes(8).toString("hex");
+      this.id = crypto2.randomBytes(8).toString("hex");
       this.name = name;
       this.start_time = SegmentUtils.getCurrentTime();
       this.in_progress = true;
@@ -1610,7 +1610,7 @@ var require_subsegment = __commonJS({
 var require_segment = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/segments/segment.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var CapturedException = require_captured_exception();
     var SegmentEmitter = require_segment_emitter();
     var SegmentUtils = require_segment_utils();
@@ -1631,7 +1631,7 @@ var require_segment = __commonJS({
       } else {
         traceId = new TraceID();
       }
-      var id = crypto.randomBytes(8).toString("hex");
+      var id = crypto2.randomBytes(8).toString("hex");
       var startTime = SegmentUtils.getCurrentTime();
       this.trace_id = traceId.toString();
       this.id = id;
@@ -2437,7 +2437,7 @@ var require_sampling_rule = __commonJS({
 var require_service_connector = __commonJS({
   "node_modules/aws-xray-sdk-core/dist/lib/middleware/sampling/service_connector.js"(exports2, module2) {
     "use strict";
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var logger = require_logger();
     var SamplingRule = require_sampling_rule();
     var DaemonConfig = require_daemon_config();
@@ -2447,7 +2447,7 @@ var require_service_connector = __commonJS({
       // client_id is a 12 byte cryptographically secure random hex
       // identifying the SDK instance and is generated during SDK initialization/
       // This is required when reporting sampling to X-Ray back-end.
-      clientId: crypto.randomBytes(12).toString("hex"),
+      clientId: crypto2.randomBytes(12).toString("hex"),
       samplingRulesPath: "/GetSamplingRules",
       samplingTargetsPath: "/SamplingTargets",
       logger,
@@ -4719,8 +4719,8 @@ var require_re = __commonJS({
     createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
     createToken("MAINVERSION", `(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})\\.(${src[t.NUMERICIDENTIFIER]})`);
     createToken("MAINVERSIONLOOSE", `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})\\.(${src[t.NUMERICIDENTIFIERLOOSE]})`);
-    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NUMERICIDENTIFIER]}|${src[t.NONNUMERICIDENTIFIER]})`);
-    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NUMERICIDENTIFIERLOOSE]}|${src[t.NONNUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t.NONNUMERICIDENTIFIER]}|${src[t.NUMERICIDENTIFIERLOOSE]})`);
     createToken("PRERELEASE", `(?:-(${src[t.PRERELEASEIDENTIFIER]}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
     createToken("PRERELEASELOOSE", `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`);
     createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
@@ -4810,7 +4810,7 @@ var require_semver = __commonJS({
     "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
-    var { safeRe: re, safeSrc: src, t } = require_re();
+    var { safeRe: re, t } = require_re();
     var parseOptions = require_parse_options();
     var { compareIdentifiers } = require_identifiers();
     var SemVer = class _SemVer {
@@ -4955,8 +4955,7 @@ var require_semver = __commonJS({
             throw new Error("invalid increment argument: identifier is empty");
           }
           if (identifier) {
-            const r = new RegExp(`^${this.options.loose ? src[t.PRERELEASELOOSE] : src[t.PRERELEASE]}$`);
-            const match = `-${identifier}`.match(r);
+            const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE]);
             if (!match || match[1] !== identifier) {
               throw new Error(`invalid identifier: ${identifier}`);
             }
@@ -16394,9 +16393,9 @@ var require_iterate = __commonJS({
     var async = require_async();
     var abort = require_abort();
     module2.exports = iterate;
-    function iterate(list, iterator, state, callback) {
+    function iterate(list, iterator2, state, callback) {
       var key = state["keyedList"] ? state["keyedList"][state.index] : state.index;
-      state.jobs[key] = runJob(iterator, key, list[key], function(error, output) {
+      state.jobs[key] = runJob(iterator2, key, list[key], function(error, output) {
         if (!(key in state.jobs)) {
           return;
         }
@@ -16409,12 +16408,12 @@ var require_iterate = __commonJS({
         callback(error, state.results);
       });
     }
-    function runJob(iterator, key, item, callback) {
+    function runJob(iterator2, key, item, callback) {
       var aborter;
-      if (iterator.length == 2) {
-        aborter = iterator(item, async(callback));
+      if (iterator2.length == 2) {
+        aborter = iterator2(item, async(callback));
       } else {
-        aborter = iterator(item, key, async(callback));
+        aborter = iterator2(item, key, async(callback));
       }
       return aborter;
     }
@@ -16470,10 +16469,10 @@ var require_parallel = __commonJS({
     var initState = require_state();
     var terminator = require_terminator();
     module2.exports = parallel;
-    function parallel(list, iterator, callback) {
+    function parallel(list, iterator2, callback) {
       var state = initState(list);
       while (state.index < (state["keyedList"] || list).length) {
-        iterate(list, iterator, state, function(error, result) {
+        iterate(list, iterator2, state, function(error, result) {
           if (error) {
             callback(error, result);
             return;
@@ -16500,16 +16499,16 @@ var require_serialOrdered = __commonJS({
     module2.exports = serialOrdered;
     module2.exports.ascending = ascending;
     module2.exports.descending = descending;
-    function serialOrdered(list, iterator, sortMethod, callback) {
+    function serialOrdered(list, iterator2, sortMethod, callback) {
       var state = initState(list, sortMethod);
-      iterate(list, iterator, state, function iteratorHandler(error, result) {
+      iterate(list, iterator2, state, function iteratorHandler(error, result) {
         if (error) {
           callback(error, result);
           return;
         }
         state.index++;
         if (state.index < (state["keyedList"] || list).length) {
-          iterate(list, iterator, state, iteratorHandler);
+          iterate(list, iterator2, state, iteratorHandler);
           return;
         }
         callback(null, state.results);
@@ -16531,8 +16530,8 @@ var require_serial = __commonJS({
     "use strict";
     var serialOrdered = require_serialOrdered();
     module2.exports = serial;
-    function serial(list, iterator, callback) {
-      return serialOrdered(list, iterator, null, callback);
+    function serial(list, iterator2, callback) {
+      return serialOrdered(list, iterator2, null, callback);
     }
   }
 });
@@ -17372,23 +17371,23 @@ var require_es_set_tostringtag = __commonJS({
     var hasToStringTag = require_shams2()();
     var hasOwn = require_hasown();
     var $TypeError = require_type();
-    var toStringTag = hasToStringTag ? Symbol.toStringTag : null;
+    var toStringTag2 = hasToStringTag ? Symbol.toStringTag : null;
     module2.exports = function setToStringTag(object, value) {
       var overrideIfSet = arguments.length > 2 && !!arguments[2] && arguments[2].force;
       var nonConfigurable = arguments.length > 2 && !!arguments[2] && arguments[2].nonConfigurable;
       if (typeof overrideIfSet !== "undefined" && typeof overrideIfSet !== "boolean" || typeof nonConfigurable !== "undefined" && typeof nonConfigurable !== "boolean") {
         throw new $TypeError("if provided, the `overrideIfSet` and `nonConfigurable` options must be booleans");
       }
-      if (toStringTag && (overrideIfSet || !hasOwn(object, toStringTag))) {
+      if (toStringTag2 && (overrideIfSet || !hasOwn(object, toStringTag2))) {
         if ($defineProperty) {
-          $defineProperty(object, toStringTag, {
+          $defineProperty(object, toStringTag2, {
             configurable: !nonConfigurable,
             enumerable: false,
             value,
             writable: false
           });
         } else {
-          object[toStringTag] = value;
+          object[toStringTag2] = value;
         }
       }
     };
@@ -17420,12 +17419,12 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs = require("fs");
     var Stream = require("stream").Stream;
+    var crypto2 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
+    var hasOwn = require_hasown();
     var populate = require_populate();
-    module2.exports = FormData3;
-    util3.inherits(FormData3, CombinedStream);
     function FormData3(options) {
       if (!(this instanceof FormData3)) {
         return new FormData3(options);
@@ -17439,16 +17438,17 @@ var require_form_data = __commonJS({
         this[option] = options[option];
       }
     }
+    util3.inherits(FormData3, CombinedStream);
     FormData3.LINE_BREAK = "\r\n";
     FormData3.DEFAULT_CONTENT_TYPE = "application/octet-stream";
     FormData3.prototype.append = function(field, value, options) {
       options = options || {};
-      if (typeof options == "string") {
+      if (typeof options === "string") {
         options = { filename: options };
       }
       var append2 = CombinedStream.prototype.append.bind(this);
-      if (typeof value == "number") {
-        value = "" + value;
+      if (typeof value === "number" || value == null) {
+        value = String(value);
       }
       if (Array.isArray(value)) {
         this._error(new Error("Arrays are not supported."));
@@ -17464,7 +17464,7 @@ var require_form_data = __commonJS({
     FormData3.prototype._trackLength = function(header, value, options) {
       var valueLength = 0;
       if (options.knownLength != null) {
-        valueLength += +options.knownLength;
+        valueLength += Number(options.knownLength);
       } else if (Buffer.isBuffer(value)) {
         valueLength = value.length;
       } else if (typeof value === "string") {
@@ -17472,7 +17472,7 @@ var require_form_data = __commonJS({
       }
       this._valueLength += valueLength;
       this._overheadLength += Buffer.byteLength(header) + FormData3.LINE_BREAK.length;
-      if (!value || !value.path && !(value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) && !(value instanceof Stream)) {
+      if (!value || !value.path && !(value.readable && hasOwn(value, "httpVersion")) && !(value instanceof Stream)) {
         return;
       }
       if (!options.knownLength) {
@@ -17480,26 +17480,25 @@ var require_form_data = __commonJS({
       }
     };
     FormData3.prototype._lengthRetriever = function(value, callback) {
-      if (Object.prototype.hasOwnProperty.call(value, "fd")) {
+      if (hasOwn(value, "fd")) {
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
           fs.stat(value.path, function(err, stat) {
-            var fileSize;
             if (err) {
               callback(err);
               return;
             }
-            fileSize = stat.size - (value.start ? value.start : 0);
+            var fileSize = stat.size - (value.start ? value.start : 0);
             callback(null, fileSize);
           });
         }
-      } else if (Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
-        callback(null, +value.headers["content-length"]);
-      } else if (Object.prototype.hasOwnProperty.call(value, "httpModule")) {
+      } else if (hasOwn(value, "httpVersion")) {
+        callback(null, Number(value.headers["content-length"]));
+      } else if (hasOwn(value, "httpModule")) {
         value.on("response", function(response) {
           value.pause();
-          callback(null, +response.headers["content-length"]);
+          callback(null, Number(response.headers["content-length"]));
         });
         value.resume();
       } else {
@@ -17507,7 +17506,7 @@ var require_form_data = __commonJS({
       }
     };
     FormData3.prototype._multiPartHeader = function(field, value, options) {
-      if (typeof options.header == "string") {
+      if (typeof options.header === "string") {
         return options.header;
       }
       var contentDisposition = this._getContentDisposition(value, options);
@@ -17519,12 +17518,12 @@ var require_form_data = __commonJS({
         // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType || [])
       };
-      if (typeof options.header == "object") {
+      if (typeof options.header === "object") {
         populate(headers, options.header);
       }
       var header;
       for (var prop in headers) {
-        if (Object.prototype.hasOwnProperty.call(headers, prop)) {
+        if (hasOwn(headers, prop)) {
           header = headers[prop];
           if (header == null) {
             continue;
@@ -17540,34 +17539,33 @@ var require_form_data = __commonJS({
       return "--" + this.getBoundary() + FormData3.LINE_BREAK + contents + FormData3.LINE_BREAK;
     };
     FormData3.prototype._getContentDisposition = function(value, options) {
-      var filename, contentDisposition;
+      var filename;
       if (typeof options.filepath === "string") {
         filename = path.normalize(options.filepath).replace(/\\/g, "/");
-      } else if (options.filename || value.name || value.path) {
-        filename = path.basename(options.filename || value.name || value.path);
-      } else if (value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
+      } else if (options.filename || value && (value.name || value.path)) {
+        filename = path.basename(options.filename || value && (value.name || value.path));
+      } else if (value && value.readable && hasOwn(value, "httpVersion")) {
         filename = path.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
-        contentDisposition = 'filename="' + filename + '"';
+        return 'filename="' + filename + '"';
       }
-      return contentDisposition;
     };
     FormData3.prototype._getContentType = function(value, options) {
       var contentType = options.contentType;
-      if (!contentType && value.name) {
+      if (!contentType && value && value.name) {
         contentType = mime.lookup(value.name);
       }
-      if (!contentType && value.path) {
+      if (!contentType && value && value.path) {
         contentType = mime.lookup(value.path);
       }
-      if (!contentType && value.readable && Object.prototype.hasOwnProperty.call(value, "httpVersion")) {
+      if (!contentType && value && value.readable && hasOwn(value, "httpVersion")) {
         contentType = value.headers["content-type"];
       }
       if (!contentType && (options.filepath || options.filename)) {
         contentType = mime.lookup(options.filepath || options.filename);
       }
-      if (!contentType && typeof value == "object") {
+      if (!contentType && value && typeof value === "object") {
         contentType = FormData3.DEFAULT_CONTENT_TYPE;
       }
       return contentType;
@@ -17591,13 +17589,16 @@ var require_form_data = __commonJS({
         "content-type": "multipart/form-data; boundary=" + this.getBoundary()
       };
       for (header in userHeaders) {
-        if (Object.prototype.hasOwnProperty.call(userHeaders, header)) {
+        if (hasOwn(userHeaders, header)) {
           formHeaders[header.toLowerCase()] = userHeaders[header];
         }
       }
       return formHeaders;
     };
     FormData3.prototype.setBoundary = function(boundary) {
+      if (typeof boundary !== "string") {
+        throw new TypeError("FormData boundary must be a string");
+      }
       this._boundary = boundary;
     };
     FormData3.prototype.getBoundary = function() {
@@ -17624,11 +17625,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData3.prototype._generateBoundary = function() {
-      var boundary = "--------------------------";
-      for (var i = 0; i < 24; i++) {
-        boundary += Math.floor(Math.random() * 10).toString(16);
-      }
-      this._boundary = boundary;
+      this._boundary = "--------------------------" + crypto2.randomBytes(12).toString("hex");
     };
     FormData3.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -17668,8 +17665,10 @@ var require_form_data = __commonJS({
       });
     };
     FormData3.prototype.submit = function(params, cb) {
-      var request, options, defaults2 = { method: "post" };
-      if (typeof params == "string") {
+      var request;
+      var options;
+      var defaults2 = { method: "post" };
+      if (typeof params === "string") {
         params = parseUrl(params);
         options = populate({
           port: params.port,
@@ -17680,11 +17679,11 @@ var require_form_data = __commonJS({
       } else {
         options = populate(params, defaults2);
         if (!options.port) {
-          options.port = options.protocol == "https:" ? 443 : 80;
+          options.port = options.protocol === "https:" ? 443 : 80;
         }
       }
       options.headers = this.getHeaders(params.headers);
-      if (options.protocol == "https:") {
+      if (options.protocol === "https:") {
         request = https3.request(options);
       } else {
         request = http3.request(options);
@@ -17723,6 +17722,7 @@ var require_form_data = __commonJS({
       return "[object FormData]";
     };
     setToStringTag(FormData3, "FormData");
+    module2.exports = FormData3;
   }
 });
 
@@ -18017,7 +18017,7 @@ var require_common = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(" ", ",").split(",").filter(Boolean);
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
         for (const ns of split) {
           if (ns[0] === "-") {
             createDebug.skips.push(ns.slice(1));
@@ -18236,7 +18236,7 @@ var require_browser = __commonJS({
     function load() {
       let r;
       try {
-        r = exports2.storage.getItem("debug");
+        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error) {
       }
       if (!r && typeof process !== "undefined" && "env" in process) {
@@ -19089,162 +19089,8 @@ __export(crawler_lambda_exports, {
 });
 module.exports = __toCommonJS(crawler_lambda_exports);
 
-// node_modules/@aws-lambda-powertools/commons/lib/esm/Utility.js
-var Utility = class {
-  coldStart = true;
-  defaultServiceName = "service_undefined";
-  /**
-   * Get the cold start status of the current execution environment.
-   *
-   * @example
-   * ```typescript
-   * import { Utility } from '@aws-lambda-powertools/commons';
-   *
-   * const utility = new Utility();
-   * utility.isColdStart(); // true
-   * utility.isColdStart(); // false
-   * ```
-   *
-   * The method also flips the cold start status to `false` after the first invocation.
-   */
-  getColdStart() {
-    if (this.coldStart) {
-      this.coldStart = false;
-      return true;
-    }
-    return false;
-  }
-  /**
-   * Get the cold start status of the current execution environment.
-   *
-   * @example
-   * ```typescript
-   * import { Utility } from '@aws-lambda-powertools/commons';
-   *
-   * const utility = new Utility();
-   * utility.isColdStart(); // true
-   * utility.isColdStart(); // false
-   * ```
-   *
-   * @see {@link getColdStart}
-   */
-  isColdStart() {
-    return this.getColdStart();
-  }
-  /**
-   * Get the default service name.
-   */
-  getDefaultServiceName() {
-    return this.defaultServiceName;
-  }
-  /**
-   * Validate that the service name provided is valid.
-   * Used internally during initialization.
-   *
-   * @param serviceName Service name to validate
-   */
-  isValidServiceName(serviceName) {
-    return typeof serviceName === "string" && serviceName.trim().length > 0;
-  }
-};
-
-// node_modules/@aws-lambda-powertools/commons/lib/esm/config/EnvironmentVariablesService.js
-var EnvironmentVariablesService = class {
-  /**
-   * Increase JSON indentation for Logger to ease debugging when running functions locally or in a non-production environment
-   */
-  devModeVariable = "POWERTOOLS_DEV";
-  /**
-   * Set service name used for tracing namespace, metrics dimension and structured logging
-   */
-  serviceNameVariable = "POWERTOOLS_SERVICE_NAME";
-  /**
-   * AWS X-Ray Trace ID environment variable
-   * @private
-   */
-  xRayTraceIdVariable = "_X_AMZN_TRACE_ID";
-  /**
-   * Get the value of an environment variable by name.
-   *
-   * @param {string} name The name of the environment variable to fetch.
-   */
-  get(name) {
-    return process.env[name]?.trim() || "";
-  }
-  /**
-   * Get the value of the `POWERTOOLS_SERVICE_NAME` environment variable.
-   */
-  getServiceName() {
-    return this.get(this.serviceNameVariable);
-  }
-  /**
-   * Get the value of the `_X_AMZN_TRACE_ID` environment variable.
-   *
-   * The AWS X-Ray Trace data available in the environment variable has this format:
-   * `Root=1-5759e988-bd862e3fe1be46a994272793;Parent=557abcec3ee5a047;Sampled=1`,
-   *
-   * The actual Trace ID is: `1-5759e988-bd862e3fe1be46a994272793`.
-   */
-  getXrayTraceId() {
-    const xRayTraceData = this.getXrayTraceData();
-    return xRayTraceData?.Root;
-  }
-  /**
-   * Determine if the current invocation is part of a sampled X-Ray trace.
-   *
-   * The AWS X-Ray Trace data available in the environment variable has this format:
-   * `Root=1-5759e988-bd862e3fe1be46a994272793;Parent=557abcec3ee5a047;Sampled=1`,
-   */
-  getXrayTraceSampled() {
-    const xRayTraceData = this.getXrayTraceData();
-    return xRayTraceData?.Sampled === "1";
-  }
-  /**
-   * Determine if the current invocation is running in a development environment.
-   */
-  isDevMode() {
-    return this.isValueTrue(this.get(this.devModeVariable));
-  }
-  /**
-   * Helper function to determine if a value is considered thruthy.
-   *
-   * @param value The value to check for truthiness.
-   */
-  isValueTrue(value) {
-    const truthyValues = ["1", "y", "yes", "t", "true", "on"];
-    return truthyValues.includes(value.toLowerCase());
-  }
-  /**
-   * Helper function to determine if a value is considered falsy.
-   *
-   * @param value The value to check for falsiness.
-   */
-  isValueFalse(value) {
-    const falsyValues = ["0", "n", "no", "f", "false", "off"];
-    return falsyValues.includes(value.toLowerCase());
-  }
-  /**
-   * Get the AWS X-Ray Trace data from the environment variable.
-   *
-   * The method parses the environment variable `_X_AMZN_TRACE_ID` and returns an object with the key-value pairs.
-   */
-  getXrayTraceData() {
-    const xRayTraceEnv = this.get(this.xRayTraceIdVariable);
-    if (xRayTraceEnv === "")
-      return void 0;
-    if (!xRayTraceEnv.includes("="))
-      return { Root: xRayTraceEnv };
-    const xRayTraceData = {};
-    for (const field of xRayTraceEnv.split(";")) {
-      const [key, value] = field.split("=");
-      xRayTraceData[key] = value;
-    }
-    return xRayTraceData;
-  }
-};
-
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.14.0";
+var PT_VERSION = "2.24.0";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -19257,8 +19103,16 @@ var middlewareOptions = {
 var isSdkClient = (client) => typeof client === "object" && client !== null && "send" in client && typeof client.send === "function" && "config" in client && client.config !== void 0 && typeof client.config === "object" && client.config !== null && "middlewareStack" in client && client.middlewareStack !== void 0 && typeof client.middlewareStack === "object" && client.middlewareStack !== null && "identify" in client.middlewareStack && typeof client.middlewareStack.identify === "function" && "addRelativeTo" in client.middlewareStack && typeof client.middlewareStack.addRelativeTo === "function";
 var customUserAgentMiddleware = (feature) => {
   return (next) => async (args) => {
-    const powertoolsUserAgent = `PT/${feature}/${PT_VERSION} PTEnv/${EXEC_ENV}`;
-    args.request.headers["user-agent"] = `${args.request.headers["user-agent"]} ${powertoolsUserAgent}`;
+    const existingUserAgent = args.request.headers["user-agent"] || "";
+    if (existingUserAgent.includes("PT/NO-OP")) {
+      const featureSpecificUserAgent = existingUserAgent.replace("PT/NO-OP", `PT/${feature}/${PT_VERSION} PTEnv/${EXEC_ENV}`);
+      args.request.headers["user-agent"] = featureSpecificUserAgent;
+      return await next(args);
+    }
+    if (existingUserAgent.includes("PT/")) {
+      return await next(args);
+    }
+    args.request.headers["user-agent"] = existingUserAgent === "" ? `PT/${feature}/${PT_VERSION} PTEnv/${EXEC_ENV}` : `${existingUserAgent} PT/${feature}/${PT_VERSION} PTEnv/${EXEC_ENV}`;
     return await next(args);
   };
 };
@@ -19286,6 +19140,59 @@ var addUserAgentMiddleware = (client, feature) => {
   }
 };
 
+// node_modules/@aws-lambda-powertools/commons/lib/esm/constants.js
+var POWERTOOLS_SERVICE_NAME_ENV_VAR = "POWERTOOLS_SERVICE_NAME";
+var XRAY_TRACE_ID_ENV_VAR = "_X_AMZN_TRACE_ID";
+
+// node_modules/@aws-lambda-powertools/commons/lib/esm/envUtils.js
+var getStringFromEnv = ({ key, defaultValue, errorMessage }) => {
+  const value = process.env[key];
+  if (value === void 0) {
+    if (defaultValue !== void 0) {
+      return defaultValue;
+    }
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+    throw new Error(`Environment variable ${key} is required`);
+  }
+  return value.trim();
+};
+var getServiceName = () => {
+  return getStringFromEnv({
+    key: POWERTOOLS_SERVICE_NAME_ENV_VAR,
+    defaultValue: ""
+  });
+};
+var getXrayTraceDataFromEnv = () => {
+  const xRayTraceEnv = getStringFromEnv({
+    key: XRAY_TRACE_ID_ENV_VAR,
+    defaultValue: ""
+  });
+  if (xRayTraceEnv === "") {
+    return void 0;
+  }
+  if (!xRayTraceEnv.includes("=")) {
+    return {
+      Root: xRayTraceEnv
+    };
+  }
+  const xRayTraceData = {};
+  for (const field of xRayTraceEnv.split(";")) {
+    const [key, value] = field.split("=");
+    xRayTraceData[key] = value;
+  }
+  return xRayTraceData;
+};
+var isRequestXRaySampled = () => {
+  const xRayTraceData = getXrayTraceDataFromEnv();
+  return xRayTraceData?.Sampled === "1";
+};
+var getXRayTraceIdFromEnv = () => {
+  const xRayTraceData = getXrayTraceDataFromEnv();
+  return xRayTraceData?.Root;
+};
+
 // node_modules/@aws-lambda-powertools/commons/lib/esm/middleware/constants.js
 var PREFIX = "powertools-for-aws";
 var TRACER_KEY = `${PREFIX}.tracer`;
@@ -19293,68 +19200,63 @@ var METRICS_KEY = `${PREFIX}.metrics`;
 var LOGGER_KEY = `${PREFIX}.logger`;
 var IDEMPOTENCY_KEY = `${PREFIX}.idempotency`;
 
-// node_modules/@aws-lambda-powertools/tracer/lib/esm/Tracer.js
-var import_aws_xray_sdk_core2 = __toESM(require_lib(), 1);
-
-// node_modules/@aws-lambda-powertools/tracer/lib/esm/config/EnvironmentVariablesService.js
-var EnvironmentVariablesService2 = class extends EnvironmentVariablesService {
-  // Environment variables
-  awsExecutionEnv = "AWS_EXECUTION_ENV";
-  samLocalVariable = "AWS_SAM_LOCAL";
-  tracerCaptureErrorVariable = "POWERTOOLS_TRACER_CAPTURE_ERROR";
-  tracerCaptureHTTPsRequestsVariable = "POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS";
-  tracerCaptureResponseVariable = "POWERTOOLS_TRACER_CAPTURE_RESPONSE";
-  tracingEnabledVariable = "POWERTOOLS_TRACE_ENABLED";
-  /**
-   * It returns the value of the AWS_EXECUTION_ENV environment variable.
-   *
-   * @returns {string}
-   */
-  getAwsExecutionEnv() {
-    return this.get(this.awsExecutionEnv);
+// node_modules/@aws-lambda-powertools/commons/lib/esm/Utility.js
+var Utility = class {
+  #initializationType;
+  coldStart = true;
+  defaultServiceName = "service_undefined";
+  constructor() {
+    this.#initializationType = this.getInitializationType();
+    if (this.#initializationType !== "on-demand") {
+      this.coldStart = false;
+    }
   }
   /**
-   * It returns the value of the POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS environment variable.
-   *
-   * @returns {string}
+   * Get the value of the `AWS_LAMBDA_INITIALIZATION_TYPE` environment variable.
    */
-  getCaptureHTTPsRequests() {
-    return this.get(this.tracerCaptureHTTPsRequestsVariable);
+  getInitializationType() {
+    const envVarValue = process.env.AWS_LAMBDA_INITIALIZATION_TYPE?.trim();
+    if (envVarValue === "on-demand") {
+      return "on-demand";
+    }
+    if (envVarValue === "provisioned-concurrency") {
+      return "provisioned-concurrency";
+    }
+    return "unknown";
   }
   /**
-   * It returns the value of the AWS_SAM_LOCAL environment variable.
+   * Get the cold start status of the current execution environment.
    *
-   * @returns {string}
+   * The method also flips the cold start status to `false` after the first invocation.
    */
-  getSamLocal() {
-    return this.get(this.samLocalVariable);
+  getColdStart() {
+    if (this.#initializationType !== "on-demand") {
+      return false;
+    }
+    if (this.coldStart) {
+      this.coldStart = false;
+      return true;
+    }
+    return false;
   }
   /**
-   * It returns the value of the POWERTOOLS_TRACER_CAPTURE_ERROR environment variable.
+   * Validate that the service name provided is valid.
+   * Used internally during initialization.
    *
-   * @returns {string}
+   * @param serviceName Service name to validate
    */
-  getTracingCaptureError() {
-    return this.get(this.tracerCaptureErrorVariable);
-  }
-  /**
-   * It returns the value of the POWERTOOLS_TRACER_CAPTURE_RESPONSE environment variable.
-   *
-   * @returns {string}
-   */
-  getTracingCaptureResponse() {
-    return this.get(this.tracerCaptureResponseVariable);
-  }
-  /**
-   * It returns the value of the POWERTOOLS_TRACE_ENABLED environment variable.
-   *
-   * @returns {string}
-   */
-  getTracingEnabled() {
-    return this.get(this.tracingEnabledVariable);
+  isValidServiceName(serviceName) {
+    return typeof serviceName === "string" && serviceName.trim().length > 0;
   }
 };
-var environmentVariablesService = new EnvironmentVariablesService2();
+
+// node_modules/@aws-lambda-powertools/commons/lib/esm/index.js
+if (!process.env.AWS_SDK_UA_APP_ID) {
+  process.env.AWS_SDK_UA_APP_ID = `PT/NO-OP/${PT_VERSION}`;
+}
+
+// node_modules/@aws-lambda-powertools/tracer/lib/esm/Tracer.js
+var import_aws_xray_sdk_core2 = __toESM(require_lib(), 1);
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/provider/ProviderService.js
 var import_aws_xray_sdk_core = __toESM(require_lib(), 1);
@@ -19397,17 +19299,21 @@ var getRequestURL = (request) => {
 var { captureAWS, captureAWSClient, captureAWSv3Client, captureAsyncFunc, captureFunc, captureHTTPsGlobal, getNamespace, getSegment, setSegment, Segment: XraySegment, setContextMissingStrategy, setDaemonAddress, setLogger } = import_aws_xray_sdk_core.default;
 var ProviderService = class {
   /**
-   * @deprecated
+   * @deprecated Use {@link captureAWSv3Client} instead.
    */
+  /* v8 ignore start */
   captureAWS(awssdk) {
     return captureAWS(awssdk);
   }
+  /* v8 ignore stop */
   /**
-   * @deprecated
+   * @deprecated Use {@link captureAWSv3Client} instead.
    */
+  /* v8 ignore start */
   captureAWSClient(service) {
     return captureAWSClient(service);
   }
+  /* v8 ignore stop */
   captureAWSv3Client(service) {
     addUserAgentMiddleware(service, "tracer");
     return captureAWSv3Client(service);
@@ -19443,13 +19349,15 @@ var ProviderService = class {
   instrumentFetch() {
     const onRequestStart = (message) => {
       const { request } = message;
+      const method = request.method;
+      if (method === "CONNECT")
+        return;
       const parentSubsegment = this.getSegment();
       const requestURL = getRequestURL(request);
       if (parentSubsegment && requestURL) {
-        const method = request.method;
         const subsegment = parentSubsegment.addNewSubsegment(requestURL.hostname);
         subsegment.addAttribute("namespace", "remote");
-        request.addHeader("X-Amzn-Trace-Id", `Root=${environmentVariablesService.getXrayTraceId()};Parent=${subsegment.id};Sampled=${subsegment.notTraced ? "0" : "1"}`);
+        request.addHeader("X-Amzn-Trace-Id", `Root=${getXRayTraceIdFromEnv()};Parent=${subsegment.id};Sampled=${subsegment.notTraced ? "0" : "1"}`);
         subsegment.http = {
           request: {
             url: `${requestURL.protocol}//${requestURL.hostname}${requestURL.pathname}`,
@@ -19571,10 +19479,17 @@ var Tracer = class extends Utility {
    */
   customConfigService;
   /**
-   * The environment variables service used by the Tracer, is always initialized in the constructor in setOptions().
+   * Cache environment variables once at init time.
    */
-  envVarsService;
-  // serviceName is always initialized in the constructor in setOptions()
+  #envConfig = {
+    awsExecutionEnv: "",
+    samLocal: "",
+    captureError: "",
+    captureHTTPsRequests: "",
+    captureResponse: "",
+    tracingEnabled: "",
+    serviceName: ""
+  };
   /**
    * The name of the service, is always initialized in the constructor in setOptions().
    */
@@ -19586,6 +19501,7 @@ var Tracer = class extends Utility {
   tracingEnabled = true;
   constructor(options = {}) {
     super();
+    this.#setEnvConfig();
     this.setOptions(options);
     this.provider = new ProviderService();
     if (this.isTracingEnabled() && this.captureHTTPsRequests) {
@@ -19656,6 +19572,8 @@ var Tracer = class extends Utility {
     }
   }
   /**
+   * @deprecated Use {@link captureAWSv3Client | `captureAWSv3Client()`} instead.
+   *
    * Patch all AWS SDK v2 clients and create traces when your application makes calls to AWS services.
    *
    * If you want to patch a specific client use {@link captureAWSClient} and if you are using AWS SDK v3 use {@link captureAWSv3Client} instead.
@@ -19674,15 +19592,18 @@ var Tracer = class extends Utility {
    * }
    * ```
    *
-   * @deprecated Use {@link captureAWSv3Client} instead.
    * @param aws - AWS SDK v2 import
    */
+  /* v8 ignore start */
   captureAWS(aws) {
     if (!this.isTracingEnabled())
       return aws;
     return this.provider.captureAWS(aws);
   }
+  /* v8 ignore stop */
   /**
+   * @deprecated Use {@link captureAWSv3Client | `captureAWSv3Client()`} instead.
+   *
    * Patch a specific AWS SDK v2 client and create traces when your application makes calls to that AWS service.
    *
    * If you want to patch all clients use {@link captureAWS} and if you are using AWS SDK v3 use {@link captureAWSv3Client} instead.
@@ -19701,7 +19622,7 @@ var Tracer = class extends Utility {
    *   ...
    * }
    * ```
-   * @deprecated Use {@link captureAWSv3Client} instead.
+   *
    * @param service - AWS SDK v2 client
    */
   /* v8 ignore start */
@@ -19917,7 +19838,7 @@ var Tracer = class extends Utility {
    * ```
    */
   getRootXrayTraceId() {
-    return this.envVarsService.getXrayTraceId();
+    return getXRayTraceIdFromEnv();
   }
   /**
    * Get the active segment or subsegment (if any) in the current scope.
@@ -19959,7 +19880,7 @@ var Tracer = class extends Utility {
   isTraceSampled() {
     if (!this.isTracingEnabled())
       return false;
-    return this.envVarsService.getXrayTraceSampled();
+    return isRequestXRaySampled();
   }
   /**
    * Get the current value of the `tracingEnabled` property.
@@ -20055,32 +19976,25 @@ var Tracer = class extends Utility {
     return this.customConfigService;
   }
   /**
-   * Get for `envVarsService`.
-   * Used internally during initialization.
-   */
-  getEnvVarsService() {
-    return this.envVarsService;
-  }
-  /**
    * Determine if we are running inside an Amplify CLI process.
    * Used internally during initialization.
    */
   isAmplifyCli() {
-    return this.getEnvVarsService().getAwsExecutionEnv() === "AWS_Lambda_amplify-mock";
+    return this.#envConfig.awsExecutionEnv === "AWS_Lambda_amplify-mock";
   }
   /**
    * Determine if we are running in a Lambda execution environment.
    * Used internally during initialization.
    */
   isLambdaExecutionEnv() {
-    return this.getEnvVarsService().getAwsExecutionEnv() !== "";
+    return this.#envConfig.awsExecutionEnv !== "";
   }
   /**
    * Determine if we are running inside a SAM CLI process.
    * Used internally during initialization.
    */
   isLambdaSamCli() {
-    return this.getEnvVarsService().getSamLocal() !== "";
+    return this.#envConfig.samLocal !== "";
   }
   /**
    * Set `captureError` based on configuration passed and environment variables.
@@ -20092,8 +20006,7 @@ var Tracer = class extends Utility {
       this.captureError = false;
       return;
     }
-    const envVarsValue = this.getEnvVarsService().getTracingCaptureError();
-    if (envVarsValue.toLowerCase() === "false") {
+    if (this.#envConfig.captureError.toLowerCase() === "false") {
       this.captureError = false;
       return;
     }
@@ -20118,8 +20031,7 @@ var Tracer = class extends Utility {
       this.captureHTTPsRequests = false;
       return;
     }
-    const envVarsValue = this.getEnvVarsService().getCaptureHTTPsRequests();
-    if (envVarsValue.toLowerCase() === "false") {
+    if (this.#envConfig.captureHTTPsRequests.toLowerCase() === "false") {
       this.captureHTTPsRequests = false;
       return;
     }
@@ -20134,8 +20046,7 @@ var Tracer = class extends Utility {
       this.captureResponse = false;
       return;
     }
-    const envVarsValue = this.getEnvVarsService().getTracingCaptureResponse();
-    if (envVarsValue.toLowerCase() === "false") {
+    if (this.#envConfig.captureResponse.toLowerCase() === "false") {
       this.captureResponse = false;
       return;
     }
@@ -20157,7 +20068,6 @@ var Tracer = class extends Utility {
    */
   setOptions(options) {
     const { enabled, serviceName, captureHTTPsRequests, customConfigService } = options;
-    this.envVarsService = environmentVariablesService;
     this.setCustomConfigService(customConfigService);
     this.setTracingEnabled(enabled);
     this.setCaptureResponse();
@@ -20182,12 +20092,11 @@ var Tracer = class extends Utility {
       this.serviceName = customConfigValue;
       return;
     }
-    const envVarsValue = this.getEnvVarsService().getServiceName();
-    if (envVarsValue !== void 0 && this.isValidServiceName(envVarsValue)) {
-      this.serviceName = envVarsValue;
+    if (this.#envConfig.serviceName !== void 0 && this.isValidServiceName(this.#envConfig.serviceName)) {
+      this.serviceName = this.#envConfig.serviceName;
       return;
     }
-    this.serviceName = this.getDefaultServiceName();
+    this.serviceName = this.defaultServiceName;
   }
   /**
    * Set `tracingEnabled` based on configurations passed and environment variables.
@@ -20205,14 +20114,44 @@ var Tracer = class extends Utility {
       this.tracingEnabled = false;
       return;
     }
-    const envVarsValue = this.getEnvVarsService().getTracingEnabled();
-    if (envVarsValue.toLowerCase() === "false") {
+    if (this.#envConfig.tracingEnabled.toLowerCase() === "false") {
       this.tracingEnabled = false;
       return;
     }
     if (this.isAmplifyCli() || this.isLambdaSamCli() || !this.isLambdaExecutionEnv()) {
       this.tracingEnabled = false;
     }
+  }
+  /**
+   * Set environment variables for the tracer.
+   * This method is called during initialization to ensure environment variables are available.
+   */
+  #setEnvConfig() {
+    this.#envConfig.awsExecutionEnv = getStringFromEnv({
+      key: "AWS_EXECUTION_ENV",
+      defaultValue: ""
+    });
+    this.#envConfig.samLocal = getStringFromEnv({
+      key: "AWS_SAM_LOCAL",
+      defaultValue: ""
+    });
+    this.#envConfig.captureError = getStringFromEnv({
+      key: "POWERTOOLS_TRACER_CAPTURE_ERROR",
+      defaultValue: ""
+    });
+    this.#envConfig.captureHTTPsRequests = getStringFromEnv({
+      key: "POWERTOOLS_TRACER_CAPTURE_HTTPS_REQUESTS",
+      defaultValue: ""
+    });
+    this.#envConfig.captureResponse = getStringFromEnv({
+      key: "POWERTOOLS_TRACER_CAPTURE_RESPONSE",
+      defaultValue: ""
+    });
+    this.#envConfig.tracingEnabled = getStringFromEnv({
+      key: "POWERTOOLS_TRACE_ENABLED",
+      defaultValue: ""
+    });
+    this.#envConfig.serviceName = getServiceName();
   }
 };
 
@@ -20226,6 +20165,7 @@ function bind(fn, thisArg) {
 // node_modules/axios/lib/utils.js
 var { toString } = Object.prototype;
 var { getPrototypeOf } = Object;
+var { iterator, toStringTag } = Symbol;
 var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
   const str = toString.call(thing);
   return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -20260,7 +20200,17 @@ var isPlainObject = (val) => {
     return false;
   }
   const prototype3 = getPrototypeOf(val);
-  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
+  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(toStringTag in val) && !(iterator in val);
+};
+var isEmptyObject = (val) => {
+  if (!isObject(val) || isBuffer(val)) {
+    return false;
+  }
+  try {
+    return Object.keys(val).length === 0 && Object.getPrototypeOf(val) === Object.prototype;
+  } catch (e) {
+    return false;
+  }
 };
 var isDate = kindOfTest("Date");
 var isFile = kindOfTest("File");
@@ -20289,6 +20239,9 @@ function forEach(obj, fn, { allOwnKeys = false } = {}) {
       fn.call(null, obj[i], i, obj);
     }
   } else {
+    if (isBuffer(obj)) {
+      return;
+    }
     const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
     const len = keys.length;
     let key;
@@ -20299,6 +20252,9 @@ function forEach(obj, fn, { allOwnKeys = false } = {}) {
   }
 }
 function findKey(obj, key) {
+  if (isBuffer(obj)) {
+    return null;
+  }
   key = key.toLowerCase();
   const keys = Object.keys(obj);
   let i = keys.length;
@@ -20407,10 +20363,10 @@ var isTypedArray = /* @__PURE__ */ ((TypedArray) => {
   };
 })(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
 var forEachEntry = (obj, fn) => {
-  const generator = obj && obj[Symbol.iterator];
-  const iterator = generator.call(obj);
+  const generator = obj && obj[iterator];
+  const _iterator = generator.call(obj);
   let result;
-  while ((result = iterator.next()) && !result.done) {
+  while ((result = _iterator.next()) && !result.done) {
     const pair = result.value;
     fn.call(obj, pair[0], pair[1]);
   }
@@ -20479,23 +20435,8 @@ var noop = () => {
 var toFiniteNumber = (value, defaultValue) => {
   return value != null && Number.isFinite(value = +value) ? value : defaultValue;
 };
-var ALPHA = "abcdefghijklmnopqrstuvwxyz";
-var DIGIT = "0123456789";
-var ALPHABET = {
-  DIGIT,
-  ALPHA,
-  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-};
-var generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-  let str = "";
-  const { length } = alphabet;
-  while (size--) {
-    str += alphabet[Math.random() * length | 0];
-  }
-  return str;
-};
 function isSpecCompliantForm(thing) {
-  return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
+  return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
 }
 var toJSONObject = (obj) => {
   const stack = new Array(10);
@@ -20503,6 +20444,9 @@ var toJSONObject = (obj) => {
     if (isObject(source)) {
       if (stack.indexOf(source) >= 0) {
         return;
+      }
+      if (isBuffer(source)) {
+        return source;
       }
       if (!("toJSON" in source)) {
         stack[i] = source;
@@ -20541,6 +20485,7 @@ var _setImmediate = ((setImmediateSupported, postMessageSupported) => {
   isFunction(_global.postMessage)
 );
 var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
+var isIterable = (thing) => thing != null && isFunction(thing[iterator]);
 var utils_default = {
   isArray,
   isArrayBuffer,
@@ -20552,6 +20497,7 @@ var utils_default = {
   isBoolean,
   isObject,
   isPlainObject,
+  isEmptyObject,
   isReadableStream,
   isRequest,
   isResponse,
@@ -20592,14 +20538,13 @@ var utils_default = {
   findKey,
   global: _global,
   isContextDefined,
-  ALPHABET,
-  generateString,
   isSpecCompliantForm,
   toJSONObject,
   isAsyncFn,
   isThenable,
   setImmediate: _setImmediate,
-  asap
+  asap,
+  isIterable
 };
 
 // node_modules/axios/lib/core/AxiosError.js
@@ -20726,6 +20671,9 @@ function toFormData(obj, formData, options) {
     if (value === null) return "";
     if (utils_default.isDate(value)) {
       return value.toISOString();
+    }
+    if (utils_default.isBoolean(value)) {
+      return value.toString();
     }
     if (!useBlob && utils_default.isBlob(value)) {
       throw new AxiosError_default("Blob is not supported. Use a Buffer instead.");
@@ -20928,11 +20876,31 @@ var transitional_default = {
   clarifyTimeoutError: false
 };
 
+// node_modules/axios/lib/platform/node/index.js
+var import_crypto = __toESM(require("crypto"), 1);
+
 // node_modules/axios/lib/platform/node/classes/URLSearchParams.js
 var import_url = __toESM(require("url"), 1);
 var URLSearchParams_default = import_url.default.URLSearchParams;
 
 // node_modules/axios/lib/platform/node/index.js
+var ALPHA = "abcdefghijklmnopqrstuvwxyz";
+var DIGIT = "0123456789";
+var ALPHABET = {
+  DIGIT,
+  ALPHA,
+  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+};
+var generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+  let str = "";
+  const { length } = alphabet;
+  const randomValues = new Uint32Array(size);
+  import_crypto.default.randomFillSync(randomValues);
+  for (let i = 0; i < size; i++) {
+    str += alphabet[randomValues[i] % length];
+  }
+  return str;
+};
 var node_default = {
   isNode: true,
   classes: {
@@ -20940,6 +20908,8 @@ var node_default = {
     FormData: FormData_default,
     Blob: typeof Blob !== "undefined" && Blob || null
   },
+  ALPHABET,
+  generateString,
   protocols: ["http", "https", "file", "data"]
 };
 
@@ -20969,15 +20939,16 @@ var platform_default = {
 
 // node_modules/axios/lib/helpers/toURLEncodedForm.js
 function toURLEncodedForm(data, options) {
-  return toFormData_default(data, new platform_default.classes.URLSearchParams(), Object.assign({
+  return toFormData_default(data, new platform_default.classes.URLSearchParams(), {
     visitor: function(value, key, path, helpers) {
       if (platform_default.isNode && utils_default.isBuffer(value)) {
         this.append(key, value.toString("base64"));
         return false;
       }
       return helpers.defaultVisitor.apply(this, arguments);
-    }
-  }, options));
+    },
+    ...options
+  });
 }
 
 // node_modules/axios/lib/helpers/formDataToJSON.js
@@ -21260,10 +21231,15 @@ var AxiosHeaders = class {
       setHeaders(header, valueOrRewrite);
     } else if (utils_default.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
       setHeaders(parseHeaders_default(header), valueOrRewrite);
-    } else if (utils_default.isHeaders(header)) {
-      for (const [key, value] of header.entries()) {
-        setHeader(value, key, rewrite);
+    } else if (utils_default.isObject(header) && utils_default.isIterable(header)) {
+      let obj = {}, dest, key;
+      for (const entry of header) {
+        if (!utils_default.isArray(entry)) {
+          throw TypeError("Object iterator must return a key-value pair");
+        }
+        obj[key = entry[0]] = (dest = obj[key]) ? utils_default.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
       }
+      setHeaders(obj, valueOrRewrite);
     } else {
       header != null && setHeader(valueOrRewrite, header, rewrite);
     }
@@ -21367,6 +21343,9 @@ var AxiosHeaders = class {
   toString() {
     return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
   }
+  getSetCookie() {
+    return this.get("set-cookie") || [];
+  }
   get [Symbol.toStringTag]() {
     return "AxiosHeaders";
   }
@@ -21463,8 +21442,9 @@ function combineURLs(baseURL, relativeURL) {
 }
 
 // node_modules/axios/lib/core/buildFullPath.js
-function buildFullPath(baseURL, requestedURL) {
-  if (baseURL && !isAbsoluteURL(requestedURL)) {
+function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+  let isRelativeUrl = !isAbsoluteURL(requestedURL);
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
     return combineURLs(baseURL, requestedURL);
   }
   return requestedURL;
@@ -21479,7 +21459,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.7.9";
+var VERSION = "1.11.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -21657,7 +21637,7 @@ var readBlob = async function* (blob) {
 var readBlob_default = readBlob;
 
 // node_modules/axios/lib/helpers/formDataToStream.js
-var BOUNDARY_ALPHABET = utils_default.ALPHABET.ALPHA_DIGIT + "-_";
+var BOUNDARY_ALPHABET = platform_default.ALPHABET.ALPHA_DIGIT + "-_";
 var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new import_util.default.TextEncoder();
 var CRLF = "\r\n";
 var CRLF_BYTES = textEncoder.encode(CRLF);
@@ -21700,7 +21680,7 @@ var formDataToStream = (form, headersHandler, options) => {
   const {
     tag = "form-data-boundary",
     size = 25,
-    boundary = tag + "-" + utils_default.generateString(size, BOUNDARY_ALPHABET)
+    boundary = tag + "-" + platform_default.generateString(size, BOUNDARY_ALPHABET)
   } = options || {};
   if (!utils_default.isFormData(form)) {
     throw TypeError("FormData instance required");
@@ -21709,7 +21689,7 @@ var formDataToStream = (form, headersHandler, options) => {
     throw Error("boundary must be 10-70 characters long");
   }
   const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
-  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF + CRLF);
+  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
   let contentLength = footerBytes.byteLength;
   const parts = Array.from(form.entries()).map(([name, value]) => {
     const part = new FormDataPart(name, value);
@@ -21821,7 +21801,7 @@ function throttle(fn, freq) {
       clearTimeout(timer);
       timer = null;
     }
-    fn.apply(null, args);
+    fn(...args);
   };
   const throttled = (...args) => {
     const now = Date.now();
@@ -22016,7 +21996,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
         config.signal.aborted ? abort() : config.signal.addEventListener("abort", abort);
       }
     }
-    const fullPath = buildFullPath(config.baseURL, config.url);
+    const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
     const parsed = new URL(fullPath, platform_default.hasBrowserEnv ? platform_default.origin : void 0);
     const protocol = parsed.protocol || supportedProtocols[0];
     if (protocol === "data:") {
@@ -22493,7 +22473,7 @@ function mergeConfig(config1, config2) {
     validateStatus: mergeDirectKeys,
     headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
   };
-  utils_default.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
+  utils_default.forEach(Object.keys({ ...config1, ...config2 }), function computeConfigValue(prop) {
     const merge2 = mergeMap[prop] || mergeDeepProperties;
     const configValue = merge2(config1[prop], config2[prop], prop);
     utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config[prop] = configValue);
@@ -22506,7 +22486,7 @@ var resolveConfig_default = (config) => {
   const newConfig = mergeConfig({}, config);
   let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
   newConfig.headers = headers = AxiosHeaders_default.from(headers);
-  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
   if (auth) {
     headers.set(
       "Authorization",
@@ -22736,7 +22716,7 @@ var readStream = async function* (stream4) {
   }
 };
 var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
-  const iterator = readBytes(stream4, chunkSize);
+  const iterator2 = readBytes(stream4, chunkSize);
   let bytes = 0;
   let done;
   let _onFinish = (e) => {
@@ -22748,7 +22728,7 @@ var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
   return new ReadableStream({
     async pull(controller) {
       try {
-        const { done: done2, value } = await iterator.next();
+        const { done: done2, value } = await iterator2.next();
         if (done2) {
           _onFinish();
           controller.close();
@@ -22767,7 +22747,7 @@ var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
     },
     cancel(reason) {
       _onFinish(reason);
-      return iterator.return();
+      return iterator2.return();
     }
   }, {
     highWaterMark: 2
@@ -22891,7 +22871,7 @@ var fetch_default = isFetchSupported && (async (config) => {
       duplex: "half",
       credentials: isCredentialsSupported ? withCredentials : void 0
     });
-    let response = await fetch(request);
+    let response = await fetch(request, fetchOptions);
     const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
     if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
       const options = {};
@@ -22926,7 +22906,7 @@ var fetch_default = isFetchSupported && (async (config) => {
     });
   } catch (err) {
     unsubscribe && unsubscribe();
-    if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
+    if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
       throw Object.assign(
         new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config, request),
         {
@@ -23105,7 +23085,7 @@ var validator_default = {
 var validators2 = validator_default.validators;
 var Axios = class {
   constructor(instanceConfig) {
-    this.defaults = instanceConfig;
+    this.defaults = instanceConfig || {};
     this.interceptors = {
       request: new InterceptorManager_default(),
       response: new InterceptorManager_default()
@@ -23167,6 +23147,12 @@ var Axios = class {
         }, true);
       }
     }
+    if (config.allowAbsoluteUrls !== void 0) {
+    } else if (this.defaults.allowAbsoluteUrls !== void 0) {
+      config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+    } else {
+      config.allowAbsoluteUrls = true;
+    }
     validator_default.assertOptions(config, {
       baseUrl: validators2.spelling("baseURL"),
       withXsrfToken: validators2.spelling("withXSRFToken")
@@ -23201,8 +23187,8 @@ var Axios = class {
     let len;
     if (!synchronousRequestInterceptors) {
       const chain = [dispatchRequest.bind(this), void 0];
-      chain.unshift.apply(chain, requestInterceptorChain);
-      chain.push.apply(chain, responseInterceptorChain);
+      chain.unshift(...requestInterceptorChain);
+      chain.push(...responseInterceptorChain);
       len = chain.length;
       promise = Promise.resolve(config);
       while (i < len) {
@@ -23237,7 +23223,7 @@ var Axios = class {
   }
   getUri(config) {
     config = mergeConfig(this.defaults, config);
-    const fullPath = buildFullPath(config.baseURL, config.url);
+    const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
     return buildURL(fullPath, config.params, config.paramsSerializer);
   }
 };

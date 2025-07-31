@@ -30,6 +30,7 @@ Tags.of(stackUnderTest).add('endor:Stage', 'development');
 
 const integ = new IntegTest(app, 'DataStoreTest', {
   testCases: [stackUnderTest],
+  allowDestroy: ['AWS::IAM::Policy'],
   cdkCommandOptions: {
     destroy: {
       args: {
