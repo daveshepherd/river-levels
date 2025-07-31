@@ -7,7 +7,6 @@ const project = new CdkTypeScriptApp({
   cdkVersion: '2.187.0',
   codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
-  defaultReleaseBranch: 'main',
   deps: [
     '@aws-lambda-powertools/tracer',
     '@aws-sdk/client-dynamodb',
