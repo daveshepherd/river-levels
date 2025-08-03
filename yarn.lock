@@ -6091,10 +6091,10 @@ projen-modules@^1.0.102:
   resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.102.tgz#eddb6ed69c8b8858053d85c4d3b38c133f93b184"
   integrity sha512-CGGM8QqyVrFdjmY7ATtmCqKLxulUwWloWWtVLf8AZbSZo1lu4cTgW8q2Cekf1krXNgcO1jSNkGKrywkVNErTXg==
 
-projen@^0.92.10:
-  version "0.92.12"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.92.12.tgz#0f7e9a073425779627c4b8c2e5610cb04915e830"
-  integrity sha512-3Hq5pQhGqJqRge79duWWiD94BBb7d4LyisztsyHmzqoNX0FPaVb8R6oRzfqkQQ6wf7PPQprzyQzAhkHEGf68Kw==
+projen@^0.95.0:
+  version "0.95.0"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.95.0.tgz#2711c4a134e9e98231f4af73cf15e0ddf8fae232"
+  integrity sha512-Ytqk+9tVNccwGs7oD35cHEumCdHTDCSOQkpfl4Ok/hmDDFT+l2YzOPWOytL3Uh6F69wHPotRA0nXv7EyV5Gw+A==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
