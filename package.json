@@ -59,7 +59,7 @@
     "projen": "^0.95.0",
     "projen-modules": "^1.0.102",
     "source-map-support": "^0.5.21",
-    "ts-jest": "^29.4.0",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
