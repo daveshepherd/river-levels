@@ -57,7 +57,7 @@
     "jest-junit": "^16",
     "nock": "^14.0.10",
     "projen": "^0.95.2",
-    "projen-modules": "^1.0.107",
+    "projen-modules": "^1.0.108",
     "source-map-support": "^0.5.21",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
