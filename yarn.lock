@@ -40,27 +40,27 @@
     "@cdklabs/tskb" "^0.0.3"
 
 "@aws-cdk/cloud-assembly-schema@^48.2.0":
-  version "48.3.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-schema/-/cloud-assembly-schema-48.3.0.tgz#f38f856e92241ff7c546489700987f6cf509cdfd"
-  integrity sha512-6R7aMNXeVnXGMOXgspwMmpVi1rmgRReGKYt7yl22ZKNZN/whJqdnV2C6O2CI2lnj5Th/SlgQWsuEQOMM3TI5RQ==
+  version "48.4.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-schema/-/cloud-assembly-schema-48.4.0.tgz#f04527276590e754ffd060c2b17f7c06ccb1f4cc"
+  integrity sha512-pWk5oucfA4Ywt0g5sjr8uABzTBNBrMfxVkHqc7b9jUYlMoY9CzCiOAcCdVLaqrtFp63a+z0M4s1sf6gaIkbeaA==
   dependencies:
     jsonschema "~1.4.1"
     semver "^7.7.2"
 
 "@aws-cdk/integ-runner@latest":
-  version "2.189.3"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.189.3.tgz#32de5247fd67d61f42ff10e9e3dd271597d143ee"
-  integrity sha512-s3mGPrOp8ZMeqAH82qi71nCUy+1tbdy0Zg1dTqZ7A8/cAV6EkENNAPYcwP7qvm1fHoBpIfcIMfAa/c4eli3FKw==
+  version "2.190.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.190.0.tgz#bbd8bb8bc4f5c0540ba479cf460f131afcd540c6"
+  integrity sha512-cP/1e9SfnFNJZoMQYDc4/xRueuNpOAT+iKTkjhxLzQ43RY3uruRnHPl4Chm5kSLZuLaERcYOTlXYZQYzR/fzxg==
   dependencies:
     "@aws-cdk/aws-service-spec" "0.1.90"
-    aws-cdk "2.1024.0"
+    aws-cdk "2.1025.0"
   optionalDependencies:
     fsevents "2.3.2"
 
 "@aws-cdk/integ-tests-alpha@latest":
-  version "2.210.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.210.0-alpha.0.tgz#3ced902e3a4f9293ec41cec05e1b18eeb87418f2"
-  integrity sha512-VPh+vsN7yYvZPHO20VpxoOpN9mOwk7bXosVXW0c/SUXo+rEWJ2f+Akfm7StoOiiYGc7/O7DGqjI9+wZVCl0TTw==
+  version "2.211.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.211.0-alpha.0.tgz#4472fcbd5d13a6615ea2f1547821655c07a66a77"
+  integrity sha512-klPbkX5RNPCHksDMXEAftneWGr4f/SyfuJuMZbqso3ua7PB1oOp9jLxxVPdGqZ4sYuwnnRR76GF37Ue1WIzJSw==
 
 "@aws-cdk/service-spec-types@^0.0.156":
   version "0.0.156"
@@ -2659,9 +2659,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.187.0:
-  version "2.210.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.210.0.tgz#ac06a1e5fc25a2f3d1ff7f96017cdb5fd3f85481"
-  integrity sha512-TSXaZLHKak1bk144PblhqBHZwyh9lvlN2yM4g52aR/HCuxlw2nkn+eupjuOtiNe0JJFwSudvO/qke65dN2WlEg==
+  version "2.211.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.211.0.tgz#da8b0210113340c43e180abfb3bf6f4181083071"
+  integrity sha512-wrEPu25572HUJwySzL/qf/fFM+a22X7HYpq1uqcjAn4sVL+h52WjVjnI7rDAuhBp6efX6+Jhmw7jZDMql4/+Cw==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.242"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.0"
@@ -2678,10 +2678,10 @@ aws-cdk-lib@^2.187.0:
     table "^6.9.0"
     yaml "1.10.2"
 
-aws-cdk@2.1024.0, aws-cdk@^2:
-  version "2.1024.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1024.0.tgz#c4fac23fa577a1a6e2253e68fa7a8b07cb6816aa"
-  integrity sha512-hY0iVT2gPX/QOQXL7RSP2sqIRI/4BYU27vSmbhZxLEj//c3pkMkd9QpIHj7gOhyWC2gf6n5JuYPw27Dgw8FEdA==
+aws-cdk@2.1025.0, aws-cdk@^2:
+  version "2.1025.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1025.0.tgz#6887de917cc6ab3aaee121b919a68d40d31708e0"
+  integrity sha512-qKYM+RG5+U/UbGpjTt8ZaxBEfKJMPdOmtPtFNidsIGlrdIWSIFdNcFYi13zo33FkMk6ZFA6yBnjfDry3fNR+hQ==
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -6053,10 +6053,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.107:
-  version "1.0.107"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.107.tgz#37247fa4eca8a67f4379c12b8af249857bbab691"
-  integrity sha512-NDaBVFAnOuLs+2iS9Yy5SUiTLEiNVrsxZB53LGIzvSlircQvOpkS/q4HPxe70qqrDl8N2O3j++BG0DBB30ZQpA==
+projen-modules@^1.0.108:
+  version "1.0.108"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.108.tgz#90f9ae6e3982588ad0ef54e8208b841e908bf1de"
+  integrity sha512-qGwLeH22wIjhAA7TO5BXj6G3SqZGgQleuojz+ifPhFkxgRZGwoMgaIWeuysMumvsyt5T/AukWDX94MYLT+sk0w==
 
 projen@^0.95.2:
   version "0.95.2"
