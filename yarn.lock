@@ -1528,9 +1528,9 @@
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
 
 "@sinclair/typebox@^0.34.0":
-  version "0.34.38"
-  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.38.tgz#2365df7c23406a4d79413a766567bfbca708b49d"
-  integrity sha512-HpkxMmc2XmZKhvaKIZZThlHmx1L0I/V1hWK1NubtlFnr6ZqdiOpV72TKudZUNQjZNsyDBay72qFEhEvb+bcwcA==
+  version "0.34.39"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.39.tgz#41db8ed5ff33fdd47cb34dab250c0eaea7a1a5be"
+  integrity sha512-keEoFsevmLwAedzacnTVmra66GViRH3fhWO1M+nZ8rUgpPJyN4mcvqlGr3QMrQXx4L8KNwW0q9/BeHSEoO4teg==
 
 "@sinonjs/commons@^3.0.0", "@sinonjs/commons@^3.0.1":
   version "3.0.1"
@@ -2144,16 +2144,16 @@
   integrity sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==
 
 "@types/node@*":
-  version "24.2.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.2.1.tgz#83e41543f0a518e006594bb394e2cd961de56727"
-  integrity sha512-DRh5K+ka5eJic8CjH7td8QpYEV6Zo10gfRkjHCO3weqZHWDtAaSTFtl4+VMqOJ4N5jcuhZ9/l+yy8rVgw7BQeQ==
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.0.tgz#89b09f45cb9a8ee69466f18ee5864e4c3eb84dec"
+  integrity sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==
   dependencies:
     undici-types "~7.10.0"
 
 "@types/node@^18":
-  version "18.19.122"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.122.tgz#e7358f8df7cc3f14e860198e1ca4dc2ed9a7de06"
-  integrity sha512-yzegtT82dwTNEe/9y+CM8cgb42WrUfMMCg2QqSddzO1J6uPmBD7qKCZ7dOHZP2Yrpm/kb0eqdNMn2MUyEiqBmA==
+  version "18.19.123"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.123.tgz#08a3e4f5e0c73b8840c677b7635ce59d5dc1f76d"
+  integrity sha512-K7DIaHnh0mzVxreCR9qwgNxp3MH9dltPNIEddW9MYUlcKAzm+3grKNSTe2vCJHI1FaLpvpL5JGJrz1UZDKYvDg==
   dependencies:
     undici-types "~5.26.4"
 
@@ -2948,10 +2948,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.3:
-  version "2.37.3"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.3.tgz#715cbff8adf898035583fc87482e3513ea9f354a"
-  integrity sha512-fHCu2pwJDsrT/99/fivLuCk9uLrTxUsmQTbhUtgn79CK9+viuIdB83fk256p1dxqmgY/lj10Ezrsj8Ss3QoOFw==
+cdk-nag@^2.37.4:
+  version "2.37.4"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.4.tgz#3cc6a9cb3be5d83d12b82c646e8f1ff87d5cf511"
+  integrity sha512-UL7VN54uIWy42WT/C36f/WKrYd8UpfVGQu78lkoUhYH2n4xXkfRG8PhvmGszQLkSQfCB4FaK3lNxbTVXUxEDGg==
 
 chai@^5.2.0:
   version "5.2.1"
@@ -3512,9 +3512,9 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     gopd "^1.2.0"
 
 electron-to-chromium@^1.5.199:
-  version "1.5.201"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.201.tgz#bdc8f13e828e2f65d2c925ab2e8b02604928632f"
-  integrity sha512-ZG65vsrLClodGqywuigc+7m0gr4ISoTQttfVh7nfpLv0M7SIwF4WbFNEOywcqTiujs12AUeeXbFyQieDICAIxg==
+  version "1.5.202"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.202.tgz#e243716943a2cab144604a81b9ebaa87b4e8c1d4"
+  integrity sha512-NxbYjRmiHcHXV1Ws3fWUW+SLb62isauajk45LUJ/HgIOkUA7jLZu/X2Iif+X9FBNK8QkF9Zb4Q2mcwXCcY30mg==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -6053,10 +6053,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.108:
-  version "1.0.108"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.108.tgz#90f9ae6e3982588ad0ef54e8208b841e908bf1de"
-  integrity sha512-qGwLeH22wIjhAA7TO5BXj6G3SqZGgQleuojz+ifPhFkxgRZGwoMgaIWeuysMumvsyt5T/AukWDX94MYLT+sk0w==
+projen-modules@^1.0.109:
+  version "1.0.109"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.109.tgz#3c6ff15f5da5f4eb4cef604347abf04a88a0f91d"
+  integrity sha512-FA0hrRQAR4hHrlFqXLi1fkp7DkUGtqwn5NZJbcl78lN0672OLhSJ5X4C/UgIObbAJ5cv9aJFr4qQ5y1Ymc0LKQ==
 
 projen@^0.95.2:
   version "0.95.2"
