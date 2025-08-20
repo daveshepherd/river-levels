@@ -2948,10 +2948,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.6:
-  version "2.37.6"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.6.tgz#fa11fce3c7178fa3fdcd6d9bf3ff26ed5731f92e"
-  integrity sha512-0i9IwYfkXB/GpBfYmp6NI/pr6XxUberA0HEVsSMD8CYhOa8zBoUVCdntgTPU6G+7CO2Avs+uNG+JHELE3SowGA==
+cdk-nag@^2.37.7:
+  version "2.37.7"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.7.tgz#a28aec574741d31ecbb938e01eaae49395625821"
+  integrity sha512-pLwiL5tCUnsuB5Rsn7x/9J9Es8v11R3nWYatuSN/7UuGaU399b/R8yyYSMyWT/YVISqpJXl301xFycuSoVg8xg==
 
 chai@^5.2.0:
   version "5.3.1"
@@ -3512,9 +3512,9 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     gopd "^1.2.0"
 
 electron-to-chromium@^1.5.204:
-  version "1.5.204"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.204.tgz#45ffed15ea3ca5d43e3205b52082721bc988d0ba"
-  integrity sha512-s9VbBXWxfDrl67PlO4avwh0/GU2vcwx8Fph3wlR8LJl7ySGYId59EFE17VWVcuC3sLWNPENm6Z/uGqKbkPCcXA==
+  version "1.5.207"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.207.tgz#0fedde3eec615065ee95531c09a10578644c5552"
+  integrity sha512-mryFrrL/GXDTmAtIVMVf+eIXM09BBPlO5IQ7lUyKmK8d+A4VpRGG+M3ofoVef6qyF8s60rJei8ymlJxjUA8Faw==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -6053,10 +6053,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.111:
-  version "1.0.111"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.111.tgz#b618076f4b7a87de8a5f4a53dda007babdaaaf4e"
-  integrity sha512-pD7P3tsrwQWrmoIX1lafGlBD9DFSklpqyLU1bTAiENIxjQ2PepQ2e823IBxzxqP57GoVM3WKaiuVav9HNOUz1A==
+projen-modules@^1.0.112:
+  version "1.0.112"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.112.tgz#5ae0fbadca37853381baf12948174160d1b8b7a2"
+  integrity sha512-vZblPtR1LULKDXHrw3NERxkqKheud6EzXPdMEQeWC2QuygN+75JehKmLy5BXP/sDYkzMGJTVr2A54JRzYxlEwQ==
 
 projen@^0.95.2:
   version "0.95.2"
