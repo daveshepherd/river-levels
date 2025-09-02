@@ -2948,10 +2948,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.13:
-  version "2.37.13"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.13.tgz#4c14e67cb458a53ec4f2e158885070eb92eea640"
-  integrity sha512-hV6/d0rjCamBHPuNifn+oUdgl/ZvujpUfapkcdV4Y31hiNU8OgyWvUyxICtA7JA++EHyPTe575s+TPANy23aUQ==
+cdk-nag@^2.37.14:
+  version "2.37.14"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.14.tgz#75c22b259d95d76d2d3dcb8ceb906c4a5ba8901b"
+  integrity sha512-9VIpmWV86pRaA0pY+P49SRe3F6Z4dhio56sHxgxjc6VbAPzJimcg81B8AWc0xJnHY71Bhq/LVl+hAzrgJh8gSA==
 
 chai@^5.2.0:
   version "5.3.3"
@@ -6053,15 +6053,15 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.119:
-  version "1.0.119"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.119.tgz#e571a45daa655310a402e1fed9e941d22efb790c"
-  integrity sha512-lx9+5WVr5zhgEZ3+mkrvEN/biZAlZahA8L63bjNHq3KpQNyQBWV+SE5snmvyV+FzZZhlvrHuEZuDZEafCj02Ew==
+projen-modules@^1.0.120:
+  version "1.0.120"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.120.tgz#2d45d9b02a33005ae0f1e19870d1b3ad851f88e9"
+  integrity sha512-UICdJXUIv04fj3n7K3zBbAA5LYTViGszDP1HJXYsBg/AQ4JlrBDEi8fsobtwZtUWe0I/eUGZ+LowBc/oWilR2g==
 
-projen@^0.95.4:
-  version "0.95.4"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.95.4.tgz#bc8a69d5390545d88026a12663c26dcead9f17e6"
-  integrity sha512-KzUg9zIaGEb4iYgvHqo3NwS5VbbgAKYWT+Wo9sLR8tXh0t2K017//DVa+qojMoUiKjjZMNTbfSegzarJDFA9fw==
+projen@^0.95.5:
+  version "0.95.5"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.95.5.tgz#d35c482fcc597800a9057c945a819cf3facf0b73"
+  integrity sha512-ans6XeNortUt2dli5n/5mTdWFhhFzT3Cyx+dJasAOYue1sWA++cnysCQRXP/sSxQdiv8Iua+uaB3fQdihpemZQ==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
