@@ -3084,13 +3084,13 @@ var require_aws_lambda = __commonJS({
       for (var key in segment) {
         if (typeof segment[key] === "function" && whitelistFcn.indexOf(key) === -1) {
           if (silentFcn.indexOf(key) === -1) {
-            segment[key] = /* @__PURE__ */ function() {
+            segment[key] = /* @__PURE__ */ (function() {
               var func = key;
               return function facade() {
                 logger.getLogger().warn('Function "' + func + '" cannot be called on an AWS Lambda segment. Please use a subsegment to record data.');
                 return;
               };
-            }();
+            })();
           } else {
             segment[key] = function facade() {
               return;
@@ -7414,7 +7414,7 @@ var require_aws_xray = __commonJS({
       Subsegment: require_subsegment(),
       SegmentUtils: segmentUtils
     };
-    AWSXRay.middleware.IncomingRequestData = require_incoming_request_data(), function() {
+    AWSXRay.middleware.IncomingRequestData = require_incoming_request_data(), (function() {
       var data = {
         runtime: process.release && process.release.name ? process.release.name : UNKNOWN,
         runtime_version: process.version,
@@ -7431,7 +7431,7 @@ var require_aws_xray = __commonJS({
       if (process.env.LAMBDA_TASK_ROOT) {
         LambdaEnv.init();
       }
-    }();
+    })();
     module2.exports = AWSXRay;
   }
 });
@@ -17052,7 +17052,7 @@ var require_get_intrinsic = __commonJS({
     var throwTypeError = function() {
       throw new $TypeError();
     };
-    var ThrowTypeError = $gOPD ? function() {
+    var ThrowTypeError = $gOPD ? (function() {
       try {
         arguments.callee;
         return throwTypeError;
@@ -17063,7 +17063,7 @@ var require_get_intrinsic = __commonJS({
           return throwTypeError;
         }
       }
-    }() : throwTypeError;
+    })() : throwTypeError;
     var hasSymbols = require_has_symbols()();
     var getProto = require_get_proto();
     var $ObjectGPO = require_Object_getPrototypeOf();
@@ -19090,7 +19090,7 @@ __export(crawler_lambda_exports, {
 module.exports = __toCommonJS(crawler_lambda_exports);
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.24.0";
+var PT_VERSION = "2.25.2";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -19138,59 +19138,6 @@ var addUserAgentMiddleware = (client, feature) => {
   } catch (error) {
     console.warn("Failed to add user agent middleware", error);
   }
-};
-
-// node_modules/@aws-lambda-powertools/commons/lib/esm/constants.js
-var POWERTOOLS_SERVICE_NAME_ENV_VAR = "POWERTOOLS_SERVICE_NAME";
-var XRAY_TRACE_ID_ENV_VAR = "_X_AMZN_TRACE_ID";
-
-// node_modules/@aws-lambda-powertools/commons/lib/esm/envUtils.js
-var getStringFromEnv = ({ key, defaultValue, errorMessage }) => {
-  const value = process.env[key];
-  if (value === void 0) {
-    if (defaultValue !== void 0) {
-      return defaultValue;
-    }
-    if (errorMessage) {
-      throw new Error(errorMessage);
-    }
-    throw new Error(`Environment variable ${key} is required`);
-  }
-  return value.trim();
-};
-var getServiceName = () => {
-  return getStringFromEnv({
-    key: POWERTOOLS_SERVICE_NAME_ENV_VAR,
-    defaultValue: ""
-  });
-};
-var getXrayTraceDataFromEnv = () => {
-  const xRayTraceEnv = getStringFromEnv({
-    key: XRAY_TRACE_ID_ENV_VAR,
-    defaultValue: ""
-  });
-  if (xRayTraceEnv === "") {
-    return void 0;
-  }
-  if (!xRayTraceEnv.includes("=")) {
-    return {
-      Root: xRayTraceEnv
-    };
-  }
-  const xRayTraceData = {};
-  for (const field of xRayTraceEnv.split(";")) {
-    const [key, value] = field.split("=");
-    xRayTraceData[key] = value;
-  }
-  return xRayTraceData;
-};
-var isRequestXRaySampled = () => {
-  const xRayTraceData = getXrayTraceDataFromEnv();
-  return xRayTraceData?.Sampled === "1";
-};
-var getXRayTraceIdFromEnv = () => {
-  const xRayTraceData = getXrayTraceDataFromEnv();
-  return xRayTraceData?.Root;
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/middleware/constants.js
@@ -19252,8 +19199,63 @@ var Utility = class {
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/index.js
 if (!process.env.AWS_SDK_UA_APP_ID) {
-  process.env.AWS_SDK_UA_APP_ID = `PT/NO-OP/${PT_VERSION}`;
+  process.env.AWS_SDK_UA_APP_ID = `PT/TEST/${PT_VERSION}`;
+} else {
+  process.env.AWS_SDK_UA_APP_ID = `${process.env.AWS_SDK_UA_APP_ID}/PT/TEST/${PT_VERSION}`;
 }
+
+// node_modules/@aws-lambda-powertools/commons/lib/esm/constants.js
+var POWERTOOLS_SERVICE_NAME_ENV_VAR = "POWERTOOLS_SERVICE_NAME";
+var XRAY_TRACE_ID_ENV_VAR = "_X_AMZN_TRACE_ID";
+
+// node_modules/@aws-lambda-powertools/commons/lib/esm/envUtils.js
+var getStringFromEnv = ({ key, defaultValue, errorMessage }) => {
+  const value = process.env[key];
+  if (value === void 0) {
+    if (defaultValue !== void 0) {
+      return defaultValue;
+    }
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+    throw new Error(`Environment variable ${key} is required`);
+  }
+  return value.trim();
+};
+var getServiceName = () => {
+  return getStringFromEnv({
+    key: POWERTOOLS_SERVICE_NAME_ENV_VAR,
+    defaultValue: ""
+  });
+};
+var getXrayTraceDataFromEnv = () => {
+  const xRayTraceEnv = getStringFromEnv({
+    key: XRAY_TRACE_ID_ENV_VAR,
+    defaultValue: ""
+  });
+  if (xRayTraceEnv === "") {
+    return void 0;
+  }
+  if (!xRayTraceEnv.includes("=")) {
+    return {
+      Root: xRayTraceEnv
+    };
+  }
+  const xRayTraceData = {};
+  for (const field of xRayTraceEnv.split(";")) {
+    const [key, value] = field.split("=");
+    xRayTraceData[key] = value;
+  }
+  return xRayTraceData;
+};
+var isRequestXRaySampled = () => {
+  const xRayTraceData = getXrayTraceDataFromEnv();
+  return xRayTraceData?.Sampled === "1";
+};
+var getXRayTraceIdFromEnv = () => {
+  const xRayTraceData = getXrayTraceDataFromEnv();
+  return xRayTraceData?.Root;
+};
 
 // node_modules/@aws-lambda-powertools/tracer/lib/esm/Tracer.js
 var import_aws_xray_sdk_core2 = __toESM(require_lib(), 1);
@@ -19705,20 +19707,16 @@ var Tracer = class extends Utility {
     return (_target, _propertyKey, descriptor) => {
       const originalMethod = descriptor.value;
       const tracerRef = this;
-      descriptor.value = function(event, context, callback) {
+      descriptor.value = function(...args) {
         if (!tracerRef.isTracingEnabled()) {
-          return originalMethod.apply(this, [event, context, callback]);
+          return originalMethod.apply(this, args);
         }
         return tracerRef.provider.captureAsyncFunc(`## ${process.env._HANDLER}`, async (subsegment) => {
           tracerRef.annotateColdStart();
           tracerRef.addServiceNameAnnotation();
           let result;
           try {
-            result = await originalMethod.apply(this, [
-              event,
-              context,
-              callback
-            ]);
+            result = await originalMethod.apply(this, args);
             if (options?.captureResponse ?? true) {
               tracerRef.addResponseAsMetadata(result, process.env._HANDLER);
             }
@@ -20033,7 +20031,6 @@ var Tracer = class extends Utility {
     }
     if (this.#envConfig.captureHTTPsRequests.toLowerCase() === "false") {
       this.captureHTTPsRequests = false;
-      return;
     }
   }
   /**
@@ -21705,13 +21702,13 @@ var formDataToStream = (form, headersHandler, options) => {
     computedHeaders["Content-Length"] = contentLength;
   }
   headersHandler && headersHandler(computedHeaders);
-  return import_stream2.Readable.from(async function* () {
+  return import_stream2.Readable.from((async function* () {
     for (const part of parts) {
       yield boundaryBytes;
       yield* part.encode();
     }
     yield footerBytes;
-  }());
+  })());
 };
 var formDataToStream_default = formDataToStream;
 
