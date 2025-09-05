@@ -216,7 +216,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "7bd667e76d3ed71d01504a1f81ab87a617df25f251184c453cada0a1b005d70f.zip"
+     "S3Key": "705c64546eac76a121b5a4aed71e8a047df26530de063ca24144c7969fa973b5.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -283,6 +283,16 @@
    "Properties": {
     "ScheduleExpression": "rate(10 minutes)",
     "State": "ENABLED",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
     "Targets": [
      {
       "Arn": {
