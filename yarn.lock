@@ -2943,10 +2943,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.18:
-  version "2.37.18"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.18.tgz#e6a3beb2da9786cd57749cb1f19f9f8b109b3ede"
-  integrity sha512-P3mz6gdjslanH3SHN3NjbrWfJm1lnSvlUJ+wnltm9qk338fH6UQHPXsYk625BYViH1x1CRKiWt2kFh1d+Swlfg==
+cdk-nag@^2.37.20:
+  version "2.37.20"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.20.tgz#5b9d49ce485b566aa6d053bf0141ab267aa49b66"
+  integrity sha512-OsLYeuytOeoh36Gu/+3YYbNl48bL51kOztUXLyt2KtLHD3Z90OKx5ON3sWub37qwPfLZa08oyj+Jjn/SThXOMg==
 
 chai@^5.2.0:
   version "5.3.3"
@@ -3971,7 +3971,7 @@ fb-watchman@^2.0.0:
   dependencies:
     bser "2.1.1"
 
-fdir@^6.4.4:
+fdir@^6.5.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/fdir/-/fdir-6.5.0.tgz#ed2ab967a331ade62f18d077dae192684d50d350"
   integrity sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==
@@ -5988,7 +5988,7 @@ picomatch@^2.0.4, picomatch@^2.2.3, picomatch@^2.3.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
-picomatch@^4.0.2:
+picomatch@^4.0.2, picomatch@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
   integrity sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==
@@ -6048,10 +6048,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.123:
-  version "1.0.123"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.123.tgz#7e9fb65202fb17e6775ff175eeb2fffcd9f71007"
-  integrity sha512-/h6ZGtMwqizwjO2a6cRW0cBi6xv3Pk/So2ysflBJJmb0Y1dFFFq/6hddOCh6E3/IfflSXHAh46HVC/7uJOnC7g==
+projen-modules@^1.0.124:
+  version "1.0.124"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.124.tgz#e3a955c3635363cb7eb1e51f050a18ada9d69bb0"
+  integrity sha512-5R6b8FTr0Pt0Obt9dnStkP3y5vJAYDU8t+UBa92uC4vxijk0/bIA6JRFv/1+rWVn83belzysWBgTrRjpRWa+JA==
 
 projen@^0.95.6:
   version "0.95.6"
@@ -6809,12 +6809,12 @@ through@2, "through@>=2.2.7 <3":
   integrity sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==
 
 tinyglobby@^0.2.13:
-  version "0.2.14"
-  resolved "https://registry.yarnpkg.com/tinyglobby/-/tinyglobby-0.2.14.tgz#5280b0cf3f972b050e74ae88406c0a6a58f4079d"
-  integrity sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==
+  version "0.2.15"
+  resolved "https://registry.yarnpkg.com/tinyglobby/-/tinyglobby-0.2.15.tgz#e228dd1e638cea993d2fdb4fcd2d4602a79951c2"
+  integrity sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==
   dependencies:
-    fdir "^6.4.4"
-    picomatch "^4.0.2"
+    fdir "^6.5.0"
+    picomatch "^4.0.3"
 
 tinyrainbow@^2.0.0:
   version "2.0.0"
