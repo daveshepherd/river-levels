@@ -47,7 +47,7 @@
     "aws-cdk": "^2",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "cdk-nag": "^2.37.27",
+    "cdk-nag": "^2.37.28",
     "commit-and-tag-version": "^12",
     "esbuild": "^0.25.9",
     "eslint": "^9",
@@ -59,12 +59,12 @@
     "projen": "^0.96.1",
     "projen-modules": "^1.0.130",
     "source-map-support": "^0.5.21",
-    "ts-jest": "^29.4.1",
+    "ts-jest": "^29.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@aws-lambda-powertools/tracer": "^2.26.0",
+    "@aws-lambda-powertools/tracer": "^2.26.1",
     "@aws-sdk/client-dynamodb": "^3.888.0",
     "@aws-sdk/client-sns": "^3.888.0",
     "aws-cdk-lib": "^2.187.0",
