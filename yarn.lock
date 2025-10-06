@@ -2947,19 +2947,19 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001746:
-  version "1.0.30001747"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001747.tgz#2cfbbb7f1f046439ebaf34bba337ee3d3474c7e5"
-  integrity sha512-mzFa2DGIhuc5490Nd/G31xN1pnBnYMadtkyTjefPI7wzypqgCEpeWu9bJr0OnDsyKrW75zA9ZAt7pbQFmwLsQg==
+  version "1.0.30001748"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001748.tgz#628a5a9293014e58f8ba1216bb4966b04c58bee0"
+  integrity sha512-5P5UgAr0+aBmNiplks08JLw+AW/XG/SurlgZLgB1dDLfAw7EfRGxIwzPHxdSCGY/BTKDqIVyJL87cCN6s0ZR0w==
 
 case@1.6.3, case@^1.6.3:
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.44:
-  version "2.37.44"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.44.tgz#553407cde1e7b12cb37457c27719bc5555112f54"
-  integrity sha512-q7QBB/hUFVhV+914HQguyBl8MUzb/VUSSbY965mlnADvSr+KAJVeqhZ91MhdxEhOnAFoUGlqCkcXPHngrEvIBw==
+cdk-nag@^2.37.45:
+  version "2.37.45"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.45.tgz#8ebed1144e3fda9030253f7c187dfeab35ef1794"
+  integrity sha512-P7V/U58FNCi7qVxy8gVEJbX0SSCtDZ4KobEEkRiHBfm1Jle2+/mY1H2rh+YMYbSdlr+qR27odokHA7dRtfyqOQ==
 
 chai@^5.2.0:
   version "5.3.3"
@@ -3005,9 +3005,9 @@ ci-info@^3.2.0:
   integrity sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==
 
 ci-info@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.3.0.tgz#c39b1013f8fdbd28cd78e62318357d02da160cd7"
-  integrity sha512-l+2bNRMiQgcfILUi33labAZYIWlH1kWDp+ecNo5iisRKrbm0xcRyCww71/YU0Fkw0mAFpz9bJayXPjey6vkmaQ==
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.3.1.tgz#355ad571920810b5623e11d40232f443f16f1daa"
+  integrity sha512-Wdy2Igu8OcBpI2pZePZ5oWjPC38tmDVx5WKUXKwlLYkA0ozo85sLsLvkBbBn/sZaSCMFOGZJ14fvW9t5/d7kdA==
 
 cjs-module-lexer@^1.0.0:
   version "1.4.3"
@@ -6067,10 +6067,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.0.145:
-  version "1.0.145"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.145.tgz#79d3e8c506af22d1f0eca9ad93244a7b1cf3f2b4"
-  integrity sha512-zw8vzUnvfM6OQc6KizfkGmnEWtalwjfVcNTlr/T8eu3weNBQtIYBIZ5F1QwHQzuGMu7blKa+L4XuAue//GGUrg==
+projen-modules@^1.0.146:
+  version "1.0.146"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.0.146.tgz#dfdc5d25e42e05af10bcdf4976eb6a9c547b3416"
+  integrity sha512-5rAobN9tI8EqNN4T3t9N7PntyZymSYx0CkYXS+UmrRu4+4H7xCy3BauwAtN4A7T0dsBAogQHJ5898TJ+oviomA==
 
 projen@^0.97.0:
   version "0.97.0"
