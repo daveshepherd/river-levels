@@ -2955,9 +2955,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001754:
-  version "1.0.30001754"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001754.tgz#7758299d9a72cce4e6b038788a15b12b44002759"
-  integrity sha512-x6OeBXueoAceOmotzx3PO4Zpt4rzpeIFsSr6AAePTZxSkXiYDUmpypEl7e2+8NCd9bD7bXjqyef8CJYPC1jfxg==
+  version "1.0.30001755"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001755.tgz#c01cfb1c30f5acf1229391666ec03492f4c332ff"
+  integrity sha512-44V+Jm6ctPj7R52Na4TLi3Zri4dWUljJd+RDm+j8LtNCc/ihLCT+X1TzoOAkRETEWqjuLnh9581Tl80FvK7jVA==
 
 case@1.6.3, case@^1.6.3:
   version "1.6.3"
@@ -6056,10 +6056,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.10:
-  version "1.1.10"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.10.tgz#fcfb83cd49015ad9fbba95a1594ab2f474d430b2"
-  integrity sha512-McdLmAbOM6O5+iDwgFV9cqEqLpe94TTA7GzMUGmj/mRxONUlZv9Y9HqYdMo/WTWGT14+rwzmKctowaKfH3TsUA==
+projen-modules@^1.1.11:
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.11.tgz#295ee9bfa87037f069d9311aeccd7a82ac2a23e8"
+  integrity sha512-5PaPhLleUuCebK/7vTlNG11/G5boGxSu7VpQ8WxLZLPy8aNB1X1y3m9bVwGqbGYnVPm5ZeamZYp3ZRr+Sp+/cA==
 
 projen@^0.98.11:
   version "0.98.11"
