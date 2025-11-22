@@ -99,18 +99,20 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-lambda-powertools/commons@2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.28.1.tgz#d29fd2f325bcefeecb83213e4e0db39316ade9b1"
-  integrity sha512-XZyup4C9gNnxIi5UUNErXudnwursG4F0tXZMaeTsyMslNLwQJp3zl35MTALV4cXx6Fbz1BmdQIUhGBJraKSpnA==
-
-"@aws-lambda-powertools/tracer@^2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.28.1.tgz#25ee0ca89955aa25c5e549e0871f6c9fe2924b8c"
-  integrity sha512-6Fy3TrU+X7Zjl1hs3EvHRPy5Rv4PTOiKYdlaqvo/1FWYlqKnUVaQEfS/ejJnOYOXL16xMMC6y40j7wOTPiTEjw==
+"@aws-lambda-powertools/commons@2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.29.0.tgz#fcb123d3332098f2630222c6221f90c6b10fb897"
+  integrity sha512-QM65MP6B4wBrwkEUuZX+hcFUv3wjJBY0mPRn30dTPIOW3UVLIEec9L92fNtWhQZKMaEYK/ezDlyAV+8AuiebfA==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
-    aws-xray-sdk-core "^3.11.0"
+    "@aws/lambda-invoke-store" "0.2.1"
+
+"@aws-lambda-powertools/tracer@^2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.29.0.tgz#a564a1ddaf797447a8533cd64a93160848b2689f"
+  integrity sha512-PjvQg0a1GPPWbSIMe0TRSqFlyqgX5qivYbBgNr1oGjeDadPKF6g6UF5RSEcPJIllCVEcDluSCB7Qn/s1EfmvgQ==
+  dependencies:
+    "@aws-lambda-powertools/commons" "2.29.0"
+    aws-xray-sdk-core "^3.12.0"
 
 "@aws-sdk/client-dynamodb@^3.936.0":
   version "3.936.0"
@@ -572,7 +574,7 @@
     fast-xml-parser "5.2.5"
     tslib "^2.6.2"
 
-"@aws/lambda-invoke-store@^0.2.0":
+"@aws/lambda-invoke-store@0.2.1", "@aws/lambda-invoke-store@^0.2.0":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@aws/lambda-invoke-store/-/lambda-invoke-store-0.2.1.tgz#ceecff9ebe1f6199369e6911f38633fac3322811"
   integrity sha512-sIyFcoPZkTtNu9xFeEoynMef3bPJIAbOfUh+ueYcfhVl6xm2VRtMcMclSxmZCMnHHd4hlYKJeq/aggmBEWynww==
@@ -2413,35 +2415,35 @@
   integrity sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==
 
 "@vitest/expect@>1.6.0":
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-4.0.12.tgz#151a425f06707bc8ff07078b23121832da8d7c71"
-  integrity sha512-is+g0w8V3/ZhRNrRizrJNr8PFQKwYmctWlU4qg8zy5r9aIV5w8IxXLlfbbxJCwSpsVl2PXPTm2/zruqTqz3QSg==
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-4.0.13.tgz#2ee6e8b3016c08bce6544ea18dffddc0015fcc7e"
+  integrity sha512-zYtcnNIBm6yS7Gpr7nFTmq8ncowlMdOJkWLqYvhr/zweY6tFbDkDi8BPPOeHxEtK1rSI69H7Fd4+1sqvEGli6w==
   dependencies:
     "@standard-schema/spec" "^1.0.0"
     "@types/chai" "^5.2.2"
-    "@vitest/spy" "4.0.12"
-    "@vitest/utils" "4.0.12"
+    "@vitest/spy" "4.0.13"
+    "@vitest/utils" "4.0.13"
     chai "^6.2.1"
     tinyrainbow "^3.0.3"
 
-"@vitest/pretty-format@4.0.12":
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/@vitest/pretty-format/-/pretty-format-4.0.12.tgz#93e152204551107c86dba67d2512cc9a0b77c6c0"
-  integrity sha512-R7nMAcnienG17MvRN8TPMJiCG8rrZJblV9mhT7oMFdBXvS0x+QD6S1G4DxFusR2E0QIS73f7DqSR1n87rrmE+g==
+"@vitest/pretty-format@4.0.13":
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/@vitest/pretty-format/-/pretty-format-4.0.13.tgz#8e330f188fd481701208f4bbf3bd741b6cd25703"
+  integrity sha512-ooqfze8URWbI2ozOeLDMh8YZxWDpGXoeY3VOgcDnsUxN0jPyPWSUvjPQWqDGCBks+opWlN1E4oP1UYl3C/2EQA==
   dependencies:
     tinyrainbow "^3.0.3"
 
-"@vitest/spy@4.0.12":
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-4.0.12.tgz#23ec14a1fe6827b6993db042e43616bc6360d1fb"
-  integrity sha512-GZjI9PPhiOYNX8Nsyqdw7JQB+u0BptL5fSnXiottAUBHlcMzgADV58A7SLTXXQwcN1yZ6gfd1DH+2bqjuUlCzw==
+"@vitest/spy@4.0.13":
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-4.0.13.tgz#a57d9a611a51ce1dc17c3315f4546d37f62c6311"
+  integrity sha512-hSu+m4se0lDV5yVIcNWqjuncrmBgwaXa2utFLIrBkQCQkt+pSwyZTPFQAZiiF/63j8jYa8uAeUZ3RSfcdWaYWw==
 
-"@vitest/utils@4.0.12":
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-4.0.12.tgz#5b89eb454906eab14fb7c05cb180f066be6b5be7"
-  integrity sha512-DVS/TLkLdvGvj1avRy0LSmKfrcI9MNFvNGN6ECjTUHWJdlcgPDOXhjMis5Dh7rBH62nAmSXnkPbE+DZ5YD75Rw==
+"@vitest/utils@4.0.13":
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-4.0.13.tgz#ecf25b02fe406a0a6f2e3ac3d5f5b580c0579bb5"
+  integrity sha512-ydozWyQ4LZuu8rLp47xFUWis5VOKMdHjXCWhs1LuJsTNKww+pTHQNK4e0assIB9K80TxFyskENL6vCu3j34EYA==
   dependencies:
-    "@vitest/pretty-format" "4.0.12"
+    "@vitest/pretty-format" "4.0.13"
     tinyrainbow "^3.0.3"
 
 JSONStream@^1.3.5:
@@ -2748,7 +2750,7 @@ aws-sdk@^2.814.0:
     uuid "8.0.0"
     xml2js "0.6.2"
 
-aws-xray-sdk-core@^3.11.0:
+aws-xray-sdk-core@^3.12.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/aws-xray-sdk-core/-/aws-xray-sdk-core-3.12.0.tgz#7337f287f022212467271c690e6eafe1648e928e"
   integrity sha512-lwalRdxXRy+Sn49/vN7W507qqmBRk5Fy2o0a9U6XTjL9IV+oR5PUiiptoBrOcaYCiVuGld8OEbNqhm6wvV3m6A==
@@ -6065,10 +6067,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.15:
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.15.tgz#ff50d400ea098ac8c101de772f8023572af7ae1a"
-  integrity sha512-03TSC3spe+yApGNrcGiv+W+LIe15aG1/vPqbz/EVR68nj+L9+45GBZQoYnZ9Z/AA3lkqpxdlS6jQewRjTJgggQ==
+projen-modules@^1.1.16:
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.16.tgz#b679b355029a368c1f4ecb98f3fcdf202e0f692c"
+  integrity sha512-GjHt+1uxEAEsMQRr0A/xDaNq+F2sBwdrZJUECietTOhHsx9OH480QCJGZBrH+w3Rspgc8nViAJXepPhWSs4SUw==
 
 projen@^0.98.17:
   version "0.98.17"
