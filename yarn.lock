@@ -6066,10 +6066,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.18:
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.18.tgz#480031d1f9be5b56b34145580cedc0c8f16f1879"
-  integrity sha512-Ken7z45kMdITyrpzOeccFDWaXA6E2IC4L5gS+gYqbKat5acp5+WzIWdq8Upp4x4hGAOesTpExpCSSVa8+zdAmQ==
+projen-modules@^1.1.19:
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.19.tgz#7eb328835f6b466ab214386601ee5965cab155ca"
+  integrity sha512-OjzuXC0xVSY8Ork7mdC55DI0TglfV2Xg5TWT9OqDY9XF9uWyv8pKAqBnndBAn14SPeWr37IQRGP206/1GMh+VQ==
 
 projen@^0.98.26:
   version "0.98.26"
