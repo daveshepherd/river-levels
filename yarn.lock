@@ -5941,10 +5941,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.25:
-  version "1.1.25"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.25.tgz#6233d0351fbaaeae6e183ddea80fa1be27b4754a"
-  integrity sha512-+wjJWzkn97WlOwvbFUFMojvXoqYCMhd+o6YWYCh7ynbbtp2FDWouc4PaMvyoeRadRxp2TImpM1+ZfpMhTDOpwQ==
+projen-modules@^1.1.26:
+  version "1.1.26"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.26.tgz#c34e84ca2f22014e18adde9d19182087e721cb05"
+  integrity sha512-KZqnkNThaULCB0jmR+1p/w6haSXuBv4baqbIVpoqHfZwrBYVq9ikJsHZ6/M+2MxG3w3W7N6GyHQJv85CAxTV6w==
 
 projen@^0.98.28:
   version "0.98.28"
