@@ -2,7 +2,7 @@
 
 * text=auto eol=lf
 *.snap linguist-generated
-/.eslintrc.json linguist-generated
+/.eslintrc.json linguist-generated linguist-language=JSON-with-Comments
 /.gitattributes linguist-generated
 /.github/pull_request_template.md linguist-generated
 /.github/workflows/build.yml linguist-generated
@@ -23,6 +23,6 @@
 /README.md linguist-generated
 /src/storage-stack/crawler-function.ts linguist-generated
 /src/storage-stack/sns-publisher-function.ts linguist-generated
-/tsconfig.dev.json linguist-generated
-/tsconfig.json linguist-generated
+/tsconfig.dev.json linguist-generated linguist-language=JSON-with-Comments
+/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /yarn.lock linguist-generated
