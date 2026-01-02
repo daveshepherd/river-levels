@@ -1519,9 +1519,9 @@
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
 
 "@sinclair/typebox@^0.34.0":
-  version "0.34.45"
-  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.45.tgz#6c0426b584c74d57625ed6b180ac59a62f139f7c"
-  integrity sha512-qJcFVfCa5jxBFSuv7S5WYbA8XdeCPmhnaVVfX/2Y6L8WYg8sk3XY2+6W0zH+3mq1Cz+YC7Ki66HfqX6IHAwnkg==
+  version "0.34.46"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.46.tgz#33ea674ef3fbc46733c6d124ae94a6826abaf8cf"
+  integrity sha512-kiW7CtS/NkdvTUjkjUJo7d5JsFfbJ14YjdhDk9KoEgK6nFjKNXZPrX0jfLA8ZlET4cFLHxOZ/0vFKOP+bOxIOQ==
 
 "@sinonjs/commons@^3.0.0", "@sinonjs/commons@^3.0.1":
   version "3.0.1"
@@ -5930,10 +5930,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.44:
-  version "1.1.44"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.44.tgz#67efca92104459b9efa1573f5e7ff64b2d7d66dd"
-  integrity sha512-vBph0TqWVA1a/UUTL3EeNIutXznFkzMNPgx/81v8H58JrwH/ca7v1a8diKQcfXrSzcdLzoYS5+OZy87hgs9bNw==
+projen-modules@^1.1.45:
+  version "1.1.45"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.45.tgz#608d2b42117e249de6f32432eb66ff584613e76a"
+  integrity sha512-D/bZfmc5yYfwn5Ienqck6tIf9XtY+yYuUDtKIfKbpRfR44JNp25AR9mOVFghW30LMJRymSkYYXHnVMsD3mN+rA==
 
 projen@^0.98.32:
   version "0.98.32"
