@@ -29,14 +29,12 @@
     semver "^7.7.2"
 
 "@aws-cdk/integ-runner@latest":
-  version "2.194.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.194.0.tgz#e0982344271745dff37ebc337b472600fa5b7000"
-  integrity sha512-J8GU4idSpl+WMv1bCl3dQdQSEvAwTC4qvkGmWcz+TfoRqNuT5d1fyFpOn0MRA/FC/0Aum7Ju22smvfuWu7/2Gw==
+  version "2.194.1"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.194.1.tgz#3604461c328ebdd1c676aa93b4ef7112b1450f74"
+  integrity sha512-2Dy7XyeW0XsOuxpT+0AN/q8wau15zI/c8wHDuLLAYvEyrrxD/lqzFo80WZz226QhUEcDvN4sWO5cv02nxeMfIQ==
   dependencies:
     "@aws-cdk/aws-service-spec" "0.1.132"
-    aws-cdk "2.1102.0"
-  optionalDependencies:
-    fsevents "2.3.2"
+    aws-cdk "2.1103.0"
 
 "@aws-cdk/integ-tests-alpha@latest":
   version "2.236.0-alpha.0"
@@ -2674,12 +2672,10 @@ aws-cdk-lib@^2.187.0:
     table "^6.9.0"
     yaml "1.10.2"
 
-aws-cdk@2.1102.0, aws-cdk@^2:
-  version "2.1102.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1102.0.tgz#c8c7875e34a231f6940980289770cb963e0920c1"
-  integrity sha512-M/TeLiZERo88hB7FIbT+LyzKQBQuxiGW34oSSfy9+rYTuGwJrO9z6ZZrBNO8/jODT2iR7z0pa3CPsdUVC71oOw==
-  optionalDependencies:
-    fsevents "2.3.2"
+aws-cdk@2.1103.0, aws-cdk@^2:
+  version "2.1103.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1103.0.tgz#6f7d331920faae4c03e348cb6a48bac47de3bfe0"
+  integrity sha512-bxEcqIeAT983x7525gf4Ya4zgpDt3Ou54El7j1ITCa/KqJ8ZaOP4F0ZHiiGuCbZduMcGJlszIXkaPJuvyNADgg==
 
 aws-lambda@^1.0.7:
   version "1.0.7"
@@ -2820,9 +2816,9 @@ base64-js@^1.0.2:
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
 baseline-browser-mapping@^2.9.0:
-  version "2.9.17"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.17.tgz#9d6019766cd7eba738cb5f32c84b9f937cc87780"
-  integrity sha512-agD0MgJFUP/4nvjqzIB29zRPUuCF7Ge6mEv9s8dHrtYD7QWXRcx75rOADE/d5ah1NI+0vkDl0yorDd5U852IQQ==
+  version "2.9.18"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.18.tgz#c8281693035a9261b10d662a5379650a6c2d1ff7"
+  integrity sha512-e23vBV1ZLfjb9apvfPk4rHVu2ry6RIr2Wfs+O324okSidrX7pTAnEJPCh/O5BtRlr7QtZI7ktOP3vsqr7Z5XoA==
 
 bowser@^2.11.0:
   version "2.13.1"
@@ -4046,11 +4042,6 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
-
-fsevents@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
-  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
 fsevents@^2.3.2:
   version "2.3.3"
@@ -5930,10 +5921,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.61:
-  version "1.1.61"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.61.tgz#29c9673525319e991830479b72d1b272e4c39631"
-  integrity sha512-eCeiJjhLPRavlBKkZZ5/EgKL7ie1n+oH4Aa5TUBk6lfbQBuiSVB53WRViiVUT/IPI627luJABj9VFYIoxWBymg==
+projen-modules@^1.1.62:
+  version "1.1.62"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.62.tgz#5e68a670acc9f110762186fcf6e64bf2571e7663"
+  integrity sha512-Pbxrkb/ScOCzcs6uGqjmrhtKTnpieawgRYIeqkk5og4jalOuWKcCth2zdAgi/FpA6q4IVK0iyRcO6pL2Y/EC9w==
 
 projen@^0.99.7:
   version "0.99.7"
