@@ -2144,9 +2144,9 @@
   integrity sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==
 
 "@types/node@*":
-  version "25.2.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.2.1.tgz#378021f9e765bb65ba36de16f3c3a8622c1fa03d"
-  integrity sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg==
+  version "25.2.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.2.2.tgz#0ddfe326c326afcb3422d32bfe5eb2938e1cb5db"
+  integrity sha512-BkmoP5/FhRYek5izySdkOneRyXYN35I860MFAGupTdebyE66uZaR+bXLHq8k4DirE5DwQi3NuhvRU1jqTVwUrQ==
   dependencies:
     undici-types "~7.16.0"
 
@@ -5906,10 +5906,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.73:
-  version "1.1.73"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.73.tgz#3113217e3395cbafe603df63ca3c4fafc943d7e0"
-  integrity sha512-qvFRibK4I4KFQPqQiMVSmMk15gwkVAkh07R/SoSgBvSaHimAh3LWaBFPR5ChYjvC5m4AyfsOBIzORzJNavdKug==
+projen-modules@^1.1.74:
+  version "1.1.74"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.74.tgz#0b148ba871e1b9c5f5a3d6bfca6d10b204c4e4c3"
+  integrity sha512-WWg0FtIYZIJ7tmYMlbgUvDWZ9Mo1C6MDiWjjtSmXKB+xkw2CNPbJcZQ4WYxlJDTR1csntmhIBexx5uPrYEO6Pw==
 
 projen@^0.99.10:
   version "0.99.10"
