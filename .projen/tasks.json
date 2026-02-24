@@ -59,7 +59,7 @@
       "description": "Create a JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -68,7 +68,7 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -77,7 +77,7 @@
       "description": "Create a JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -86,7 +86,7 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

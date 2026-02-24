@@ -31,7 +31,7 @@ const project = new CdkTypeScriptApp({
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
   lambdaOptions: {
-    runtime: LambdaRuntime.NODEJS_22_X,
+    runtime: LambdaRuntime.NODEJS_24_X,
   },
   license: 'MIT',
   majorVersion: 1,
