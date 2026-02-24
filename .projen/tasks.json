@@ -218,6 +218,16 @@
         }
       ]
     },
+    "integ:debug": {
+      "name": "integ:debug",
+      "description": "Run integration tests with verbose diagnostics and failure artifacts",
+      "steps": [
+        {
+          "exec": "integ-runner $@ --language typescript -vv --inspect-failures",
+          "receiveArgs": true
+        }
+      ]
+    },
     "integ:force": {
       "name": "integ:force",
       "description": "Run integration snapshot tests, forcing tests to run even if there's no changes",
