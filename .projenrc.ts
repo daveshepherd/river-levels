@@ -59,6 +59,15 @@ project.addTask('integ:watch', {
     },
   ],
 });
+project.addTask('integ:debug', {
+  description: 'Run integration tests with verbose diagnostics and failure artifacts',
+  steps: [
+    {
+      exec: 'integ-runner $@ --language typescript -vv --inspect-failures',
+      receiveArgs: true,
+    },
+  ],
+});
 const deploymentJob = {
   runsOn: ['ubuntu-latest'],
   permissions: {
