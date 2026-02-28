@@ -109,10 +109,10 @@
     "@aws-lambda-powertools/commons" "2.31.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.999.0":
-  version "3.999.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.999.0.tgz#20aef34051e5a0bb0fa5f4a6bee938570860086c"
-  integrity sha512-DbFR7Y4KQ6HUgt9QcKyx1XvBgz2JJP5JWApL4o1oxyYJaHwAazqKq+QtidOhGNVkaCMoQv70NrrUFwZXf3ArNQ==
+"@aws-sdk/client-dynamodb@^3.1000.0":
+  version "3.1000.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1000.0.tgz#ef65f43ffd92e53be92ecebd1e00accc5875e8cb"
+  integrity sha512-S0M9ndVgGiupQEX9M6yLIKx2Iw1Z/lnZR1j5guuR76sqteQM6jsQseTJepq0hJ9SGGpzSwMucYJxETQDHsgFhQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -157,10 +157,10 @@
     "@smithy/util-waiter" "^4.2.10"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.999.0":
-  version "3.999.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.999.0.tgz#7701ef54ad64d44e99978ec7a762524570b088e9"
-  integrity sha512-psivYIswVyagbQFCgzTP8FiVviBFLFSM7E/lgwd5jwuKx07ieCt8fhNadYxhofdO5GrSuPt/YuEZGuitCu6Mrg==
+"@aws-sdk/client-sns@^3.1000.0":
+  version "3.1000.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1000.0.tgz#111a7efbe332252d41df887f104331279d3fd546"
+  integrity sha512-dSFYOydmOBjM20zZ+7MO/XrtO6zvPqRAhD9G1KCY+VkV+g2GQ0hEtNxdqIuJk2XueI0phXK+bUVCGXbpTKxZoA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -2690,10 +2690,10 @@ aws-xray-sdk-core@^3.12.0:
     cls-hooked "^4.2.2"
     semver "^7.5.3"
 
-axios@^1.13.5:
-  version "1.13.5"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
-  integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
+axios@^1.13.6:
+  version "1.13.6"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.6.tgz#c3f92da917dc209a15dd29936d20d5089b6b6c98"
+  integrity sha512-ChTCHMouEe2kn713WHbQGcuYrr6fXTBiu460OTwWrWob16g1bXn4vtz07Ope7ewMozJAnEquLk5lWQWtBig9DQ==
   dependencies:
     follow-redirects "^1.15.11"
     form-data "^4.0.5"
@@ -2796,9 +2796,9 @@ brace-expansion@^1.1.7:
     concat-map "0.0.1"
 
 brace-expansion@^5.0.2:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.3.tgz#6a9c6c268f85b53959ec527aeafe0f7300258eef"
-  integrity sha512-fy6KJm2RawA5RcHkLa1z/ScpBeA762UF9KmZQxwIbDtRJrgLzM10depAiEQ+CXYcoiqW1/m96OAAoke2nE9EeA==
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.4.tgz#614daaecd0a688f660bbbc909a8748c3d80d4336"
+  integrity sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==
   dependencies:
     balanced-match "^4.0.2"
 
@@ -5894,10 +5894,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.89:
-  version "1.1.89"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.89.tgz#4360f72f89d88bd50c81ea1159e3403aa9ca08dc"
-  integrity sha512-25+KssMnic51bQS4uPEUix4xvj/BSeKktxiP1vtcKB7ps6Y2YPQDjRRBbDoZe0qb2Tvg4dh8SMVLNMduxc/GGQ==
+projen-modules@^1.1.90:
+  version "1.1.90"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.90.tgz#d84b74bfd915ddb3befadaa5faa6135738c07021"
+  integrity sha512-DStuYZwDXPiFVoUBnGCoNW0zB0evkC1wYdlROqZkJOuqNwza1CLxHsjyoTTtgacz7MnKOfNNs7kLZIajWLwNow==
 
 projen@^0.99.17:
   version "0.99.17"
