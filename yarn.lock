@@ -37,17 +37,17 @@
     semver "^7.7.3"
 
 "@aws-cdk/integ-runner@latest":
-  version "2.197.3"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.197.3.tgz#5f04de4ff72b8cef90267f10f4ef6455a8891d28"
-  integrity sha512-v2oXseDR7DTDTNFnHHtpjmLkyIeZrpxjjG72y7wIF/9tQvtmSuPG01zbaCvZKwSLXLUmfBaQ1OonMBd/Im3KwA==
+  version "2.197.4"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-runner/-/integ-runner-2.197.4.tgz#b4ba63339c58b004f10e0c7fee92f7692726260b"
+  integrity sha512-RrXEvdPyAiVD3e7UBfoqEU0NzB2sC6+RnbLNrVVoJn0egkifqQeB+2vRrXYTgVd1lQgngXF5ELUQ7mS7i8Yx7g==
   dependencies:
     "@aws-cdk/aws-service-spec" "0.1.161"
-    aws-cdk "2.1110.0"
+    aws-cdk "2.1111.0"
 
 "@aws-cdk/integ-tests-alpha@latest":
-  version "2.242.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.242.0-alpha.0.tgz#a35ad6e87e74e5c2a9532f00b7a160bf0652c617"
-  integrity sha512-bWldEpl0owIdFSp/loK8koEVDFS6uH6fWEFRMswk2vCA9gepgc7Xp5x6RdLfzxHOyOgoiXJ+zAxza4uSYZU9bw==
+  version "2.243.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.243.0-alpha.0.tgz#a9c2287af739be20c4d1d145a7f88bb38cf957c0"
+  integrity sha512-nD++k/qgBqnvKPMnUNqUOGw21rjxmoW8F78mvfHAaL7akMng5Zq1Xoy/eAiNDrxHD3LEjXUwvvYPrKFAjuY4JA==
 
 "@aws-cdk/service-spec-types@^0.0.227":
   version "0.0.227"
@@ -109,10 +109,10 @@
     "@aws-lambda-powertools/commons" "2.31.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1006.0":
-  version "3.1006.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1006.0.tgz#f8e070ac1285e483dc3d3b265b10d153937c4236"
-  integrity sha512-PTGnTtTdOezfg7UsICBeS8BtxAxYfWI2/JNLflWjjryiJdHIl7aAprsHrIzlsD6qwQOloxhmwqp7C9JFY5BT2Q==
+"@aws-sdk/client-dynamodb@^3.1007.0":
+  version "3.1007.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1007.0.tgz#e4fc4c2deff4fd1baf7ae2ce396f9a59230ae550"
+  integrity sha512-wGkXr8jG9p2AYwUdxxo1q/F0AYUT8g1mL0OntbBPBCr8fDuicOf1r2M28lV7lEiIrRCAxKVOzRJ6gHef6IpErA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -157,10 +157,10 @@
     "@smithy/util-waiter" "^4.2.12"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.1006.0":
-  version "3.1006.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1006.0.tgz#b938f2fb311624b3711ee81b020be3f32b902276"
-  integrity sha512-VLj5vhf2yO52r+MROIYmNSlsaXdYrMFSnpbhRjI7AwG+4KO/PYuomOQqB5UjojF4JGlsOeEgm4y1JFM7qp+C8A==
+"@aws-sdk/client-sns@^3.1007.0":
+  version "3.1007.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1007.0.tgz#72d91f482200d6a3e21e7e6b0fb75d8d31ef54f1"
+  integrity sha512-IpX4d8vR2IQ/vD1Vac+mmShwyPBI+9PENtR11u5OvXWyBpvs3IomjohxPTb91pL0PyZTKL2sZyU9lbJghwOZPQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -2605,9 +2605,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.187.0:
-  version "2.242.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.242.0.tgz#f2d359623a0aa5c224d998402c638452826b1063"
-  integrity sha512-AmZl4Ep9gWX7wGxmIaLGNqE7DSQFrIg1tpiCQE/INf4vc9MbLvUVYE2qikzk8LUnwe0qF1bG2SaaZZ0u9UMs3w==
+  version "2.243.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.243.0.tgz#c240ebc41cc293c37aed674550ef9d8c69de769f"
+  integrity sha512-qIhg/3gSNeZ9LoVmDATO45HPk+POkoCfPZRezeOPhd2kAJ/wzYswyUcMqpDWXrlRrEVYntxsykQs+2eMA04Isg==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.263"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.1"
@@ -2625,10 +2625,10 @@ aws-cdk-lib@^2.187.0:
     table "^6.9.0"
     yaml "1.10.2"
 
-aws-cdk@2.1110.0, aws-cdk@^2:
-  version "2.1110.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1110.0.tgz#958b480d3f630802184f8a00e994ae361206a6f2"
-  integrity sha512-t881rXhuHWbiCXf8nuzf81jyOzHCgX1DNiCD3COwVGpT6DYna2SjsrDbraenJM722Oc+2OOAAMpKNEtVNj7mEg==
+aws-cdk@2.1111.0, aws-cdk@^2:
+  version "2.1111.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1111.0.tgz#b251b922987554d0e0e43b9e8cce134380d490f0"
+  integrity sha512-69AVF04cxbAhYzmeJYtUF5bs6ruNnH05EQZJfjadk5Lpg+HVaJY2NjG/2qgsMmKrfRgvLet73Ir8ehVlAaaGng==
 
 aws-lambda@^1.0.7:
   version "1.0.7"
@@ -3872,12 +3872,12 @@ fast-uri@^3.0.1:
   resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
   integrity sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==
 
-fast-xml-builder@^1.0.0, fast-xml-builder@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/fast-xml-builder/-/fast-xml-builder-1.1.0.tgz#6d103ebd731bc5d478cc5035a114b28cfb4b9b03"
-  integrity sha512-7mtITW/we2/wTUZqMyBOR2F8xP4CRxMiSEcQxPIqdRWdO2L/HZSOlzoNyghmyDwNB8BDxePooV1ZTJpkOUhdRg==
+fast-xml-builder@^1.0.0, fast-xml-builder@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/fast-xml-builder/-/fast-xml-builder-1.1.2.tgz#52a1f7d639ed2dcc5c144d6c58377296e52e6add"
+  integrity sha512-NJAmiuVaJEjVa7TjLZKlYd7RqmzOC91EtPFXHvlTcqBVo50Qh7XV5IwvXi1c7NRz2Q/majGX9YLcwJtWgHjtkA==
   dependencies:
-    path-expression-matcher "^1.1.2"
+    path-expression-matcher "^1.1.3"
 
 fast-xml-parser@5.4.1:
   version "5.4.1"
@@ -3888,12 +3888,12 @@ fast-xml-parser@5.4.1:
     strnum "^2.1.2"
 
 fast-xml-parser@^5.2.5:
-  version "5.5.1"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.1.tgz#8ba45ed81f93a49face58ae387449c7ac1769478"
-  integrity sha512-JTpMz8P5mDoNYzXTmTT/xzWjFiCWi0U+UQTJtrFH9muXsr2RqtXZPbnCW5h2mKsOd4u3XcPWCvDSrnaBPlUcMQ==
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.3.tgz#2166aef8ae1d3d9d0f1659f42882b5c5b93be7fb"
+  integrity sha512-Ymnuefk6VzAhT3SxLzVUw+nMio/wB1NGypHkgetwtXcK1JfryaHk4DWQFGVwQ9XgzyS5iRZ7C2ZGI4AMsdMZ6A==
   dependencies:
-    fast-xml-builder "^1.1.0"
-    path-expression-matcher "^1.1.2"
+    fast-xml-builder "^1.1.2"
+    path-expression-matcher "^1.1.3"
     strnum "^2.1.2"
 
 fastq@^1.6.0:
@@ -5791,10 +5791,10 @@ path-exists@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-exists/-/path-exists-4.0.0.tgz#513bdbe2d3b95d7762e8c1137efa195c6c61b5b3"
   integrity sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==
 
-path-expression-matcher@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/path-expression-matcher/-/path-expression-matcher-1.1.2.tgz#0102f74415abf183857532acd78bb7ad6ff6fa00"
-  integrity sha512-LXWqJmcpp2BKOEmgt4CyuESFmBfPuhJlAHKJsFzuJU6CxErWk75BrO+Ni77M9OxHN6dCYKM4vj+21Z6cOL96YQ==
+path-expression-matcher@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/path-expression-matcher/-/path-expression-matcher-1.1.3.tgz#8bf7c629dc1b114e42b633c071f06d14625b4e0d"
+  integrity sha512-qdVgY8KXmVdJZRSS1JdEPOKPdTiEK/pi0RkcT2sw1RhXxohdujUlJFPuS1TSkevZ9vzd3ZlL7ULl1MHGTApKzQ==
 
 path-is-absolute@^1.0.0:
   version "1.0.1"
@@ -5898,10 +5898,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.100:
-  version "1.1.100"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.100.tgz#d433c30ffc73d7b524b97e7b49178bae127b1d80"
-  integrity sha512-eofkSXw22TcXtjpeJLnu49XKigxjFzF7R9UzqzyxVZbRXWsCmsI7+s/aM/lyOi9DJqP4JrSg1T7rtPvZUPePDA==
+projen-modules@^1.1.101:
+  version "1.1.101"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.101.tgz#2ee1c4f65016cd359404049057299b1eb666c2b7"
+  integrity sha512-HM9IHUSJGOhdIGiy9/2oX28IpLc2I8/9W0TMtF8Rw+0WzGrojK9YN/5TCUO/gUoNdEg4Hn+VZERVC9WZOKeb1g==
 
 projen@^0.99.19:
   version "0.99.19"
