@@ -109,10 +109,10 @@
     "@aws-lambda-powertools/commons" "2.31.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1010.0":
-  version "3.1010.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1010.0.tgz#c159e8bf5cfd44aaced7d8bbb7e5483d76f2cf76"
-  integrity sha512-iVgfou3tQ6lIsaWh4Ke4Ki5zc8p0Gu/fOrTnpbqwaTFPxjMgYv56wZ5RsRdvmpenWarsi6YyAUeNODLkzi1DWw==
+"@aws-sdk/client-dynamodb@^3.1011.0":
+  version "3.1011.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1011.0.tgz#1c0eec6447b920883600afee4717bf5faadfab48"
+  integrity sha512-oCYlsiLR0qESxmr6LWeUDZH2qITGL69mgFxqFPzrblBfKSZPw6jEzVSB/T6JUqzSQrARnusiLNHxn6eph0rSHQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -157,10 +157,10 @@
     "@smithy/util-waiter" "^4.2.13"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.1010.0":
-  version "3.1010.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1010.0.tgz#72b3136d6780818f51f84015318dd28d2c577c8c"
-  integrity sha512-kkiHnPG3NO7Wd3X2iRAZlZvwXdhduS1r9IQIeGRVBfI6Ei5n9D3dVYcMbF4eFBrRYguIux0SrkPO9Vbgukk8nw==
+"@aws-sdk/client-sns@^3.1011.0":
+  version "3.1011.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1011.0.tgz#cc8383bdc8b28b25ff80ab87a821a9e39fe50e0b"
+  integrity sha512-av0AZRlJAflhro+51oZV1bTIBU4buiLZth8FdkRM0UCVV7gz66DE46wN/46FZjHbKx+QpWX9BuEeWYWvE5+zdQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -2903,9 +2903,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001759:
-  version "1.0.30001779"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001779.tgz#75e4941d406928ba00c8d7a3ddda0b2cb90d7474"
-  integrity sha512-U5og2PN7V4DMgF50YPNtnZJGWVLFjjsN3zb6uMT5VGYIewieDj1upwfuVNXf4Kor+89c3iCRJnSzMD5LmTvsfA==
+  version "1.0.30001780"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001780.tgz#0e413de292808868a62ed9118822683fa120a110"
+  integrity sha512-llngX0E7nQci5BPJDqoZSbuZ5Bcs9F5db7EtgfwBerX9XGtkkiO4NwfDDIRzHTTwcYC8vC7bmeUEPGrKlR/TkQ==
 
 case@1.6.3, case@^1.6.3:
   version "1.6.3"
@@ -3044,9 +3044,9 @@ comment-json@4.2.2:
     repeat-string "^1.6.1"
 
 commit-and-tag-version@^12:
-  version "12.6.1"
-  resolved "https://registry.yarnpkg.com/commit-and-tag-version/-/commit-and-tag-version-12.6.1.tgz#f648c7e6ad00c98cd756f8837d6cd74cb8f01cfc"
-  integrity sha512-QNwgDDrg44oFAiLwXChOGabeGlkuaEvD7lUbLYleWLmOVYqFidek0G6xUE1NbRtitkOrDx8fuFh8w17+nUCOYg==
+  version "12.7.0"
+  resolved "https://registry.yarnpkg.com/commit-and-tag-version/-/commit-and-tag-version-12.7.0.tgz#d893145125e6b6760a82723efc7458ce98cfe953"
+  integrity sha512-uICrirNtf1FvNydqHLrTPsX7zp74pStCJUuenrxlQSwjrriAYeIPIuIl8z7no3fiQEtvQxjJ/A48rMLY5gqOxQ==
   dependencies:
     chalk "^2.4.2"
     conventional-changelog "4.0.0"
@@ -3056,7 +3056,7 @@ commit-and-tag-version@^12:
     detect-indent "^6.1.0"
     detect-newline "^3.1.0"
     dotgitignore "^2.1.0"
-    fast-xml-parser "^5.2.5"
+    fast-xml-parser "^5.3.4"
     figures "^3.2.0"
     find-up "^5.0.0"
     git-semver-tags "^5.0.1"
@@ -3895,7 +3895,7 @@ fast-xml-parser@5.4.1:
     fast-xml-builder "^1.0.0"
     strnum "^2.1.2"
 
-fast-xml-parser@^5.2.5:
+fast-xml-parser@^5.3.4:
   version "5.5.6"
   resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.6.tgz#6fc61f5ae06a55a1f058abd6a4f4b5d3e9972cd0"
   integrity sha512-3+fdZyBRVg29n4rXP0joHthhcHdPUHaIC16cuyyd1iLsuaO6Vea36MPrxgAzbZna8lhvZeRL8Bc9GP56/J9xEw==
@@ -3983,9 +3983,9 @@ flat-cache@^4.0.0:
     keyv "^4.5.4"
 
 flatted@^3.2.9:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.4.1.tgz#84ccd9579e76e9cc0d246c11d8be0beb019143e6"
-  integrity sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.4.2.tgz#f5c23c107f0f37de8dbdf24f13722b3b98d52726"
+  integrity sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==
 
 follow-redirects@^1.15.11:
   version "1.15.11"
@@ -5906,15 +5906,15 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.1.105:
-  version "1.1.105"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.105.tgz#3dde1d330d1174e3a7556d1ee0e101028fca0445"
-  integrity sha512-4hILz/1DG/kwCL5YLOopMfOLlbZU4bCqSsjBc96CB40qq8tKz8/y9HM7ClLFjM+aGNnqeJGPtj5LfcKeZAnfOg==
+projen-modules@^1.1.106:
+  version "1.1.106"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.1.106.tgz#e15f77c63bed1cb5ddf3bcd5aa9648bdca547623"
+  integrity sha512-d7ZJUbs4iVqZ8BVdDdomb/YJIeGEeWm/s8mS1VVt1qLrvt/afuLk50onqImllcls3zeDSwgNyKH68NTYLHWppg==
 
-projen@^0.99.20:
-  version "0.99.20"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.99.20.tgz#80fece27076b3d00b49b46e27f08539f96951b82"
-  integrity sha512-mK3s7G3JgeUdy2+7d3p3h/05AigbgKXvFpz8ud7Fj4XpZ2UTiKJQ+fDl29nAxIW0AnVQUQN6UfvqZGibWxni/g==
+projen@^0.99.21:
+  version "0.99.21"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.99.21.tgz#fd8a2ccce7b58b06315f6e4e483100c31d69136d"
+  integrity sha512-2GJUnNWZ9TDmkChzBcf4m1JL6h7gBV83aiCjlXQgcrlBXKqB9d+Sv+E/tLRHUz6bDIw3X2pZ+BSgwN3dd1t0HA==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
