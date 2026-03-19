@@ -11,7 +11,6 @@ const project = new CdkTypeScriptApp({
     '@aws-lambda-powertools/tracer',
     '@aws-sdk/client-dynamodb',
     '@aws-sdk/client-sns',
-    'aws-lambda',
     'axios',
   ],
   description:
