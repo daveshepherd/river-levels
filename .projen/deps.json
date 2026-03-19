@@ -135,10 +135,6 @@
       "type": "runtime"
     },
     {
-      "name": "aws-lambda",
-      "type": "runtime"
-    },
-    {
       "name": "axios",
       "type": "runtime"
     },

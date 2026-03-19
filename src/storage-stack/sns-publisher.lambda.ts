@@ -1,5 +1,5 @@
 import { SNSClient, PublishBatchCommand } from '@aws-sdk/client-sns';
-import { DynamoDBStreamEvent } from 'aws-lambda';
+import type { DynamoDBStreamEvent } from 'aws-lambda';
 
 const snsClient = new SNSClient({});
 
