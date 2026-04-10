@@ -216,7 +216,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "9c3a3b764e948a0b7dda81e1d7c71e6f669954c57f152090c425b183c7018d3d.zip"
+     "S3Key": "c92983b28f315a33420b924f88c463e36d5f9bcdb591eb3a608190e52544b710.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -228,20 +228,6 @@
      }
     },
     "Handler": "index.handler",
-    "Layers": [
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:aws:lambda:",
-        {
-         "Ref": "AWS::Region"
-        },
-        ":580247275435:layer:LambdaInsightsExtension-Arm64:19"
-       ]
-      ]
-     }
-    ],
     "LoggingConfig": {
      "LogGroup": {
       "Ref": "crawlerloggroup6A20A1A3"
