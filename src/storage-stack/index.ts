@@ -82,7 +82,7 @@ export class StorageStack extends Stack {
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
       },
-      layers: [layer],
+      layers: [],
       logGroup: crawlerLogGroup,
       memorySize: 256,
       role: executionRole,
