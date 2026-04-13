@@ -141,7 +141,7 @@ export class StorageStack extends Stack {
           startingPosition: StartingPosition.LATEST,
         }),
       ],
-      layers: [layer],
+      layers: [],
       logGroup: snsPublisherLogGroup,
       memorySize: 128,
       role: snsPublisherExecutionRole,
