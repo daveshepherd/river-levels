@@ -582,20 +582,6 @@
      }
     },
     "Handler": "index.handler",
-    "Layers": [
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:aws:lambda:",
-        {
-         "Ref": "AWS::Region"
-        },
-        ":580247275435:layer:LambdaInsightsExtension-Arm64:19"
-       ]
-      ]
-     }
-    ],
     "LoggingConfig": {
      "LogGroup": {
       "Ref": "snspublishergroup0F35AF53"

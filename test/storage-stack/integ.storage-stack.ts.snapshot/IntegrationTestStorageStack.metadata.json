@@ -258,9 +258,7 @@
         "architecture": "*",
         "environment": "*",
         "events": "*",
-        "layers": [
-          "*"
-        ],
+        "layers": [],
         "logGroup": "*",
         "memorySize": "*",
         "role": "*",
@@ -283,9 +281,7 @@
     {
       "type": "aws:cdk:analytics:method",
       "data": {
-        "addLayers": [
-          "*"
-        ]
+        "addLayers": []
       }
     },
     {
