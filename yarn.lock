@@ -1386,9 +1386,9 @@
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
 "@mswjs/interceptors@^0.41.0":
-  version "0.41.3"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.3.tgz#d766dc1a168aa315a6a0b2d0f2e0cf1b74f23c82"
-  integrity sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA==
+  version "0.41.4"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.4.tgz#a2468abcf0517041ecc4a85c51e4b0db0832c057"
+  integrity sha512-3B9EinUkrdOUGYzHRzRWSXunQ4YFGboJnyLNRwEJWEde+j8fNhPUHvrN1E3g1DU/iS/s8JQrMNVe+S7AHHVs0w==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -2749,9 +2749,9 @@ balanced-match@^4.0.2:
   integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
 
 baseline-browser-mapping@^2.10.12:
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.10.19.tgz#7697721c22f94f66195d0c34299b1a91e3299493"
-  integrity sha512-qCkNLi2sfBOn8XhZQ0FXsT1Ki/Yo5P90hrkRamVFRS7/KV9hpfA4HkoWNU152+8w0zPjnxo5psx5NL3PSGgv5g==
+  version "2.10.20"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.10.20.tgz#7c99b86d43ae9be3810cac515f4675802e1f6b87"
+  integrity sha512-1AaXxEPfXT+GvTBJFuy4yXVHWJBXa4OdbIebGN/wX5DlsIkU0+wzGnd2lOzokSk51d5LUmqjgBLRLlypLUqInQ==
 
 bowser@^2.11.0:
   version "2.14.1"
@@ -5848,10 +5848,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.7:
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.7.tgz#66d88a7584959d5953374c702ebede039f61ec91"
-  integrity sha512-+H37qO55mxSUlJM7ZqVH6Tg2w0j7qRn+rZhBrcVmbFsWEBemwKqPEHkRRIaOwWk/SAJI4vfwkOdGWcOzWNXiVw==
+projen-modules@^1.2.8:
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.8.tgz#3841b4352f96aceb4c435291e454480ebf5a5d4b"
+  integrity sha512-kSphizmbSz6MaVrnZl5Ogs8sidwh51WMNQ8VWXfSpDHKKd8qvbQJHhHDPwbKJtck2GAYFlcxYFlD13x/s+ILZw==
 
 projen@^0.99.51:
   version "0.99.51"
