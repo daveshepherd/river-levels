@@ -2666,10 +2666,10 @@ aws-xray-sdk-core@^3.12.0:
     cls-hooked "^4.2.2"
     semver "^7.5.3"
 
-axios@^1.15.0:
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.15.0.tgz#0fcee91ef03d386514474904b27863b2c683bf4f"
-  integrity sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==
+axios@^1.15.1:
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.15.1.tgz#075420b785da8adbdf545785b69f90c926b28542"
+  integrity sha512-WOG+Jj8ZOvR0a3rAn+Tuf1UQJRxw5venr6DgdbJzngJE3qG7X0kL83CZGpdHMxEm+ZK3seAbvFsw4FfOfP9vxg==
   dependencies:
     follow-redirects "^1.15.11"
     form-data "^4.0.5"
@@ -5848,10 +5848,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.8:
-  version "1.2.8"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.8.tgz#3841b4352f96aceb4c435291e454480ebf5a5d4b"
-  integrity sha512-kSphizmbSz6MaVrnZl5Ogs8sidwh51WMNQ8VWXfSpDHKKd8qvbQJHhHDPwbKJtck2GAYFlcxYFlD13x/s+ILZw==
+projen-modules@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.9.tgz#1ad02d64504e12e13c542a1b7a6abd4270512fd9"
+  integrity sha512-wFgVS0iKN0WA+d/izkI4+MovFOJ1bOfachrl1a3cWIl+Uy/mxWs5m+Uyc7q3i0aO2DSXADx71ZlHqNy6qzv4yQ==
 
 projen@^0.99.51:
   version "0.99.51"
