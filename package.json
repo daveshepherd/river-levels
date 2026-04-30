@@ -58,7 +58,7 @@
     "jest-junit": "^16",
     "nock": "^14.0.13",
     "projen": "^0.99.52",
-    "projen-modules": "^1.2.16",
+    "projen-modules": "^1.2.17",
     "source-map-support": "^0.5.21",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
@@ -66,8 +66,8 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/tracer": "^2.33.0",
-    "@aws-sdk/client-dynamodb": "^3.1038.0",
-    "@aws-sdk/client-sns": "^3.1038.0",
+    "@aws-sdk/client-dynamodb": "^3.1039.0",
+    "@aws-sdk/client-sns": "^3.1039.0",
     "aws-cdk-lib": "^2.187.0",
     "axios": "^1.15.2",
     "constructs": "^10.5.1"
