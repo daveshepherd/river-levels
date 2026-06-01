@@ -4609,9 +4609,9 @@ js-yaml@^3.13.1:
     esprima "^4.0.0"
 
 js-yaml@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.1.tgz#854c292467705b699476e1a2decc0c8a3458806b"
-  integrity sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.2.0.tgz#2bd9e85682dd91bd469afb809d816043b3d49524"
+  integrity sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==
   dependencies:
     argparse "^2.0.1"
 
@@ -5376,10 +5376,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.45:
-  version "1.2.45"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.45.tgz#3277e1af69ba98180fe370584f3476fa7b2a968a"
-  integrity sha512-7aKlX70y+B6uK4u5QziQkYbv/1/Lh9POCg+ur9/YBWzxXGnL2k5Eo7Mkxn+j7sFk4CPFB/FaWgmCdVVyfkzr3g==
+projen-modules@^1.2.46:
+  version "1.2.46"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.46.tgz#23371413be2b8e39855a36354941b42ddd46b4e7"
+  integrity sha512-d2ju5FxS3J5YKaAOmdudc4W38dMvTcc7MEETqUvlPDh/mnXzbjTMsO1nDHc81Z5t179CBU8v+WjEnanYy6cGvQ==
 
 projen@^0.99.70:
   version "0.99.70"
