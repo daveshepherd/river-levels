@@ -45,9 +45,9 @@
     aws-cdk "2.1127.0"
 
 "@aws-cdk/integ-tests-alpha@latest":
-  version "2.259.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.259.0-alpha.0.tgz#1f77900e255a1b4dee2717ea12f53d7afd3f1336"
-  integrity sha512-zyz0diC1fH3j5N4iCU7mPFJoF0UoecHfLESTp0PG/6O9C1YkH9RdLV4GQgh2wFxhNHXFbRdNaRIpK0G8DaEKdg==
+  version "2.260.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/integ-tests-alpha/-/integ-tests-alpha-2.260.0-alpha.0.tgz#830bbd4518de1ee4e16f5d113f593c424a425ed3"
+  integrity sha512-GGGKoAkDs7i6o5pWicVsbA5qG5bkQIQCuCeBJNtEHyEaSsNclOgKSIIgvsC+ykWkeIc4J0ZcFFRLulw/GhAGHA==
 
 "@aws-cdk/service-spec-types@^0.0.251":
   version "0.0.251"
@@ -118,10 +118,10 @@
     "@aws-lambda-powertools/commons" "2.33.1"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1069.0":
-  version "3.1069.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1069.0.tgz#98ca46b9b96d72f8313a9840b8c35d55ab4864db"
-  integrity sha512-cVnKUba/cdaFfslzw2+IAZGwna8mG0A5yFBELUQ6j7L/vqzEcW7l17ogkCmXhIcsoYAO8WA25c82Tgjet0Fpdw==
+"@aws-sdk/client-dynamodb@^3.1070.0":
+  version "3.1070.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1070.0.tgz#8dc05658c532c6287b4d15f50a776086f8368c7d"
+  integrity sha512-H5rA840DhCV0cFb5t5pWcixLXzpG/d8knhkSAh5hrkzJkoPnz2k2MAmSiPy8mzOZysQcTyNq28grRUpZ3aQbWg==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -136,10 +136,10 @@
     "@smithy/types" "^4.14.3"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.1069.0":
-  version "3.1069.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1069.0.tgz#aa054ffb3f694190cd7f9e1794c2b6ee8b5c147f"
-  integrity sha512-qiBqtJQWsWsjX6T0fRuxAs6yNx61003j/YskIq7XAiQ11yZ0PPByn4nqVqu3zJDMWiwbQyf3QBBLYLp5NPbaoA==
+"@aws-sdk/client-sns@^3.1070.0":
+  version "3.1070.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1070.0.tgz#84c8c3f0b5660c00940b17e4137883e80827ed1d"
+  integrity sha512-JtOVpLGuaUhJbewPW08Q3xMTrXhJ+G2nQV4wQkItHm80/WNX0dCEYZSwKek/CfhMHImgzWJkB8s7yPvMxX50LA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -2135,9 +2135,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.187.0:
-  version "2.259.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.259.0.tgz#7417fdc5af5e380445db9487603ceb07daebc861"
-  integrity sha512-qcsbyRBZpFMUzx/Nle5vKXFC14Z1VutvAqw6S4Duh3Yj5ZFl4e/RhN2Vg8QmYktxu9l1aF9H5UyF+Xz81qk9gw==
+  version "2.260.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.260.0.tgz#cd4cc7cae99c8f6c61315358e36ee19738fed484"
+  integrity sha512-2PPG+hbPDot8+ibkb5Jl9y3OY5rBE6TFwjzOi+yEyU4ZG6u8bM4DDKhhBi/S20NqqSFDso9rH1txVJAdwXNiuQ==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.282"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.2"
@@ -2916,9 +2916,9 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     gopd "^1.2.0"
 
 electron-to-chromium@^1.5.328:
-  version "1.5.373"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.373.tgz#7a29b55c79bd9a8f47d0cd501985c4da2bad2f9e"
-  integrity sha512-G2Hym8JIf/QreuseqkDibgH8Ci8KfJzqGDKdakbhSx9UltwRBH2cBLAWU/lBX0sCdv0TlhyxQyDCnSfxgMWsjA==
+  version "1.5.375"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.375.tgz#54a9a616dc2b3765e7263d98d14c2135408954d9"
+  integrity sha512-ZWP5eB4BVPW/ZYo9252hQZHZ5XavtsTgpbhcmMmRwymavC5AsLWQWBPaKMeNd2LW0KGby5HPXvj7+sr4ta5j/Q==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -5409,10 +5409,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.58:
-  version "1.2.58"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.58.tgz#79c6f2bd1566626eae625322d16b27fc2eceb911"
-  integrity sha512-Xv5Y0iFHHQVwcooYfPqWTnKydP8Ufzwfny6qi11Ow7rxOIo3tDYS0I0wz6PJFYGMbr9MoaYou4IuNloE3qFoTg==
+projen-modules@^1.2.59:
+  version "1.2.59"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.59.tgz#b248ccc20e29cc8b01525cf1b5c4bd2d8a488c18"
+  integrity sha512-d4qI8qNSybh5iFtmV+zM2c8fo//USJF+b3F9m0BmO8pabcEZn4nUWyV2zj46Y5byv0+sqUy8rs/gnkVFsIMaKg==
 
 projen@^0.99.74:
   version "0.99.74"
