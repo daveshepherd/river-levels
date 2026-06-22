@@ -5346,15 +5346,15 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.63:
-  version "1.2.63"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.63.tgz#f8c4f94bbd440e50e690d4149f7f9ab787e92544"
-  integrity sha512-hOtfD8Cb0nIzO35Zek/qW/Z+i4wsGiAwgmOKsILIjKI3k3cArV775ltM2SRh6TAPDpbF/fFFUrGcPOyF/5NP1Q==
+projen-modules@^1.2.64:
+  version "1.2.64"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.64.tgz#a356fa0b5701d15b74e0a65feff648f97b1f47e9"
+  integrity sha512-Fkei5HyUhJ+ctzWfoAck2R3se+/aaZfzoLzKg99Y07xqf3sbO+KUgcbmsXW/mdJgUMVNo5DhxZZfIJUBazHacA==
 
-projen@^0.100.1:
-  version "0.100.1"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.100.1.tgz#d2e1197a87c67a48108cd280979943585ec93561"
-  integrity sha512-17SV8a4eFomhRbEZfCZ8SeZ+k1cQAxigKTOPp8HVl4t3B3AFhkupWUjlXMmqbXrdU04IUgsI/nrDAQS0sAyhHQ==
+projen@^0.100.2:
+  version "0.100.2"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.100.2.tgz#06d9fcb59411085fd6e3b04ac7ecabdb58b46e63"
+  integrity sha512-SLKKgRAxp9k8gUS3UYqo2xH6YSdD43aY3iiQ0WG0Q2XRL1T22h1JStyvOZ3xFZgllgbD2oQssI/VRBLXjcYwNg==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
@@ -5370,7 +5370,7 @@ projen@^0.100.1:
     semver "^7.8.4"
     xmlbuilder2 "^4.0.3"
     yaml "^2.2.2"
-    yargs "^17.7.2"
+    yargs "^17.7.3"
 
 prompts@^2.0.1:
   version "2.4.2"
@@ -6500,7 +6500,7 @@ yargs@^16.2.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yargs@^17.3.1, yargs@^17.7.2:
+yargs@^17.3.1, yargs@^17.7.2, yargs@^17.7.3:
   version "17.7.3"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.3.tgz#779dffe6bcafec596a7172e983289a588647faaa"
   integrity sha512-GZtjxm/J/4TSxuL3FNYjCmLktBTnIw/rVmKSIyKeYAZpmJB2ig9VauCC5xsa82GNKVKDAqpOn3KVzNt0zmrU0g==
