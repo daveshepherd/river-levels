@@ -20,9 +20,10 @@
 /CODEOWNERS linguist-generated
 /LICENSE linguist-generated
 /package.json linguist-generated
+/projenrc/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /README.md linguist-generated
 /src/storage-stack/crawler-function.ts linguist-generated
 /src/storage-stack/sns-publisher-function.ts linguist-generated
-/tsconfig.dev.json linguist-generated linguist-language=JSON-with-Comments
+/test/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /yarn.lock linguist-generated
