@@ -606,22 +606,22 @@
       }
     }
   ],
-  "/IntegrationTestStorageStack/Exports/Output{\"Ref\":\"crawlerlambda65FC80E0\"}": [
+  "/IntegrationTestStorageStack/Publish/Output{\"Ref\":\"crawlerlambda65FC80E0\"}": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
+      "data": "PublishOutputRefcrawlerlambda65FC80E066798C7A"
     }
   ],
-  "/IntegrationTestStorageStack/Exports/Output{\"Ref\":\"riverlevelstableA1F25F33\"}": [
+  "/IntegrationTestStorageStack/Publish/Output{\"Ref\":\"riverlevelstableA1F25F33\"}": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
+      "data": "PublishOutputRefriverlevelstableA1F25F33A5F734CE"
     }
   ],
-  "/IntegrationTestStorageStack/Exports/Output{\"Ref\":\"testqueueA58C838B\"}": [
+  "/IntegrationTestStorageStack/Publish/Output{\"Ref\":\"testqueueA58C838B\"}": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "ExportsOutputReftestqueueA58C838B800488D5"
+      "data": "PublishOutputReftestqueueA58C838BE85F9255"
     }
   ],
   "/IntegrationTestStorageStack/crawler-role/crawler-policy/Resource": [
