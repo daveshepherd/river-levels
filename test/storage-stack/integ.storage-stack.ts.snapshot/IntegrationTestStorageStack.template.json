@@ -216,7 +216,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "c92983b28f315a33420b924f88c463e36d5f9bcdb591eb3a608190e52544b710.zip"
+     "S3Key": "7ef336a5a7aa8b75def7a566c1f697f7dd17f23c6b10642b0c6ac04b95e7eaf2.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -810,28 +810,19 @@
     ]
    }
   },
-  "ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2": {
+  "PublishOutputRefcrawlerlambda65FC80E066798C7A": {
    "Value": {
     "Ref": "crawlerlambda65FC80E0"
-   },
-   "Export": {
-    "Name": "IntegrationTestStorageStack:ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
    }
   },
-  "ExportsOutputRefriverlevelstableA1F25F33A0433BB0": {
+  "PublishOutputRefriverlevelstableA1F25F33A5F734CE": {
    "Value": {
     "Ref": "riverlevelstableA1F25F33"
-   },
-   "Export": {
-    "Name": "IntegrationTestStorageStack:ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
    }
   },
-  "ExportsOutputReftestqueueA58C838B800488D5": {
+  "PublishOutputReftestqueueA58C838BE85F9255": {
    "Value": {
     "Ref": "testqueueA58C838B"
-   },
-   "Export": {
-    "Name": "IntegrationTestStorageStack:ExportsOutputReftestqueueA58C838B800488D5"
    }
   }
  },

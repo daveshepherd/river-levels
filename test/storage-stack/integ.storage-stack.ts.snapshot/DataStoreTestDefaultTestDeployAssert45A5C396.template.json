@@ -18,7 +18,13 @@
        [
         "\"",
         {
-         "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestStorageStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputRefcrawlerlambda65FC80E066798C7A"
+         }
         },
         "\""
        ]
@@ -27,7 +33,7 @@
      "Payload": "\"{\\\"readingsLimit\\\":1}\""
     },
     "flattenResponse": "false",
-    "salt": "1776074705978"
+    "salt": "1784025384958"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -37,7 +43,13 @@
    "Properties": {
     "Action": "lambda:InvokeFunction",
     "FunctionName": {
-     "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
+     "Fn::GetStackOutput": {
+      "StackName": "IntegrationTestStorageStack",
+      "Region": {
+       "Ref": "AWS::Region"
+      },
+      "OutputName": "PublishOutputRefcrawlerlambda65FC80E066798C7A"
+     }
     },
     "Principal": {
      "Fn::GetAtt": [
@@ -106,7 +118,13 @@
              },
              ":function:",
              {
-              "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputRefcrawlerlambda65FC80E0E20F2ED2"
+              "Fn::GetStackOutput": {
+               "StackName": "IntegrationTestStorageStack",
+               "Region": {
+                "Ref": "AWS::Region"
+               },
+               "OutputName": "PublishOutputRefcrawlerlambda65FC80E066798C7A"
+              }
              }
             ]
            ]
@@ -167,12 +185,12 @@
   "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
-    "Runtime": "nodejs22.x",
+    "Runtime": "nodejs24.x",
     "Code": {
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "b5c2a7158e57582e84496b24c0499302cec1fd88624535b3dfb629311b3fdc2a.zip"
+     "S3Key": "6ffc47b88143a52aa50e26c31da776854b28dff0e45b1a97d7c1e530d59590ad.zip"
     },
     "Timeout": 120,
     "Handler": "index.handler",
@@ -181,6 +199,10 @@
       "SingletonFunction1488541a7b23466481b69b4408076b81Role37ABCE73",
       "Arn"
      ]
+    },
+    "LoggingConfig": {
+     "LogFormat": "JSON",
+     "ApplicationLogLevel": "FATAL"
     }
    }
   },
@@ -210,7 +232,13 @@
        [
         "\"",
         {
-         "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestStorageStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputRefriverlevelstableA1F25F33A5F734CE"
+         }
         },
         "\""
        ]
@@ -218,7 +246,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1776074705979"
+    "salt": "1784025384959"
    },
    "DependsOn": [
     "LambdaInvoke65d9b14047bbf63b418a533e51656c7d",
@@ -411,12 +439,12 @@
   "SingletonFunction76b3e830a873425f8453eddd85c86925Handler81461ECE": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
-    "Runtime": "nodejs22.x",
+    "Runtime": "nodejs24.x",
     "Code": {
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "b5c2a7158e57582e84496b24c0499302cec1fd88624535b3dfb629311b3fdc2a.zip"
+     "S3Key": "6ffc47b88143a52aa50e26c31da776854b28dff0e45b1a97d7c1e530d59590ad.zip"
     },
     "Timeout": 120,
     "Handler": "index.isComplete",
@@ -425,6 +453,10 @@
       "SingletonFunction76b3e830a873425f8453eddd85c86925Role918961BB",
       "Arn"
      ]
+    },
+    "LoggingConfig": {
+     "LogFormat": "JSON",
+     "ApplicationLogLevel": "FATAL"
     }
    }
   },
@@ -453,12 +485,12 @@
   "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
-    "Runtime": "nodejs22.x",
+    "Runtime": "nodejs24.x",
     "Code": {
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "b5c2a7158e57582e84496b24c0499302cec1fd88624535b3dfb629311b3fdc2a.zip"
+     "S3Key": "6ffc47b88143a52aa50e26c31da776854b28dff0e45b1a97d7c1e530d59590ad.zip"
     },
     "Timeout": 120,
     "Handler": "index.onTimeout",
@@ -467,10 +499,14 @@
       "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aRoleB84BD8CE",
       "Arn"
      ]
+    },
+    "LoggingConfig": {
+     "LogFormat": "JSON",
+     "ApplicationLogLevel": "FATAL"
     }
    }
   },
-  "AwsApiCallawssdkclientdynamodbPutItemCommand8cfb9f48a59a92204cab05e99ec91deb": {
+  "AwsApiCallawssdkclientdynamodbPutItemCommand865d7e0f9f4535c9c021fd4c0b4470e1": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbPutItemC",
    "Properties": {
     "ServiceToken": {
@@ -482,14 +518,20 @@
     "service": "@aws-sdk/client-dynamodb",
     "api": "PutItemCommand",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1776074705980\"},\"reading_depth\":{\"N\":\"1.1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1784025384959\"},\"reading_depth\":{\"N\":\"1.1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
        [
         "\"",
         {
-         "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputRefriverlevelstableA1F25F33A0433BB0"
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestStorageStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputRefriverlevelstableA1F25F33A5F734CE"
+         }
         },
         "\""
        ]
@@ -497,7 +539,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1776074705980"
+    "salt": "1784025384960"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -513,7 +555,7 @@
     },
     "service": "@aws-sdk/client-sqs",
     "api": "ReceiveMessageCommand",
-    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1776074705980}\"}}}}}]}}}",
+    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1784025384959}\"}}}}}]}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallawssdkclientsqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dcWaitFor82F86A45"
     },
@@ -524,7 +566,13 @@
        [
         "\"",
         {
-         "Fn::ImportValue": "IntegrationTestStorageStack:ExportsOutputReftestqueueA58C838B800488D5"
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestStorageStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputReftestqueueA58C838BE85F9255"
+         }
         },
         "\""
        ]
@@ -532,7 +580,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1776074705980"
+    "salt": "1784025384960"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
