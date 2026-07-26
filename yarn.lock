@@ -2180,9 +2180,9 @@ balanced-match@^4.0.2:
   integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
 
 baseline-browser-mapping@^2.10.44:
-  version "2.11.1"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.1.tgz#390b4714558634093df77add4acca0c5c0c1605e"
-  integrity sha512-HYXq73DDpCtNzOmrFsm9eSwCvWCql0RzqjpDzXN9EadiLJ4DNat0nsZ/Bzmy+Ud12mb4/zKDY0cQ805ZzN+i0A==
+  version "2.11.3"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.3.tgz#3ab75c7ebb6a72fb8ca2cd5e1eea82e2b9b05bce"
+  integrity sha512-sbT0Ui/CZwyAyy7icT1Gw5P1LKRlFaHwaF6tDCW5YHq2X5SeeZFphBuIagopSfwSSZq3sQcbmEL072yphxm7ew==
 
 bowser@^2.11.0:
   version "2.14.1"
@@ -5234,10 +5234,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.94:
-  version "1.2.94"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.94.tgz#21b743eed750a3a4321073921516ed7f7698b479"
-  integrity sha512-btoOXcsF46H8kojCPgxBD+afn4rumCsSrRXrCtsCkk2rFqX6BMLCQqzgdNa8gzRhBhz5hzHQuQ2yjJco+GNtwA==
+projen-modules@^1.2.95:
+  version "1.2.95"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.95.tgz#8849bfc4eaa6fab059871e3fd826d3914f06aa1d"
+  integrity sha512-8uD5ofufZyGjeoUC0U1FR5ixrLlZUhYdbjMCKMDQkh+RKE/RgPdK8sPj7FfT7T87YubBN7D4YpqXwzeayvwK9w==
 
 projen@^0.101.20:
   version "0.101.20"
