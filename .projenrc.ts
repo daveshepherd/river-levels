@@ -39,6 +39,11 @@ const project = new CdkTypeScriptApp({
   release: true,
   workflowPackageCache: true,
 });
+
+project
+  .tryFindObjectFile('test/tsconfig.json')
+  ?.addOverride('compilerOptions.isolatedModules', true);
+
 project.addTask('integ:force', {
   description:
     "Run integration snapshot tests, forcing tests to run even if there's no changes",
