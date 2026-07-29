@@ -73,6 +73,13 @@
     "axios": "^1.18.1",
     "constructs": "^10.5.1"
   },
+  "devEngines": {
+    "packageManager": {
+      "name": "yarn",
+      "version": "1.22.22",
+      "onFail": "ignore"
+    }
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
