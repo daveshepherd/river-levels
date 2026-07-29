@@ -1,6 +1,7 @@
 import { github } from 'projen';
 import { LambdaRuntime } from 'projen/lib/awscdk';
 import { JobPermission } from 'projen/lib/github/workflows-model';
+import { NodePackageManager } from 'projen/lib/javascript';
 import { CdkTypeScriptApp } from 'projen-modules';
 
 const project = new CdkTypeScriptApp({
@@ -35,6 +36,7 @@ const project = new CdkTypeScriptApp({
   license: 'MIT',
   majorVersion: 1,
   name: 'river-levels',
+  packageManager: NodePackageManager.YARN_CLASSIC,
   projenrcTs: true,
   release: true,
   workflowPackageCache: true,
