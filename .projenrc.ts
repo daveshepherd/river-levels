@@ -4,7 +4,7 @@ import { JobPermission } from 'projen/lib/github/workflows-model';
 import { CdkTypeScriptApp } from 'projen-modules';
 
 const project = new CdkTypeScriptApp({
-  cdkVersion: '2.187.0',
+  cdkVersion: '2.262.2',
   codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
   deps: [
@@ -64,7 +64,8 @@ project.addTask('integ:watch', {
   ],
 });
 project.addTask('integ:debug', {
-  description: 'Run integration tests with verbose diagnostics and failure artifacts',
+  description:
+    'Run integration tests with verbose diagnostics and failure artifacts',
   steps: [
     {
       exec: 'integ-runner $@ --language typescript -vv --inspect-failures',
@@ -137,7 +138,9 @@ project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
   needs: ['deploy_development'],
   ...deploymentJob,
 });
-project.readme?.addSection('CDK', `On first run of a CDK installation:
+project.readme?.addSection(
+  'CDK',
+  `On first run of a CDK installation:
 
 \`\`\`sh
 npx cdk bootstrap
@@ -151,5 +154,6 @@ npx projen build
 Deploy the CDK stack
 \`\`\`sh
 npx projen deploy
-\`\`\``);
+\`\`\``,
+);
 project.synth();

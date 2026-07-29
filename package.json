@@ -69,7 +69,7 @@
     "@aws-lambda-powertools/tracer": "^2.34.0",
     "@aws-sdk/client-dynamodb": "^3.1097.0",
     "@aws-sdk/client-sns": "^3.1097.0",
-    "aws-cdk-lib": "^2.187.0",
+    "aws-cdk-lib": "^2.262.2",
     "axios": "^1.18.1",
     "constructs": "^10.5.1"
   },
