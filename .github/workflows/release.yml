@@ -28,21 +28,26 @@ jobs:
       CI: "true"
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set git identity
+        id: set_git_identity
         run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Setup Node.js
+        id: setup_node_js
         uses: actions/setup-node@v6
         with:
           cache: yarn
           package-manager-cache: true
       - name: Install dependencies
+        id: install_dependencies
         run: yarn install --check-files --frozen-lockfile
       - name: release
+        id: release
         run: npx projen release
       - name: Check if version has already been tagged
         id: check_tag_exists
@@ -59,6 +64,7 @@ jobs:
           cat $GITHUB_OUTPUT
         shell: bash
       - name: Backup artifact permissions
+        id: backup_artifact_permissions
         if: ${{ steps.git_remote.outputs.latest_commit == github.sha }}
         run: cd dist && getfacl -R . > permissions-backup.acl
         continue-on-error: true
@@ -80,30 +86,37 @@ jobs:
     if: needs.release.outputs.tag_exists != 'true'
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Download build artifacts
+        id: download_build_artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
           path: dist
       - name: Setup Node.js
+        id: setup_node_js
         uses: actions/setup-node@v4
         with:
           cache: yarn
       - name: Install dependencies
+        id: install_dependencies
         run: yarn install --check-files
       - name: build
+        id: build
         run: npx projen build
       - name: configure aws credentials
+        id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           role-session-name: river-levels-deploy
           aws-region: eu-west-2
       - name: deploy
+        id: deploy
         run: yarn deploy --require-approval never
   deploy_production:
     name: Deploy to Production
@@ -115,30 +128,37 @@ jobs:
     if: needs.release.outputs.tag_exists != 'true'
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Download build artifacts
+        id: download_build_artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
           path: dist
       - name: Setup Node.js
+        id: setup_node_js
         uses: actions/setup-node@v4
         with:
           cache: yarn
       - name: Install dependencies
+        id: install_dependencies
         run: yarn install --check-files
       - name: build
+        id: build
         run: npx projen build
       - name: configure aws credentials
+        id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           role-session-name: river-levels-deploy
           aws-region: eu-west-2
       - name: deploy
+        id: deploy
         run: yarn deploy --require-approval never
   release_github:
     name: Publish to GitHub Releases
@@ -153,14 +173,17 @@ jobs:
           node-version: lts/*
           package-manager-cache: false
       - name: Download build artifacts
+        id: download_build_artifacts
         uses: actions/download-artifact@v8
         with:
           artifact-ids: ${{ needs.release.outputs.artifact_id }}
           path: dist
       - name: Restore build artifact permissions
+        id: restore_build_artifact_permissions
         run: cd dist && setfacl --restore=permissions-backup.acl
         continue-on-error: true
       - name: Release
+        id: release
         if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
