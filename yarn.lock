@@ -3252,15 +3252,15 @@ fast-xml-builder@^1.2.0:
     xml-naming "^0.3.0"
 
 fast-xml-parser@^5.5.6:
-  version "5.10.1"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.10.1.tgz#19313f7c9386c47fa4a1de527547b73ed2cfcede"
-  integrity sha512-IEMIf7298kXuZSRFoGfMYrl7is8LpavODgbNz1cwIudv7KwVFnuU+UsMporfq6PD6aXSlawZlARiA3UywCTfMw==
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.11.0.tgz#7cd9ea0e34c15619c1af0c7e2d8e183c891ee832"
+  integrity sha512-9IGxMqvqLOnqP+Egi1nqDHKv5k8aZ7r9n558enxcucmyVGEBNPAU+MOg/8jPIS7rO7sSq4gFm1/nHtiaubMruw==
   dependencies:
     "@nodable/entities" "^3.0.0"
     fast-xml-builder "^1.2.0"
     is-unsafe "^2.0.0"
     path-expression-matcher "^1.6.2"
-    strnum "^2.4.1"
+    strnum "^2.4.2"
     xml-naming "^0.3.0"
 
 fastq@^1.6.0:
@@ -5234,10 +5234,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen-modules@^1.2.116:
-  version "1.2.116"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.116.tgz#9b67baa6357622e8a07d8a8e3740f600019aedf5"
-  integrity sha512-+gSzh5GTwx5ofSF6NxnWmO688CYqAMEfgX3V6+NJurMEsm9onAlCuWpzkFepm7VMcSHeJw5Wvg4JMOn8JdUEoQ==
+projen-modules@^1.2.117:
+  version "1.2.117"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.117.tgz#d19db8079acd1d49cb92e4e65af568b9f56c2b0a"
+  integrity sha512-Jf0XicIDAduYDqIVnUS0uqI5BwguycjU9CkBTOGutkQvLv/Y9q4R/hFZp65YWBtK7kFZ3Asdu54UcHlzF6y2yg==
 
 projen@^0.101.31:
   version "0.101.31"
@@ -5838,7 +5838,7 @@ strip-json-comments@^3.1.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
-strnum@^2.4.1:
+strnum@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.4.2.tgz#af43ab51a06d04227023fc2e42ca229214ec10f0"
   integrity sha512-rDG3Ah4TV0k1hWvLSzkZtMmLN9+eS+h3knq4MP6A42Y3Yh5qGNnOUs1jJkoSr8FG5dsL28c7KgkIBzSEykqtuw==
