@@ -85,7 +85,16 @@
       "description": "Create a JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/storage-stack/crawler.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/storage-stack/crawler.lambda/index.js",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
         }
       ]
     },
@@ -94,7 +103,17 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/crawler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/crawler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/crawler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/storage-stack/crawler.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/storage-stack/crawler.lambda/index.js",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
         }
       ]
     },
@@ -103,7 +122,16 @@
       "description": "Create a JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/storage-stack/sns-publisher.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/storage-stack/sns-publisher.lambda/index.js",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
         }
       ]
     },
@@ -112,7 +140,17 @@
       "description": "Continuously update the JavaScript bundle from src/storage-stack/sns-publisher.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/storage-stack/sns-publisher.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/storage-stack/sns-publisher.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/storage-stack/sns-publisher.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/storage-stack/sns-publisher.lambda/index.js",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
         }
       ]
     },
@@ -124,22 +162,35 @@
       },
       "steps": [
         {
-          "exec": "git checkout -b scratch",
+          "execArgs": [
+            "git",
+            "checkout",
+            "-b",
+            "scratch"
+          ],
           "name": "save current HEAD in \"scratch\" branch"
         },
         {
-          "exec": "git checkout $BRANCH"
+          "exec": "git checkout \"$BRANCH\""
         },
         {
-          "exec": "git fetch origin",
+          "execArgs": [
+            "git",
+            "fetch",
+            "origin"
+          ],
           "name": "fetch latest changes from origin"
         },
         {
-          "exec": "git reset --hard origin/$BRANCH",
+          "exec": "git reset --hard \"origin/$BRANCH\"",
           "name": "hard reset to origin commit"
         },
         {
-          "exec": "git clean -fdx",
+          "execArgs": [
+            "git",
+            "clean",
+            "-fdx"
+          ],
           "name": "clean all untracked files"
         },
         {
@@ -225,7 +276,19 @@
       },
       "steps": [
         {
-          "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern $@ src test build-tools projenrc .projenrc.ts",
+          "execArgs": [
+            "eslint",
+            "--ext",
+            ".ts,.tsx",
+            "--fix",
+            "--no-error-on-unmatched-pattern",
+            "$@",
+            "src",
+            "test",
+            "build-tools",
+            "projenrc",
+            ".projenrc.ts"
+          ],
           "receiveArgs": true
         }
       ]
@@ -356,7 +419,11 @@
       },
       "steps": [
         {
-          "exec": "rm -fr dist"
+          "execArgs": [
+            "rm",
+            "-fr",
+            "dist"
+          ]
         },
         {
           "spawn": "bump"
@@ -402,7 +469,11 @@
       "description": "Run tests",
       "steps": [
         {
-          "exec": "jest --passWithNoTests --updateSnapshot",
+          "execArgs": [
+            "jest",
+            "--passWithNoTests",
+            "--updateSnapshot"
+          ],
           "receiveArgs": true
         },
         {
@@ -418,7 +489,10 @@
       "description": "Run jest in watch mode",
       "steps": [
         {
-          "exec": "jest --watch"
+          "execArgs": [
+            "jest",
+            "--watch"
+          ]
         }
       ]
     },
