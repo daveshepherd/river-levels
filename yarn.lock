@@ -4848,10 +4848,10 @@ pretty-format@^29.0.0, pretty-format@^29.7.0:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
-projen-modules@^1.2.148:
-  version "1.2.148"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.148.tgz#5fc2066ddaae35b1581b9aa71e8b062fe8fad3f1"
-  integrity sha512-77XOnN02bkQbC1l4uVaMydTkwpdirDa66hw34OtRPkm4pacJkEWPoG27KvVMJJHrJgwnX/e7jay8fwCzJmtNYA==
+projen-modules@^1.2.149:
+  version "1.2.149"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.149.tgz#17b890a68c19934ac10733bab211ff43b2a1774c"
+  integrity sha512-2vaWW13uZvKBpGv4I6RJ/+DyCmAM9Flhb+ZIOjUClIMRUhHGIIHP3SIAUmw3kCy6L92/fdygQmXGycNdo8FGqg==
 
 projen@^0.103.27:
   version "0.103.27"
