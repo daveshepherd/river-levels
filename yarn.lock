@@ -2334,9 +2334,9 @@ chalk@^4.0.0, chalk@^4.1.2:
     supports-color "^7.1.0"
 
 chalk@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-6.0.0.tgz#a3bae843bc8454f41ef66ef3fd584dcf34dd805d"
-  integrity sha512-2uNTXIuTTxk7ciZgAU1BQcgnchcG0xXnrs6jzkQfj9SsRa9M2s5zE8WT96hS6KmG4MzWHSrvH43DF1m4XRkrFg==
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-6.0.1.tgz#077d4667ad6e608c9687782caed3d534d7f9abc3"
+  integrity sha512-/Ce6KNm3vIbWdMlNna6RVIZ/ICQxnJxCicet5LBKK9ZffBkqzDw0xh9EiKSljdRtiIQ1S1z4YgcscUUGzNCWrA==
 
 char-regex@^1.0.2:
   version "1.0.2"
@@ -4848,10 +4848,10 @@ pretty-format@^29.0.0, pretty-format@^29.7.0:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
-projen-modules@^1.2.149:
-  version "1.2.149"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.149.tgz#17b890a68c19934ac10733bab211ff43b2a1774c"
-  integrity sha512-2vaWW13uZvKBpGv4I6RJ/+DyCmAM9Flhb+ZIOjUClIMRUhHGIIHP3SIAUmw3kCy6L92/fdygQmXGycNdo8FGqg==
+projen-modules@^1.2.150:
+  version "1.2.150"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.150.tgz#52bb6547a6792a5e8082be7f3f72b83851bc2527"
+  integrity sha512-yqENq6zukNon3HWcD4/esNjsS9vnxPxwoACf3XxwLKDvbwNx52AaFg5mM4RL/VZrTqRtVsi1MYAL4ldfxIOJQA==
 
 projen@^0.103.27:
   version "0.103.27"
