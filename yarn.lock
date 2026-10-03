@@ -72,10 +72,10 @@
     "@aws/lambda-invoke-store" "0.3.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1145.0":
-  version "3.1145.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1145.0.tgz#2fa4ea05d3e536a0bc8ee9a0d430433b5c780dd9"
-  integrity sha512-T5yELCRj9w2wPKPX0gGLY4tC4dhZq79LDyiqTfYUpAc9IjtR7vVTHQ6Epe8w5TnIHJVOOxUZvz77cXOWm3/IpA==
+"@aws-sdk/client-dynamodb@^3.1146.0":
+  version "3.1146.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1146.0.tgz#d5a4df6d515968e2a34dd16be7f729012fac859a"
+  integrity sha512-3Mc8YkSu2KlgNNSuspaW+Fo0pTwX+fLYlC5ovH3yX3OoDg2RPtp3Py8KuQJr0FDlQj1tHw0K3+AtaH4NXlI3aQ==
   dependencies:
     "@aws-sdk/core" "^3.978.1"
     "@aws-sdk/credential-provider-node" "^3.972.84"
@@ -88,10 +88,10 @@
     "@smithy/types" "^4.19.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.1145.0":
-  version "3.1145.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1145.0.tgz#022a90aeb33905cd5bcf8b35ad20d55042a44bf0"
-  integrity sha512-AuipekFm88Cld8udBMKT93k6Ok6oVgY/BJin8QON+hA5IsEHfryJDvO+1GP2YcxAQa4Z8eruLiMPG8kxeqDJWQ==
+"@aws-sdk/client-sns@^3.1146.0":
+  version "3.1146.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1146.0.tgz#12f8a8b45fdade5e256a326863fe0932284d3d73"
+  integrity sha512-U+nlmrVA0PQTrrdsqGQfYUx112WQYqyTS98M7PMGRagTVDgWnzYFpYvhWTsbSw8boH4VKH/x2nS7lCrsSdyFeQ==
   dependencies:
     "@aws-sdk/core" "^3.978.1"
     "@aws-sdk/credential-provider-node" "^3.972.84"
@@ -3480,9 +3480,9 @@ ignore@^5.2.0, ignore@^5.3.2:
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==
 
 ignore@^7.0.5:
-  version "7.0.11"
-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-7.0.11.tgz#76dd267e937832bc019dec4042a43d9d3c03afd0"
-  integrity sha512-YChdK5txDjwGUvgR7oCJcLGkwi3LDh8Zx8tS7ndYciLEg/oOCL26VUBSUEtgS7EjiybcBqFxh5j0rAdDX7/bbg==
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-7.0.12.tgz#36048ce2e8d8e0f97fd87863a1cb595ea0a5c69f"
+  integrity sha512-/8UvqAPU9DGTI9k4mxtf49U37Isfwr8Uts96+SBHIkFxPJnHS0Ew4f00sM4Scd8V8EjM0jUNtVDdv1kPdt35lg==
 
 import-fresh@^3.2.1:
   version "3.3.1"
@@ -4848,10 +4848,10 @@ pretty-format@^29.0.0, pretty-format@^29.7.0:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
-projen-modules@^1.2.153:
-  version "1.2.153"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.153.tgz#c2c95fe160f982677bbd5b2397fc65e63b8a8b3c"
-  integrity sha512-AkslOLVeTPWG9PZGlA98A6ucc5BmoJGqS3U5Q2p+aMFve88+H3cNqxF8cwK7R+6GMp77fXTtUvuASDEk66tCEw==
+projen-modules@^1.2.154:
+  version "1.2.154"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-1.2.154.tgz#1a476d24c6a7914d678f43e47ab4068936a3a353"
+  integrity sha512-MfqlbpaU8Fy0G05XI5DnQMzUmy6L/xHhw4nE+ULkN+q319NTwcboW4bOvNYlIEZmGXlHumwjP3LEyC9ybsasIA==
 
 projen@^0.103.27:
   version "0.103.27"
