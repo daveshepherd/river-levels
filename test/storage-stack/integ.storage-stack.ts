@@ -120,3 +120,14 @@ NagSuppressions.addStackSuppressions(stackUnderTest, [
     reason: 'the lambda tracing option creates a wildcard policy',
   },
 ]);
+NagSuppressions.addResourceSuppressionsByPath(
+  stackUnderTest,
+  '/IntegrationTestStorageStack/sns-publisher-failure-queue/Resource',
+  [
+    {
+      id: 'AwsSolutions-SQS3',
+      reason:
+        'this queue is the on-failure destination for the stream event source, so it does not need a DLQ of its own',
+    },
+  ],
+);

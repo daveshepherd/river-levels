@@ -534,6 +534,20 @@
       },
       {
        "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "snspublisherfailurequeue972E49A6",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
         "dynamodb:DescribeStream",
         "dynamodb:GetRecords",
         "dynamodb:GetShardIterator",
@@ -560,6 +574,69 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
+  "snspublisherfailurequeue972E49A6": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "this queue is the on-failure destination for the stream event source, so it does not need a DLQ of its own",
+       "id": "AwsSolutions-SQS3"
+      }
+     ]
+    }
+   }
+  },
+  "snspublisherfailurequeuePolicyC34F62E5": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "snspublisherfailurequeue972E49A6",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "snspublisherfailurequeue972E49A6"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
   "snspublisherlambda35C1A2D1": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
@@ -570,7 +647,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "cfeba0f013534c3b34d9feb00b7d483905ae8dca68b7457ed29db8a571dd8193.zip"
+     "S3Key": "f595bd538a74a41547ae7eb2e16190a1bc8bfc1f1c5cc773aced9cbd196b933b.zip"
     },
     "Description": "src/storage-stack/sns-publisher.lambda.ts",
     "Environment": {
@@ -623,6 +700,17 @@
    "Type": "AWS::Lambda::EventSourceMapping",
    "Properties": {
     "BatchSize": 100,
+    "BisectBatchOnFunctionError": true,
+    "DestinationConfig": {
+     "OnFailure": {
+      "Destination": {
+       "Fn::GetAtt": [
+        "snspublisherfailurequeue972E49A6",
+        "Arn"
+       ]
+      }
+     }
+    },
     "EventSourceArn": {
      "Fn::GetAtt": [
       "riverlevelstableA1F25F33",
@@ -632,6 +720,10 @@
     "FunctionName": {
      "Ref": "snspublisherlambda35C1A2D1"
     },
+    "FunctionResponseTypes": [
+     "ReportBatchItemFailures"
+    ],
+    "MaximumRetryAttempts": 5,
     "StartingPosition": "LATEST",
     "Tags": [
      {
