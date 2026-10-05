@@ -266,12 +266,13 @@ describe('sns-publisher', () => {
       snsClientMock.commandCalls(PublishBatchCommand)[0].firstArg.input;
     expect(actualRequest).toStrictEqual(expectedRequest);
   });
-  it('should fail if unable to publish to SNS', async () => {
+  it('should report the first record as failed if unable to publish to SNS', async () => {
     const testEvent: DynamoDBStreamEvent = {
       Records: [
         {
           eventName: 'INSERT',
           dynamodb: {
+            SequenceNumber: '100',
             NewImage: {
               reading_depth: {
                 N: '0.705',
@@ -291,6 +292,84 @@ describe('sns-publisher', () => {
     process.env.SNS_TOPIC_ARN = 'my-sns-topic';
     snsClientMock.on(PublishBatchCommand).rejects('some error');
 
-    await expect(target.handler(testEvent)).rejects.toThrow('some error');
+    await expect(target.handler(testEvent)).resolves.toStrictEqual({
+      batchItemFailures: [{ itemIdentifier: '100' }],
+    });
+  });
+  it('should publish in batches of no more than 10 messages', async () => {
+    const testEvent = buildInsertEvent(25);
+
+    process.env.SNS_TOPIC_ARN = 'my-sns-topic';
+    snsClientMock.on(PublishBatchCommand).resolves({ Failed: [] });
+
+    await expect(target.handler(testEvent)).resolves.toStrictEqual({
+      batchItemFailures: [],
+    });
+
+    const calls = snsClientMock.commandCalls(PublishBatchCommand);
+    expect(
+      calls.map((call) => call.firstArg.input.PublishBatchRequestEntries.length),
+    ).toStrictEqual([10, 10, 5]);
+    expect(
+      calls.flatMap((call) =>
+        call.firstArg.input.PublishBatchRequestEntries.map(
+          (entry: { Id: string }) => entry.Id,
+        ),
+      ),
+    ).toStrictEqual(
+      testEvent.Records.map(
+        (record) =>
+          `kenilworth${record.dynamodb!.NewImage!.timestamp.N}`,
+      ),
+    );
+  });
+  it('should stop and report the earliest failed entry when SNS partially fails a batch', async () => {
+    const testEvent = buildInsertEvent(25);
+
+    process.env.SNS_TOPIC_ARN = 'my-sns-topic';
+    snsClientMock
+      .on(PublishBatchCommand)
+      .resolvesOnce({ Failed: [] })
+      .resolvesOnce({
+        Failed: [
+          { Id: 'kenilworth1718374500017', Code: 'InternalError', SenderFault: false },
+          { Id: 'kenilworth1718374500013', Code: 'InternalError', SenderFault: false },
+        ],
+      });
+
+    await expect(target.handler(testEvent)).resolves.toStrictEqual({
+      batchItemFailures: [{ itemIdentifier: '113' }],
+    });
+    expect(snsClientMock).toHaveReceivedCommandTimes(PublishBatchCommand, 2);
+  });
+  it('should report the first record of the failing batch when a later publish errors', async () => {
+    const testEvent = buildInsertEvent(25);
+
+    process.env.SNS_TOPIC_ARN = 'my-sns-topic';
+    snsClientMock
+      .on(PublishBatchCommand)
+      .resolvesOnce({ Failed: [] })
+      .rejectsOnce('some error');
+
+    await expect(target.handler(testEvent)).resolves.toStrictEqual({
+      batchItemFailures: [{ itemIdentifier: '110' }],
+    });
+    expect(snsClientMock).toHaveReceivedCommandTimes(PublishBatchCommand, 2);
   });
 });
+
+function buildInsertEvent(count: number): DynamoDBStreamEvent {
+  return {
+    Records: Array.from({ length: count }, (_, i) => ({
+      eventName: 'INSERT',
+      dynamodb: {
+        SequenceNumber: `${100 + i}`,
+        NewImage: {
+          reading_depth: { N: '0.7' },
+          station: { S: 'kenilworth' },
+          timestamp: { N: `${1718374500000 + i}` },
+        },
+      },
+    })),
+  };
+}

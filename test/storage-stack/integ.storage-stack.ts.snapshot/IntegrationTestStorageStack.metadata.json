@@ -248,6 +248,23 @@
           {}
         ]
       }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/sns-publisher-failure-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
     }
   ],
   "/IntegrationTestStorageStack/sns-publisher-lambda": [
@@ -527,6 +544,30 @@
           {}
         ]
       }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/sns-publisher-failure-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherfailurequeue972E49A6"
+    }
+  ],
+  "/IntegrationTestStorageStack/sns-publisher-failure-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
     }
   ],
   "/IntegrationTestStorageStack/sns-publisher-lambda/Resource": [
@@ -544,9 +585,9 @@
         "metricsConfig": "*",
         "supportS3OnFailureDestination": true,
         "batchSize": "*",
-        "bisectBatchOnError": "*",
+        "bisectBatchOnError": true,
         "startingPosition": "LATEST",
-        "reportBatchItemFailures": "*",
+        "reportBatchItemFailures": true,
         "maxBatchingWindow": "*",
         "maxRecordAge": "*",
         "retryAttempts": "*",
@@ -664,6 +705,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "snspublisherroleDefaultPolicyE5B88FFE"
+    }
+  ],
+  "/IntegrationTestStorageStack/sns-publisher-failure-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherfailurequeuePolicyC34F62E5"
     }
   ],
   "/IntegrationTestStorageStack/sns-publisher-lambda/Code/AssetBucket": [

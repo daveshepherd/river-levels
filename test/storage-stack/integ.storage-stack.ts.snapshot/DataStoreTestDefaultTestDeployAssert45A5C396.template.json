@@ -33,7 +33,7 @@
      "Payload": "\"{\\\"readingsLimit\\\":1}\""
     },
     "flattenResponse": "false",
-    "salt": "1784025384958"
+    "salt": "1791236272073"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -246,7 +246,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1784025384959"
+    "salt": "1791236272078"
    },
    "DependsOn": [
     "LambdaInvoke65d9b14047bbf63b418a533e51656c7d",
@@ -506,7 +506,7 @@
     }
    }
   },
-  "AwsApiCallawssdkclientdynamodbPutItemCommand865d7e0f9f4535c9c021fd4c0b4470e1": {
+  "AwsApiCallawssdkclientdynamodbPutItemCommand9e110ac7d78ece18131fa77cb471603a": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbPutItemC",
    "Properties": {
     "ServiceToken": {
@@ -518,7 +518,7 @@
     "service": "@aws-sdk/client-dynamodb",
     "api": "PutItemCommand",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1784025384959\"},\"reading_depth\":{\"N\":\"1.1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1791236272080\"},\"reading_depth\":{\"N\":\"1.1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -539,7 +539,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1784025384960"
+    "salt": "1791236272080"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -555,7 +555,7 @@
     },
     "service": "@aws-sdk/client-sqs",
     "api": "ReceiveMessageCommand",
-    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1784025384959}\"}}}}}]}}}",
+    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"Message\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1791236272080}\"}}}}}]}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallawssdkclientsqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dcWaitFor82F86A45"
     },
@@ -580,7 +580,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1784025384960"
+    "salt": "1791236272081"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"

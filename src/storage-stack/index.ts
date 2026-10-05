@@ -22,9 +22,13 @@ import {
   StartingPosition,
   Tracing,
 } from 'aws-cdk-lib/aws-lambda';
-import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import {
+  DynamoEventSource,
+  SqsDlq,
+} from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ITopic, Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct, IConstruct } from 'constructs';
 import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
@@ -131,6 +135,17 @@ export class StorageStack extends Stack {
       },
     );
 
+    // Receives metadata for stream batches that still fail after retries, so
+    // a bad batch is set aside instead of blocking the shard for 24 hours
+    const snsPublisherFailureQueue = new Queue(
+      this,
+      'sns-publisher-failure-queue',
+      {
+        enforceSSL: true,
+        retentionPeriod: Duration.days(14),
+      },
+    );
+
     new SnsPublisherFunction(this, 'sns-publisher-lambda', {
       architecture: Architecture.ARM_64,
       environment: {
@@ -138,6 +153,10 @@ export class StorageStack extends Stack {
       },
       events: [
         new DynamoEventSource(riverLevelsTable, {
+          bisectBatchOnError: true,
+          onFailure: new SqsDlq(snsPublisherFailureQueue),
+          reportBatchItemFailures: true,
+          retryAttempts: 5,
           startingPosition: StartingPosition.LATEST,
         }),
       ],

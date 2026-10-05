@@ -59,6 +59,18 @@ describe('StorageStack', () => {
       Description: Match.anyValue(),
       Path: '/service-policy/',
     });
+    template.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
+      BisectBatchOnFunctionError: true,
+      DestinationConfig: {
+        OnFailure: { Destination: Match.anyValue() },
+      },
+      FunctionResponseTypes: ['ReportBatchItemFailures'],
+      MaximumRetryAttempts: 5,
+      StartingPosition: 'LATEST',
+    });
+    template.hasResourceProperties('AWS::SQS::Queue', {
+      MessageRetentionPeriod: 1209600,
+    });
     template.hasResource('AWS::SNS::Topic', {});
     template.hasResourceProperties('AWS::SNS::Topic', {
       DisplayName: 'river-levels-notifications',
