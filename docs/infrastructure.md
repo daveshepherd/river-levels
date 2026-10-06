@@ -117,7 +117,7 @@ Logical names as they appear in the CloudFormation template.
 
 **Stack output:** `RiverLevelsTable`, the table ARN.
 
-**Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage=development`, and `endor:Version` (the release tag, or `local`).
+**Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 
 ## IAM
 
@@ -141,7 +141,7 @@ flowchart LR
   dev --> prod["deploy_production<br/>environment: production"]
 ```
 
-- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`.
+- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - The workflow is generated from [`.projenrc.ts`](../.projenrc.ts). Change it there, not in `.github/workflows/`.
 - The integ snapshot check compares the synthesized template with [`test/storage-stack/integ.storage-stack.ts.snapshot/`](../test/storage-stack/integ.storage-stack.ts.snapshot). Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.

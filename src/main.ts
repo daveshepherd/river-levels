@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { App, Tags } from 'aws-cdk-lib';
+import { resolveStage } from './stage';
 import { StorageStack } from './storage-stack';
 
 const app = new App();
@@ -11,7 +12,7 @@ const storageStack = new StorageStack(app, 'RiverLevels', {
   replicaRegions: ['eu-west-1'],
 });
 Tags.of(storageStack).add('endor:ManagedBy', 'cdk');
-Tags.of(storageStack).add('endor:Stage', 'development');
+Tags.of(storageStack).add('endor:Stage', resolveStage());
 
 let version = 'local';
 if (existsSync('./dist/releasetag.txt')) {

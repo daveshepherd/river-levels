@@ -117,6 +117,8 @@ jobs:
           aws-region: eu-west-2
       - name: deploy
         id: deploy
+        env:
+          STAGE: development
         run: yarn deploy --require-approval never
   deploy_production:
     name: Deploy to Production
@@ -159,6 +161,8 @@ jobs:
           aws-region: eu-west-2
       - name: deploy
         id: deploy
+        env:
+          STAGE: production
         run: yarn deploy --require-approval never
   release_github:
     name: Publish to GitHub Releases
