@@ -250,6 +250,93 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
+  "crawlerdeadletterqueue07A80621": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "this queue is the dead-letter queue for the crawler schedule target, so it does not need a DLQ of its own",
+       "id": "AwsSolutions-SQS3"
+      }
+     ]
+    }
+   }
+  },
+  "crawlerdeadletterqueuePolicyD5E47EF8": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "crawlerdeadletterqueue07A80621",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Fn::GetAtt": [
+           "crawlercronD1309D29",
+           "Arn"
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "events.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "crawlerdeadletterqueue07A80621",
+         "Arn"
+        ]
+       },
+       "Sid": "AllowEventRuleIntegrationTestStorageStackcrawlercron80A5884B"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "crawlerdeadletterqueue07A80621"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
   "crawlercronD1309D29": {
    "Type": "AWS::Events::Rule",
    "Properties": {
@@ -272,6 +359,14 @@
         "crawlerlambda65FC80E0",
         "Arn"
        ]
+      },
+      "DeadLetterConfig": {
+       "Arn": {
+        "Fn::GetAtt": [
+         "crawlerdeadletterqueue07A80621",
+         "Arn"
+        ]
+       }
       },
       "Id": "Target0",
       "RetryPolicy": {
@@ -709,6 +804,281 @@
       "Value": "development"
      }
     ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmsalerts44C0CABB": {
+   "Type": "AWS::SNS::Topic",
+   "Properties": {
+    "DisplayName": "river-levels-alerts",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmsalertsPolicy96B07FEA": {
+   "Type": "AWS::SNS::TopicPolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sns:Publish",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": "*",
+       "Resource": {
+        "Ref": "alarmsalerts44C0CABB"
+       },
+       "Sid": "AllowPublishThroughSSLOnly"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Topics": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmscrawlererrors997B4B6E": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "AlarmDescription": "The crawler has failed in every run for 30 minutes, so no new readings are being stored.",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "crawlerlambda65FC80E0"
+      }
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "Errors",
+    "Namespace": "AWS/Lambda",
+    "OKActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "Period": 600,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Threshold": 1,
+    "TreatMissingData": "notBreaching"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmscrawlernotrunning2DAFA5B4": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "AlarmDescription": "The crawler has not been invoked for 30 minutes. Check the crawler-cron EventBridge rule.",
+    "ComparisonOperator": "LessThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "crawlerlambda65FC80E0"
+      }
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "Invocations",
+    "Namespace": "AWS/Lambda",
+    "OKActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "Period": 1800,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Threshold": 1,
+    "TreatMissingData": "breaching"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmscrawlerdeadletters80D6E810": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "AlarmDescription": "EventBridge could not invoke the crawler after retries. Messages are in the crawler dead-letter queue.",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [
+     {
+      "Name": "QueueName",
+      "Value": {
+       "Fn::GetAtt": [
+        "crawlerdeadletterqueue07A80621",
+        "QueueName"
+       ]
+      }
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "ApproximateNumberOfMessagesVisible",
+    "Namespace": "AWS/SQS",
+    "OKActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "Period": 300,
+    "Statistic": "Maximum",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Threshold": 1,
+    "TreatMissingData": "notBreaching"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmssnspublisheriteratorage3238D578": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "AlarmDescription": "The SNS publisher is more than 15 minutes behind the DynamoDB stream, so notifications are delayed or stuck.",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "snspublisherlambda35C1A2D1"
+      }
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "IteratorAge",
+    "Namespace": "AWS/Lambda",
+    "OKActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "Period": 300,
+    "Statistic": "Maximum",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Threshold": 900000,
+    "TreatMissingData": "notBreaching"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "alarmssnspublisherfailuresA3942966": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "AlarmDescription": "Stream batches failed to publish after all retries. Their stream positions are in sns-publisher-failure-queue.",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [
+     {
+      "Name": "QueueName",
+      "Value": {
+       "Fn::GetAtt": [
+        "snspublisherfailurequeue972E49A6",
+        "QueueName"
+       ]
+      }
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "ApproximateNumberOfMessagesVisible",
+    "Namespace": "AWS/SQS",
+    "OKActions": [
+     {
+      "Ref": "alarmsalerts44C0CABB"
+     }
+    ],
+    "Period": 300,
+    "Statistic": "Maximum",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Threshold": 1,
+    "TreatMissingData": "notBreaching"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"

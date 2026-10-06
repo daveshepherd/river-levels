@@ -136,6 +136,7 @@ const deploymentJob = (stage: 'development' | 'production') => ({
       name: 'deploy',
       run: 'yarn deploy --require-approval never',
       env: {
+        ALERT_EMAIL: '${{ secrets.ALERT_EMAIL }}',
         STAGE: stage,
       },
     },

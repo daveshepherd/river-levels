@@ -29,17 +29,24 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ITopic, Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct, IConstruct } from 'constructs';
+import { StorageAlarms } from './alarms';
 import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
 import { SnsPublisherFunction } from './sns-publisher-function';
 import { SnsPublisherRole } from './sns-publisher.role';
 
 export interface StorageStackProps extends StackProps {
+  /**
+   * Email address that receives alarm notifications. Optional, so local
+   * synths and integ tests don't need one.
+   */
+  alertEmail?: string;
   replicaRegions?: Array<string>;
   setDestroyPolicyToAllResources?: boolean;
 }
 
 export class StorageStack extends Stack {
+  public readonly alertsTopic: ITopic;
   public readonly crawlerFunctionName: string;
   public readonly riverLevelsNotificationsTopic: ITopic;
   public readonly riverLevelsTableName: string;
@@ -84,11 +91,16 @@ export class StorageStack extends Stack {
     });
     this.crawlerFunctionName = crawler.functionName;
 
+    const crawlerDeadLetterQueue = new Queue(this, 'crawler-dead-letter-queue', {
+      enforceSSL: true,
+      retentionPeriod: Duration.days(14),
+    });
     new Rule(this, 'crawler-cron', {
       enabled: true,
       schedule: Schedule.rate(Duration.minutes(10)),
       targets: [
         new LambdaFunction(crawler, {
+          deadLetterQueue: crawlerDeadLetterQueue,
           retryAttempts: 3,
         }),
       ],
@@ -134,7 +146,7 @@ export class StorageStack extends Stack {
       },
     );
 
-    new SnsPublisherFunction(this, 'sns-publisher-lambda', {
+    const snsPublisher = new SnsPublisherFunction(this, 'sns-publisher-lambda', {
       architecture: Architecture.ARM_64,
       environment: {
         SNS_TOPIC_ARN: riverLevelsNotificationsTopic.topicArn,
@@ -154,6 +166,15 @@ export class StorageStack extends Stack {
       timeout: Duration.seconds(30),
       tracing: Tracing.ACTIVE,
     });
+    const alarms = new StorageAlarms(this, 'alarms', {
+      alertEmail: props.alertEmail,
+      crawler,
+      crawlerDeadLetterQueue,
+      snsPublisher,
+      snsPublisherFailureQueue,
+    });
+    this.alertsTopic = alarms.alertsTopic;
+
     // If Destroy Policy Aspect is present:
     if (props?.setDestroyPolicyToAllResources) {
       Aspects.of(this).add(new ApplyDestroyPolicyAspect());
