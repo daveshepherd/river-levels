@@ -24,3 +24,7 @@ Deploy the CDK stack
 ```sh
 npx projen deploy
 ```
+
+## Documentation
+
+- [Infrastructure](docs/infrastructure.md): architecture, data flow, resources, IAM and deployment
