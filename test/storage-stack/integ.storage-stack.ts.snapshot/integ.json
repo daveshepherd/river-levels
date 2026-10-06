@@ -6,7 +6,7 @@
         "IntegrationTestStorageStack"
       ],
       "regions": [
-        "${Token[AWS.Region.12]}"
+        "${Token[AWS.Region.8]}"
       ],
       "allowDestroy": [
         "AWS::IAM::Policy"
@@ -23,5 +23,5 @@
     }
   },
   "enableLookups": true,
-  "minimumCliVersion": "2.1133.0"
+  "minimumCliVersion": "2.1144.0"
 }

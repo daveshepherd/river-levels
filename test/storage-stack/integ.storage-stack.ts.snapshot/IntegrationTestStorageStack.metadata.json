@@ -33,9 +33,6 @@
         "managedPolicies": [
           {
             "managedPolicyArn": "*"
-          },
-          {
-            "managedPolicyArn": "*"
           }
         ],
         "path": "*"
@@ -89,7 +86,6 @@
         "description": "*",
         "architecture": "*",
         "environment": "*",
-        "layers": [],
         "logGroup": "*",
         "memorySize": "*",
         "role": "*",
@@ -107,12 +103,6 @@
           "*",
           "*"
         ]
-      }
-    },
-    {
-      "type": "aws:cdk:analytics:method",
-      "data": {
-        "addLayers": []
       }
     },
     {
@@ -183,9 +173,6 @@
         },
         "description": "*",
         "managedPolicies": [
-          {
-            "managedPolicyArn": "*"
-          },
           {
             "managedPolicyArn": "*"
           }
@@ -275,7 +262,6 @@
         "architecture": "*",
         "environment": "*",
         "events": "*",
-        "layers": [],
         "logGroup": "*",
         "memorySize": "*",
         "role": "*",
@@ -293,12 +279,6 @@
           "*",
           "*"
         ]
-      }
-    },
-    {
-      "type": "aws:cdk:analytics:method",
-      "data": {
-        "addLayers": []
       }
     },
     {

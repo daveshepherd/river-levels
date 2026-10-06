@@ -6,8 +6,7 @@
      "reason": "it is acceptable to use build in iam policies for basic lambda runtime",
      "id": "AwsSolutions-IAM4",
      "applies_to": [
-      "Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-      "Policy::arn:<AWS::Partition>:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+      "Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
      ]
     },
     {
@@ -99,18 +98,6 @@
         {
          "Ref": "AWS::Partition"
         },
-        ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
-       ]
-      ]
-     },
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
         ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
        ]
       ]
@@ -144,7 +131,6 @@
       {
        "Action": [
         "dynamodb:Query",
-        "dynamodb:Scan",
         "dynamodb:UpdateItem"
        ],
        "Effect": "Allow",
@@ -216,7 +202,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "7ef336a5a7aa8b75def7a566c1f697f7dd17f23c6b10642b0c6ac04b95e7eaf2.zip"
+     "S3Key": "cbd5eacc06cfd4d050902148b56ac17848178ff014fe4c277f0757bcd820ee73.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -423,18 +409,6 @@
     },
     "Description": "The service role for running the river levels sns publisher lambda",
     "ManagedPolicyArns": [
-     {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
-       ]
-      ]
-     },
      {
       "Fn::Join": [
        "",

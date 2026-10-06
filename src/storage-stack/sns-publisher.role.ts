@@ -19,9 +19,6 @@ export class SnsPublisherRole extends Role {
         'The service role for running the river levels sns publisher lambda',
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName(
-          'CloudWatchLambdaInsightsExecutionRolePolicy',
-        ),
-        ManagedPolicy.fromAwsManagedPolicyName(
           'service-role/AWSLambdaBasicExecutionRole',
         ),
       ],
