@@ -118,6 +118,7 @@ jobs:
       - name: deploy
         id: deploy
         env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           STAGE: development
         run: yarn deploy --require-approval never
   deploy_production:
@@ -162,6 +163,7 @@ jobs:
       - name: deploy
         id: deploy
         env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           STAGE: production
         run: yarn deploy --require-approval never
   release_github:

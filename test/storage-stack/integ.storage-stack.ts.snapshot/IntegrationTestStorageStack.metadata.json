@@ -118,6 +118,15 @@
       }
     }
   ],
+  "/IntegrationTestStorageStack/crawler-dead-letter-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
   "/IntegrationTestStorageStack/crawler-cron": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -404,6 +413,22 @@
       "data": "crawlerlambda65FC80E0"
     }
   ],
+  "/IntegrationTestStorageStack/crawler-dead-letter-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerdeadletterqueue07A80621"
+    }
+  ],
+  "/IntegrationTestStorageStack/crawler-dead-letter-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
   "/IntegrationTestStorageStack/crawler-cron/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -580,6 +605,135 @@
       }
     }
   ],
+  "/IntegrationTestStorageStack/alarms/alerts": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-errors": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-not-running": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "breaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-dead-letters": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/sns-publisher-iterator-age": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/sns-publisher-failures": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
   "/IntegrationTestStorageStack/test-dlq/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -663,6 +817,12 @@
       "data": "*"
     }
   ],
+  "/IntegrationTestStorageStack/crawler-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerdeadletterqueuePolicyD5E47EF8"
+    }
+  ],
   "/IntegrationTestStorageStack/river-levels-notifications/Policy/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -705,6 +865,52 @@
       "data": "snspublisherlambdaDynamoDBEventSourceIntegrationTestStorageStackriverlevelstableA4CFEE911A99E01F"
     }
   ],
+  "/IntegrationTestStorageStack/alarms/alerts/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmsalerts44C0CABB"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/alerts/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-errors/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlererrors997B4B6E"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-not-running/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlernotrunning2DAFA5B4"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/crawler-dead-letters/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlerdeadletters80D6E810"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/sns-publisher-iterator-age/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmssnspublisheriteratorage3238D578"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/sns-publisher-failures/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmssnspublisherfailuresA3942966"
+    }
+  ],
   "/IntegrationTestStorageStack/test-dlq/Policy/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -721,6 +927,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "testqueueIntegrationTestStorageStackriverlevelsnotifications526AEA1ED13E6843"
+    }
+  ],
+  "/IntegrationTestStorageStack/alarms/alerts/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmsalertsPolicy96B07FEA"
     }
   ]
 }

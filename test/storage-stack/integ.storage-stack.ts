@@ -130,3 +130,14 @@ NagSuppressions.addResourceSuppressionsByPath(
     },
   ],
 );
+NagSuppressions.addResourceSuppressionsByPath(
+  stackUnderTest,
+  '/IntegrationTestStorageStack/crawler-dead-letter-queue/Resource',
+  [
+    {
+      id: 'AwsSolutions-SQS3',
+      reason:
+        'this queue is the dead-letter queue for the crawler schedule target, so it does not need a DLQ of its own',
+    },
+  ],
+);

@@ -22,12 +22,17 @@ flowchart LR
     publisher["sns-publisher Lambda<br/>arm64 · 128 MB · 30 s"]
     topic["SNS topic<br/>river-levels-notifications"]
     dlq["SQS<br/>sns-publisher-failure-queue"]
+    crawlerdlq["SQS<br/>crawler-dead-letter-queue"]
+    alarms["CloudWatch alarms<br/>(5)"]
+    alerts["SNS topic<br/>river-levels-alerts"]
   end
 
   replica[("DynamoDB replica<br/>eu-west-1")]
   subs["Subscribers<br/>(outside this repo)"]
+  email["Alert email<br/>(ALERT_EMAIL)"]
 
   rule -- "invoke (3 retries)" --> crawler
+  rule -. "invoke failed after retries" .-> crawlerdlq
   crawler -- "HTTPS GET readings" --> ea
   crawler -- "Query latest / UpdateItem" --> table
   table -. "replication" .-> replica
@@ -36,6 +41,9 @@ flowchart LR
   publisher -- "PublishBatch, 10 per call" --> topic
   stream -. "after 5 failed retries" .-> dlq
   topic --> subs
+  crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
+  alarms -- "ALARM and OK" --> alerts
+  alerts --> email
 ```
 
 The stack also creates a CloudWatch log group per Lambda (one-year retention) and one IAM role per Lambda. X-Ray tracing is on for both Lambdas and the SNS topic.
@@ -108,10 +116,13 @@ Logical names as they appear in the CloudFormation template.
 |----------|------|--------------|
 | `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). |
 | `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`. |
-| `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, 3 retry attempts. |
+| `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, 3 retry attempts, then `crawler-dead-letter-queue`. |
+| `crawler-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives scheduled invocations EventBridge couldn't deliver to the crawler. |
 | `sns-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 128 MB, 30 s timeout, X-Ray active. Env: `SNS_TOPIC_ARN`. |
 | `sns-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | DynamoDB stream, starting position `LATEST`, batch size 100. `ReportBatchItemFailures` and bisect on error. 5 retries, then on-failure destination. |
 | `sns-publisher-failure-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives stream batches that still fail after retries. |
+| `alarms/alerts` | `AWS::SNS::Topic` | `river-levels-alerts`. SSL enforced; not encrypted, because CloudWatch can't publish to a topic using the AWS-managed SNS key. Email subscription to `alertEmail` when set. |
+| `alarms/*` | `AWS::CloudWatch::Alarm` | Five alarms, listed under [Alarms](#alarms). Each notifies the alerts topic on ALARM and on return to OK. |
 | `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. |
 | `crawler-log-group`, `sns-publisher-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
@@ -142,6 +153,7 @@ flowchart LR
 ```
 
 - Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
+- Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - The workflow is generated from [`.projenrc.ts`](../.projenrc.ts). Change it there, not in `.github/workflows/`.
 - The integ snapshot check compares the synthesized template with [`test/storage-stack/integ.storage-stack.ts.snapshot/`](../test/storage-stack/integ.storage-stack.ts.snapshot). Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
@@ -151,5 +163,16 @@ flowchart LR
 - **Logs:** CloudWatch Logs groups for `crawler-lambda` and `sns-publisher-lambda`.
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
-- **Alarms:** none yet. A crawler that stops running, or a growing stream iterator age, would currently go unnoticed.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
+
+### Alarms
+
+All alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) and email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
+
+| Alarm | Fires when | Where to look |
+|-------|-----------|---------------|
+| `crawler-errors` | The crawler reports errors in every 10-minute window for 30 minutes. One bad run (up to 3 errors with Lambda's async retries) doesn't trigger it. | Crawler logs; the flood API's availability |
+| `crawler-not-running` | No crawler invocations in 30 minutes. Missing data counts as breaching. | The `crawler-cron` rule is enabled; `crawler-dead-letter-queue` |
+| `crawler-dead-letters` | `crawler-dead-letter-queue` has any messages | EventBridge couldn't invoke the crawler; check its permissions and throttling |
+| `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
+| `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |
