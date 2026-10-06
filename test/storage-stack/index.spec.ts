@@ -52,7 +52,7 @@ describe('StorageStack', () => {
     template.hasResourceProperties('AWS::IAM::Role', {
       Description: Match.anyValue(),
       Path: '/service-role/',
-      ManagedPolicyArns: [Match.anyValue(), Match.anyValue(), Match.anyValue()],
+      ManagedPolicyArns: [Match.anyValue(), Match.anyValue()],
     });
     template.hasResource('AWS::IAM::ManagedPolicy', {});
     template.hasResourceProperties('AWS::IAM::ManagedPolicy', {

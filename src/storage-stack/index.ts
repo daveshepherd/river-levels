@@ -18,7 +18,6 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Alias } from 'aws-cdk-lib/aws-kms';
 import {
   Architecture,
-  LayerVersion,
   StartingPosition,
   Tracing,
 } from 'aws-cdk-lib/aws-lambda';
@@ -72,21 +71,11 @@ export class StorageStack extends Stack {
     const crawlerLogGroup = new LogGroup(this, 'crawler-log-group', {
       retention: RetentionDays.ONE_YEAR,
     });
-    const layerArn =
-      'arn:aws:lambda:' +
-      Stack.of(this).region +
-      ':580247275435:layer:LambdaInsightsExtension-Arm64:19';
-    const layer = LayerVersion.fromLayerVersionArn(
-      this,
-      'LayerFromArn',
-      layerArn,
-    );
     const crawler = new CrawlerFunction(this, 'crawler-lambda', {
       architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
       },
-      layers: [],
       logGroup: crawlerLogGroup,
       memorySize: 256,
       role: executionRole,
@@ -121,7 +110,6 @@ export class StorageStack extends Stack {
       },
     );
     this.riverLevelsNotificationsTopic = riverLevelsNotificationsTopic;
-    // TODO: x ray tracing policy?
 
     const snsPublisherLogGroup = new LogGroup(this, 'sns-publisher-group', {
       retention: RetentionDays.ONE_YEAR,
@@ -160,7 +148,6 @@ export class StorageStack extends Stack {
           startingPosition: StartingPosition.LATEST,
         }),
       ],
-      layers: [],
       logGroup: snsPublisherLogGroup,
       memorySize: 128,
       role: snsPublisherExecutionRole,

@@ -121,11 +121,11 @@ Logical names as they appear in the CloudFormation template.
 
 ## IAM
 
-Each Lambda has its own role under the `/service-role/` path. Both roles attach `AWSLambdaBasicExecutionRole` and `CloudWatchLambdaInsightsExecutionRolePolicy`. CDK also adds a default policy to each role for X-Ray and, on the publisher, for its event source.
+Each Lambda has its own role under the `/service-role/` path. Both roles attach `AWSLambdaBasicExecutionRole`. CDK also adds a default policy to each role for X-Ray (because tracing is active) and, on the publisher, for its event source. Lambda Insights is not used; it was removed because of its CloudWatch cost.
 
 | Role | Permission | Resource |
 |------|------------|----------|
-| `crawler-role` | `dynamodb:Query`, `dynamodb:Scan`, `dynamodb:UpdateItem` | the table |
+| `crawler-role` | `dynamodb:Query`, `dynamodb:UpdateItem` | the table |
 | `sns-publisher-role` | `dynamodb:DescribeStream`, `GetRecords`, `GetShardIterator`, `ListStreams` | the table stream |
 | `sns-publisher-role` | `sns:Publish` | the topic |
 | `sns-publisher-role` | `sqs:SendMessage`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | the failure queue |

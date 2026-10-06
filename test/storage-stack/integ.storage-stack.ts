@@ -108,7 +108,6 @@ NagSuppressions.addStackSuppressions(stackUnderTest, [
   {
     appliesTo: [
       'Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
-      'Policy::arn:<AWS::Partition>:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy',
     ],
     id: 'AwsSolutions-IAM4',
     reason:

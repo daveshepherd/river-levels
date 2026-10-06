@@ -18,9 +18,6 @@ export class CrawlerRole extends Role {
         'The service role for running the river levels crawler lambda',
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName(
-          'CloudWatchLambdaInsightsExecutionRolePolicy',
-        ),
-        ManagedPolicy.fromAwsManagedPolicyName(
           'service-role/AWSLambdaBasicExecutionRole',
         ),
       ],
@@ -31,7 +28,7 @@ export class CrawlerRole extends Role {
       path: '/service-policy/',
       statements: [
         new PolicyStatement({
-          actions: ['dynamodb:Query', 'dynamodb:Scan', 'dynamodb:UpdateItem'],
+          actions: ['dynamodb:Query', 'dynamodb:UpdateItem'],
           resources: [props.dynamoDbTableArn],
         }),
       ],

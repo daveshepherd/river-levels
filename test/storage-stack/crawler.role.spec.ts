@@ -24,7 +24,7 @@ describe('CrawlerRole', () => {
       Description:
         'The service role for running the river levels crawler lambda',
       Path: '/service-role/',
-      ManagedPolicyArns: [Match.anyValue(), Match.anyValue(), Match.anyValue()],
+      ManagedPolicyArns: [Match.anyValue(), Match.anyValue()],
     });
 
     template.hasResource('AWS::IAM::ManagedPolicy', {});
@@ -34,6 +34,7 @@ describe('CrawlerRole', () => {
       PolicyDocument: {
         Statement: [
           {
+            Action: ['dynamodb:Query', 'dynamodb:UpdateItem'],
             Resource: 'someArn',
           },
         ],
