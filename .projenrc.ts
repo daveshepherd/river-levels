@@ -158,4 +158,8 @@ Deploy the CDK stack
 npx projen deploy
 \`\`\``,
 );
+project.readme?.addSection(
+  'Documentation',
+  '- [Infrastructure](docs/infrastructure.md): architecture, data flow, resources, IAM and deployment',
+);
 project.synth();
