@@ -32,6 +32,7 @@
     "synth:silent": "projen synth:silent",
     "test": "projen test",
     "test:watch": "projen test:watch",
+    "typecheck": "projen typecheck",
     "unbump": "projen unbump",
     "upgrade": "projen upgrade",
     "watch": "projen watch",

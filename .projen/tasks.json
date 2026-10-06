@@ -470,6 +470,9 @@
       "description": "Run tests",
       "steps": [
         {
+          "spawn": "typecheck"
+        },
+        {
           "execArgs": [
             "jest",
             "--passWithNoTests",
@@ -494,6 +497,18 @@
             "jest",
             "--watch"
           ]
+        }
+      ]
+    },
+    "typecheck": {
+      "name": "typecheck",
+      "description": "Type-check source and test files without emitting",
+      "steps": [
+        {
+          "exec": "tsc --noEmit -p tsconfig.json"
+        },
+        {
+          "exec": "tsc --noEmit -p test/tsconfig.json"
         }
       ]
     },

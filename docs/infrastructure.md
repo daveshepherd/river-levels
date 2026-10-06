@@ -134,7 +134,7 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 
 ```mermaid
 flowchart LR
-  pr["Pull request"] --> build["build workflow<br/>compile · synth · unit tests ·<br/>eslint · integ snapshot check"]
+  pr["Pull request"] --> build["build workflow<br/>compile · synth · typecheck ·<br/>unit tests · eslint ·<br/>integ snapshot check"]
   build --> merge["Merge to main"]
   merge --> release["release job<br/>build, bump version, tag"]
   release --> dev["deploy_development<br/>environment: development"]

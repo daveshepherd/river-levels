@@ -46,6 +46,16 @@ project
   .tryFindObjectFile('test/tsconfig.json')
   ?.addOverride('compilerOptions.isolatedModules', true);
 
+// ts-jest runs with isolatedModules, so it doesn't type-check. Do it before the tests run.
+const typecheck = project.addTask('typecheck', {
+  description: 'Type-check source and test files without emitting',
+  steps: [
+    { exec: 'tsc --noEmit -p tsconfig.json' },
+    { exec: 'tsc --noEmit -p test/tsconfig.json' },
+  ],
+});
+project.testTask.prependSpawn(typecheck);
+
 project.addTask('integ:force', {
   description:
     "Run integration snapshot tests, forcing tests to run even if there's no changes",
