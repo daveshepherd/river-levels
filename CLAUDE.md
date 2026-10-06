@@ -78,6 +78,6 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Git and releases
 
 - Use conventional commits (`fix(storage-stack): …`, `feat: …`). Release versions are calculated from them: `fix` gives a patch, `feat` gives a minor.
-- Each merge to `main` runs the `release` workflow: it builds, tags, deploys to the `development` environment, then to `production`. Both deploy jobs run the same `yarn deploy` and differ only in the GitHub environment secrets (`AWS_DEPLOYMENT_ROLE_ARN`).
+- Each merge to `main` runs the `release` workflow: it builds, tags, deploys to the `development` environment, then to `production`. Both deploy jobs run the same `yarn deploy`. They differ in the GitHub environment secrets (`AWS_DEPLOYMENT_ROLE_ARN`) and in the `STAGE` env var, which sets the `endor:Stage` tag (see `src/stage.ts`; unset means `local`, and an unknown value fails the synth).
 - Dependency upgrades arrive as automated `chore(deps)` PRs from projen's `upgrade-main` workflow.
 - When a change alters the synthesized template, commit the updated integ snapshot with it, or CI fails.

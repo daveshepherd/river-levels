@@ -85,7 +85,7 @@ project.addTask('integ:debug', {
     },
   ],
 });
-const deploymentJob = {
+const deploymentJob = (stage: 'development' | 'production') => ({
   runsOn: ['ubuntu-latest'],
   permissions: {
     idToken: JobPermission.WRITE,
@@ -135,20 +135,23 @@ const deploymentJob = {
     {
       name: 'deploy',
       run: 'yarn deploy --require-approval never',
+      env: {
+        STAGE: stage,
+      },
     },
   ],
-};
+});
 project.github?.tryFindWorkflow('release')?.addJob('deploy_development', {
   name: 'Deploy to Development',
   environment: 'development',
   needs: ['release'],
-  ...deploymentJob,
+  ...deploymentJob('development'),
 });
 project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
   name: 'Deploy to Production',
   environment: 'production',
   needs: ['deploy_development'],
-  ...deploymentJob,
+  ...deploymentJob('production'),
 });
 project.readme?.addSection(
   'CDK',
