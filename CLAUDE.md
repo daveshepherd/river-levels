@@ -33,14 +33,14 @@ This is a projen project (`CdkTypeScriptApp` from `projen-modules`). **`.projenr
 | Task | Command |
 |------|---------|
 | Unit tests (Jest, coverage on) | `npx jest` or `npx jest test/storage-stack` |
-| Type-check tests | `npx tsc --noEmit -p test/tsconfig.json` |
+| Type-check `src/` and `test/` | `npx projen typecheck` |
 | Lint | `npx projen eslint` |
 | Bundle Lambdas | `npx projen bundle` |
-| Full build (compile, synth, test, eslint, integ snapshot check) | `npx projen build` |
+| Full build (compile, synth, typecheck, test, eslint, integ snapshot check) | `npx projen build` |
 | Update integ snapshots (**deploys to AWS**) | `yarn integ:update` |
 
 Gotchas:
-- **ts-jest doesn't type-check.** `test/tsconfig.json` sets `isolatedModules`, so tests can pass with type errors. Run the `tsc --noEmit` command above after changing types.
+- **ts-jest doesn't type-check.** `test/tsconfig.json` sets `isolatedModules`, so `npx jest` passes even with type errors. The `test` task runs `typecheck` first, so `npx projen test` and the build catch them. Running `npx jest` on its own doesn't, so run `npx projen typecheck` after changing types.
 - **`projen eslint` runs `--fix`.** It rewrites files in place, including untracked work-in-progress. Code style is single quotes, 2-space indent and trailing commas.
 - **Integration tests deploy real stacks** to the user's AWS account and take about 10 minutes. Don't run `integ:update`, `integ:force` or `integ:debug` without asking. The plain `integ` task, which `build` also runs, only compares snapshots and fails if they differ. It never deploys.
 
