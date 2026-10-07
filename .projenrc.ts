@@ -5,10 +5,6 @@ import { NodePackageManager } from 'projen/lib/javascript';
 import { CdkTypeScriptApp } from 'projen-modules';
 
 const project = new CdkTypeScriptApp({
-  // Sole maintainer: GitHub doesn't allow approving your own pull requests,
-  // so the queue merges once checks pass. Fork PRs are gated by requiring
-  // approval before their workflows run (Settings → Actions).
-  autoMergeOptions: { approvedReviews: 0 },
   cdkVersion: '2.262.2',
   codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
@@ -43,6 +39,9 @@ const project = new CdkTypeScriptApp({
   packageManager: NodePackageManager.YARN_CLASSIC,
   projenrcTs: true,
   release: true,
+  // Sole maintainer, who can't approve their own pull requests: the queue
+  // merges these authors' PRs without an approval. Everyone else needs one.
+  trustedAuthors: ['daveshepherd'],
   workflowPackageCache: true,
 });
 

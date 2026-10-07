@@ -8,6 +8,9 @@ queue_rules:
       - -label~=(do-not-merge)
       - status-success=build
       - -draft
+      - or:
+          - "#approved-reviews-by>=1"
+          - author=daveshepherd
       - status-success=CodeQL
     merge_method: squash
     commit_message_format:
@@ -23,6 +26,9 @@ pull_request_rules:
       - -label~=(do-not-merge)
       - status-success=build
       - -draft
+      - or:
+          - "#approved-reviews-by>=1"
+          - author=daveshepherd
       - status-success=CodeQL
   - name: Automatic approval for projen upgrade pull requests
     conditions:
