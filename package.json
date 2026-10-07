@@ -67,9 +67,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/tracer": "^2.35.0",
-    "@aws-sdk/client-dynamodb": "^3.1146.0",
-    "@aws-sdk/client-sns": "^3.1146.0",
+    "@aws-lambda-powertools/tracer": "^2.36.0",
+    "@aws-sdk/client-dynamodb": "^3.1147.0",
+    "@aws-sdk/client-sns": "^3.1147.0",
     "aws-cdk-lib": "^2.262.2",
     "axios": "^1.20.0",
     "constructs": "^10.5.1"
