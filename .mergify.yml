@@ -4,9 +4,14 @@ queue_rules:
   - name: default
     update_method: merge
     queue_conditions:
-      - "#approved-reviews-by>=1"
+      - "#approved-reviews-by>=0"
       - -label~=(do-not-merge)
       - status-success=build
+      - -draft
+      - or:
+          - "#approved-reviews-by>=1"
+          - author=daveshepherd
+      - status-success=CodeQL
     merge_method: squash
     commit_message_format:
       title: pr-title
@@ -17,9 +22,14 @@ pull_request_rules:
       queue:
         name: default
     conditions:
-      - "#approved-reviews-by>=1"
+      - "#approved-reviews-by>=0"
       - -label~=(do-not-merge)
       - status-success=build
+      - -draft
+      - or:
+          - "#approved-reviews-by>=1"
+          - author=daveshepherd
+      - status-success=CodeQL
   - name: Automatic approval for projen upgrade pull requests
     conditions:
       - author=endor-projen[bot]

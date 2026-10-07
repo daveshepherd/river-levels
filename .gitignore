@@ -59,4 +59,5 @@ junit.xml
 !/src/storage-stack/sns-publisher-function.ts
 !/CODEOWNERS
 !/README.md
+!/.github/workflows/codeql.yml
 !/.projenrc.ts
