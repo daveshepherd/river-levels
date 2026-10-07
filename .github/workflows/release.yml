@@ -87,30 +87,24 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Download build artifacts
         id: download_build_artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: build-artifact
           path: dist
       - name: Setup Node.js
         id: setup_node_js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           cache: yarn
       - name: Install dependencies
         id: install_dependencies
-        run: yarn install --check-files
-      - name: build
-        id: build
-        run: npx projen build
+        run: yarn install --check-files --frozen-lockfile
       - name: configure aws credentials
         id: configure_aws_credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           role-session-name: river-levels-deploy
@@ -123,7 +117,9 @@ jobs:
         run: yarn deploy --require-approval never
   deploy_production:
     name: Deploy to Production
-    needs: deploy_development
+    needs:
+      - release
+      - deploy_development
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -132,30 +128,24 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Download build artifacts
         id: download_build_artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: build-artifact
           path: dist
       - name: Setup Node.js
         id: setup_node_js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           cache: yarn
       - name: Install dependencies
         id: install_dependencies
-        run: yarn install --check-files
-      - name: build
-        id: build
-        run: npx projen build
+        run: yarn install --check-files --frozen-lockfile
       - name: configure aws credentials
         id: configure_aws_credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           role-session-name: river-levels-deploy
