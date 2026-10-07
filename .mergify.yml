@@ -7,6 +7,8 @@ queue_rules:
       - "#approved-reviews-by>=1"
       - -label~=(do-not-merge)
       - status-success=build
+      - -draft
+      - status-success=CodeQL
     merge_method: squash
     commit_message_format:
       title: pr-title
@@ -20,6 +22,8 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - -label~=(do-not-merge)
       - status-success=build
+      - -draft
+      - status-success=CodeQL
   - name: Automatic approval for projen upgrade pull requests
     conditions:
       - author=endor-projen[bot]

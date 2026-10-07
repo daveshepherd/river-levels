@@ -60,7 +60,7 @@
     "jest-junit": "^17",
     "nock": "^14.0.17",
     "projen": "^0.104.0",
-    "projen-modules": "^1.2.155",
+    "projen-modules": "^3.2.1",
     "source-map-support": "^0.5.21",
     "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
