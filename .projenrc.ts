@@ -1,4 +1,4 @@
-import { github } from 'projen';
+import { DependencyType, github } from 'projen';
 import { LambdaRuntime } from 'projen/lib/awscdk';
 import { JobPermission } from 'projen/lib/github/workflows-model';
 import { NodePackageManager } from 'projen/lib/javascript';
@@ -17,7 +17,11 @@ const project = new CdkTypeScriptApp({
   description:
     'A scraper and APIs for getting river readings from the Environment Agency',
   devDeps: [
-    '@aws-cdk/integ-tests-alpha',
+    // Pinned so integ snapshots only change when these are bumped on purpose.
+    // Keep integ-tests-alpha on the same version as the installed aws-cdk-lib.
+    '@aws-cdk/integ-runner@2.205.5',
+    '@aws-cdk/integ-tests-alpha@2.272.0-alpha.0',
+    '@types/node@^24',
     '@types/aws-lambda',
     'aws-sdk-client-mock-jest',
     'aws-sdk-client-mock',
@@ -27,6 +31,9 @@ const project = new CdkTypeScriptApp({
     'source-map-support',
   ],
   experimentalIntegRunner: true,
+  jestOptions: {
+    jestVersion: '^30',
+  },
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
@@ -45,9 +52,20 @@ const project = new CdkTypeScriptApp({
   workflowPackageCache: true,
 });
 
+// experimentalIntegRunner adds both integ packages at "latest"; drop those so
+// the pinned devDeps above are the only versions.
+for (const name of ['@aws-cdk/integ-runner', '@aws-cdk/integ-tests-alpha']) {
+  project.deps.removeDependency(name, DependencyType.DEVENV);
+}
+
 project
   .tryFindObjectFile('test/tsconfig.json')
   ?.addOverride('compilerOptions.isolatedModules', true);
+// Jest 30 hoists @sinonjs/fake-timers 15, whose bundled types don't match the
+// @types/sinon that aws-sdk-client-mock uses. Skip checking library .d.ts files.
+project
+  .tryFindObjectFile('test/tsconfig.json')
+  ?.addOverride('compilerOptions.skipLibCheck', true);
 
 // ts-jest runs with isolatedModules, so it doesn't type-check. Do it before the tests run.
 const typecheck = project.addTask('typecheck', {

@@ -1,7 +1,13 @@
 {
   "dependencies": [
     {
+      "name": "@aws-cdk/integ-runner",
+      "version": "2.205.5",
+      "type": "build"
+    },
+    {
       "name": "@aws-cdk/integ-tests-alpha",
+      "version": "2.272.0-alpha.0",
       "type": "build"
     },
     {
@@ -15,10 +21,12 @@
     },
     {
       "name": "@types/jest",
+      "version": "^30",
       "type": "build"
     },
     {
       "name": "@types/node",
+      "version": "^24",
       "type": "build"
     },
     {
@@ -71,12 +79,13 @@
       "type": "build"
     },
     {
-      "name": "jest",
+      "name": "jest-junit",
+      "version": "^17",
       "type": "build"
     },
     {
-      "name": "jest-junit",
-      "version": "^17",
+      "name": "jest",
+      "version": "^30",
       "type": "build"
     },
     {
@@ -97,6 +106,7 @@
     },
     {
       "name": "ts-jest",
+      "version": "^29",
       "type": "build"
     },
     {
@@ -106,16 +116,6 @@
     {
       "name": "typescript",
       "type": "build"
-    },
-    {
-      "name": "@aws-cdk/integ-runner",
-      "version": "latest",
-      "type": "devenv"
-    },
-    {
-      "name": "@aws-cdk/integ-tests-alpha",
-      "version": "latest",
-      "type": "devenv"
     },
     {
       "name": "@aws-lambda-powertools/tracer",
