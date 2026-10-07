@@ -146,7 +146,8 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 ```mermaid
 flowchart LR
   pr["Pull request"] --> build["build workflow<br/>compile · synth · typecheck ·<br/>unit tests · eslint ·<br/>integ snapshot check"]
-  build --> merge["Merge to main"]
+  pr --> codeql["codeql workflow<br/>javascript-typescript · actions"]
+  build & codeql --> merge["Mergify merge queue<br/>squash merge to main"]
   merge --> release["release job<br/>build, bump version, tag"]
   release --> dev["deploy_development<br/>environment: development"]
   dev --> prod["deploy_production<br/>environment: production"]
@@ -155,6 +156,7 @@ flowchart LR
 - Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
 - Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
+- Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. No approval is required, because there is a single maintainer; fork PRs need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in the README's GitHub Configuration section.
 - The workflow is generated from [`.projenrc.ts`](../.projenrc.ts). Change it there, not in `.github/workflows/`.
 - The integ snapshot check compares the synthesized template with [`test/storage-stack/integ.storage-stack.ts.snapshot/`](../test/storage-stack/integ.storage-stack.ts.snapshot). Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
 
