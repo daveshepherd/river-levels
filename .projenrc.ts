@@ -88,6 +88,12 @@ project.addTask('integ:debug', {
     },
   ],
 });
+// Actions are pinned to commit SHAs, matching the projen-generated jobs.
+// The deploy job checks out the commit that triggered the release (the
+// default for push events) and deploys with the release's dist artifact,
+// which carries releasetag.txt for the endor:Version tag. It doesn't rebuild:
+// the release job already built and tested this commit, and cdk deploy
+// bundles the Lambdas itself through the build hook in cdk.json.
 const deploymentJob = (stage: 'development' | 'production') => ({
   runsOn: ['ubuntu-latest'],
   permissions: {
@@ -97,15 +103,13 @@ const deploymentJob = (stage: 'development' | 'production') => ({
   steps: [
     {
       name: 'Checkout',
-      uses: 'actions/checkout@v4',
-      with: {
-        ref: '${{ github.event.pull_request.head.ref }}',
-        repository: '${{ github.event.pull_request.head.repo.full_name }}',
-      },
+      // v7.0.1
+      uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1',
     },
     {
       name: 'Download build artifacts',
-      uses: 'actions/download-artifact@v4',
+      // v8.0.1
+      uses: 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
       with: {
         name: 'build-artifact',
         path: 'dist',
@@ -113,22 +117,20 @@ const deploymentJob = (stage: 'development' | 'production') => ({
     },
     {
       name: 'Setup Node.js',
-      uses: 'actions/setup-node@v4',
+      // v7.0.0
+      uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020',
       with: {
         cache: 'yarn',
       },
     },
     {
       name: 'Install dependencies',
-      run: 'yarn install --check-files',
-    },
-    {
-      name: 'build',
-      run: 'npx projen build',
+      run: 'yarn install --check-files --frozen-lockfile',
     },
     {
       name: 'configure aws credentials',
-      uses: 'aws-actions/configure-aws-credentials@v3',
+      // v6.3.0
+      uses: 'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd',
       with: {
         'role-to-assume': '${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}',
         'role-session-name': 'river-levels-deploy',
@@ -154,7 +156,7 @@ project.github?.tryFindWorkflow('release')?.addJob('deploy_development', {
 project.github?.tryFindWorkflow('release')?.addJob('deploy_production', {
   name: 'Deploy to Production',
   environment: 'production',
-  needs: ['deploy_development'],
+  needs: ['release', 'deploy_development'],
   ...deploymentJob('production'),
 });
 project.readme?.addSection(
