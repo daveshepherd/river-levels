@@ -39,6 +39,9 @@ const project = new CdkTypeScriptApp({
   packageManager: NodePackageManager.YARN_CLASSIC,
   projenrcTs: true,
   release: true,
+  // Sole maintainer, who can't approve their own pull requests: the queue
+  // merges these authors' PRs without an approval. Everyone else needs one.
+  trustedAuthors: ['daveshepherd'],
   workflowPackageCache: true,
 });
 
