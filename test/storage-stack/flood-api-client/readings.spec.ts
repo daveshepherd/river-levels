@@ -44,6 +44,7 @@ describe('crawler flood readings api client', () => {
       .reply(200, JSON.stringify(testResponse));
 
     const actualReadings = await target.getReadingsSince(
+      '2627-level-stage-i-15_min-mASD',
       new Date('2020-03-02T13:00:00Z'),
     );
 
@@ -80,6 +81,7 @@ describe('crawler flood readings api client', () => {
       .reply(200, JSON.stringify(testResponse));
 
     const actualReadings = await target.getReadingsSince(
+      '2627-level-stage-i-15_min-mASD',
       new Date('2020-03-02T13:00:00Z'),
     );
 
@@ -126,7 +128,7 @@ describe('crawler flood readings api client', () => {
       )
       .reply(200, JSON.stringify(testResponse));
 
-    const actualReadings = await target.getReadings(3);
+    const actualReadings = await target.getReadings('2627-level-stage-i-15_min-mASD', 3);
 
     const expectedReadings = [
       {
@@ -152,7 +154,7 @@ describe('crawler flood readings api client', () => {
       )
       .reply(503, 'Service Unavailable');
 
-    await expect(target.getReadings(3)).rejects.toThrow(
+    await expect(target.getReadings('2627-level-stage-i-15_min-mASD', 3)).rejects.toThrow(
       'Request failed with status code 503',
     );
   });

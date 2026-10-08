@@ -6,8 +6,6 @@ import {
 import { logger, tracer } from '../powertools';
 import { Reading } from '../reading';
 
-const DEFAULT_STATION = 'kenilworth';
-
 // The most UpdateItem calls in flight at once. A backfill writes up to 96
 // readings; this keeps a burst of writes from all landing at the same moment.
 export const MAX_CONCURRENT_WRITES = 10;
@@ -17,7 +15,7 @@ const dynamoDbClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
 
 /** The most recent stored reading for a station, or null if there are none. */
 export async function getLatestReading(
-  station = DEFAULT_STATION,
+  station: string,
 ): Promise<Reading | null> {
   let result;
   try {
@@ -50,7 +48,7 @@ export async function getLatestReading(
   return null;
 }
 
-async function updateReading(reading: Reading, station = DEFAULT_STATION) {
+async function updateReading(station: string, reading: Reading) {
   try {
     await dynamoDbClient.send(
       new UpdateItemCommand({
@@ -76,13 +74,13 @@ async function updateReading(reading: Reading, station = DEFAULT_STATION) {
 }
 
 /**
- * Writes readings, creating new ones and overwriting existing ones, with at
- * most MAX_CONCURRENT_WRITES in flight.
+ * Writes a station's readings, creating new ones and overwriting existing
+ * ones, with at most MAX_CONCURRENT_WRITES in flight.
  */
-export async function updateReadings(readings: Reading[]) {
+export async function updateReadings(station: string, readings: Reading[]) {
   for (let i = 0; i < readings.length; i += MAX_CONCURRENT_WRITES) {
     const batch = readings.slice(i, i + MAX_CONCURRENT_WRITES);
-    await Promise.all(batch.map((reading) => updateReading(reading)));
+    await Promise.all(batch.map((reading) => updateReading(station, reading)));
   }
-  logger.info('Readings updated', { count: readings.length });
+  logger.info('Readings updated', { station, count: readings.length });
 }

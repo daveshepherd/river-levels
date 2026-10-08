@@ -110,6 +110,15 @@
       "data": {
         "addEnvironment": [
           "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
           "*",
           {
             "removeInEdge": true

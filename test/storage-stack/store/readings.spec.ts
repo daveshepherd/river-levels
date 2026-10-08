@@ -29,7 +29,7 @@ describe('readings store', () => {
 
     process.env.DYNAMODB_READINGS_TABLE = 'my-dynamodb-table';
 
-    const actualReading = await target.getLatestReading();
+    const actualReading = await target.getLatestReading('kenilworth');
 
     const expectedReading = {
       date: new Date('2020-01-01T00:00:00Z'),
@@ -59,7 +59,7 @@ describe('readings store', () => {
 
     process.env.DYNAMODB_READINGS_TABLE = 'my-dynamodb-table';
 
-    const actualReading = await target.getLatestReading();
+    const actualReading = await target.getLatestReading('kenilworth');
 
     expect(actualReading).toEqual(null);
 
@@ -97,7 +97,7 @@ describe('readings store', () => {
       },
     ];
 
-    await target.updateReadings(readingsToSave);
+    await target.updateReadings('kenilworth', readingsToSave);
 
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 3);
 
@@ -117,25 +117,25 @@ describe('readings store', () => {
       Items: [{ station: { S: 'kenilworth' }, timestamp: { N: '1577836800000' } }],
     });
 
-    await expect(target.getLatestReading()).resolves.toBeNull();
+    await expect(target.getLatestReading('kenilworth')).resolves.toBeNull();
   });
 
   it('rethrows when the latest reading query fails', async () => {
     dynamoDBClientMock.on(QueryCommand).rejects(new Error('query failed'));
 
-    await expect(target.getLatestReading()).rejects.toThrow('query failed');
+    await expect(target.getLatestReading('kenilworth')).rejects.toThrow('query failed');
   });
 
   it('rethrows when a reading update fails', async () => {
     dynamoDBClientMock.on(UpdateItemCommand).rejects(new Error('update failed'));
 
     await expect(
-      target.updateReadings([{ date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 }]),
+      target.updateReadings('kenilworth', [{ date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 }]),
     ).rejects.toThrow('update failed');
   });
 
   it('makes no calls when there are no readings', async () => {
-    await target.updateReadings([]);
+    await target.updateReadings('kenilworth', []);
 
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 0);
   });
@@ -155,7 +155,7 @@ describe('readings store', () => {
       depth: 0.8,
     }));
 
-    await target.updateReadings(readings);
+    await target.updateReadings('kenilworth', readings);
 
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 25);
     expect(maxInFlight).toBe(target.MAX_CONCURRENT_WRITES);

@@ -202,7 +202,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "9d4d149b4b395095853ca59e150a0706466c82a45ec0471632144780f6cfffd2.zip"
+     "S3Key": "e0afec7a192424eca76d41c07c6fa4a9dd2d31cc1a64f1ef4d69cc424aaea93a.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -210,6 +210,7 @@
       "DYNAMODB_READINGS_TABLE": {
        "Ref": "riverlevelstableA1F25F33"
       },
+      "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\"}]",
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
      }
     },

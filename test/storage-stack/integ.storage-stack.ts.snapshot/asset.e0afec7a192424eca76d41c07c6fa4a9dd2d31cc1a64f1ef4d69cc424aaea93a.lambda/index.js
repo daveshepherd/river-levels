@@ -19586,8 +19586,8 @@ var require_lib = __commonJS({
 // src/storage-stack/crawler.lambda.ts
 var crawler_lambda_exports = {};
 __export(crawler_lambda_exports, {
+  DEFAULT_MAX_DEPTH_RISE_METRES: () => DEFAULT_MAX_DEPTH_RISE_METRES,
   DEFAULT_READINGS_LIMIT: () => DEFAULT_READINGS_LIMIT,
-  MAX_DEPTH_RISE_METRES: () => MAX_DEPTH_RISE_METRES,
   MAX_LOOKBACK_DAYS: () => MAX_LOOKBACK_DAYS,
   SPIKE_FILTER_WINDOW_MS: () => SPIKE_FILTER_WINDOW_MS,
   handler: () => handler
@@ -28501,9 +28501,9 @@ async function traced(name, fn) {
 }
 
 // src/storage-stack/flood-api-client/readings.ts
-var READINGS_URL = "https://environment.data.gov.uk/flood-monitoring/id/measures/2627-level-stage-i-15_min-mASD/readings";
-async function fetchReadings(query) {
-  const url2 = `${READINGS_URL}?_sorted&${query}`;
+var MEASURES_URL = "https://environment.data.gov.uk/flood-monitoring/id/measures";
+async function fetchReadings(measureId, query) {
+  const url2 = `${MEASURES_URL}/${encodeURIComponent(measureId)}/readings?_sorted&${query}`;
   logger.info("Requesting readings from the flood API", { url: url2 });
   let response;
   try {
@@ -28520,19 +28520,49 @@ async function fetchReadings(query) {
     depth: reading.value
   }));
 }
-async function getReadings(limit) {
-  return fetchReadings(`_limit=${limit}`);
+async function getReadings(measureId, limit) {
+  return fetchReadings(measureId, `_limit=${limit}`);
 }
-async function getReadingsSince(queryDate = /* @__PURE__ */ new Date()) {
-  return fetchReadings(`since=${queryDate.toISOString()}`);
+async function getReadingsSince(measureId, queryDate) {
+  return fetchReadings(measureId, `since=${queryDate.toISOString()}`);
+}
+
+// src/storage-stack/stations.ts
+function validateStations(stations) {
+  if (!Array.isArray(stations) || stations.length === 0) {
+    throw new Error("At least one station must be configured");
+  }
+  const ids = /* @__PURE__ */ new Set();
+  for (const station of stations) {
+    if (!station?.id || !station.measureId) {
+      throw new Error(
+        `Each station needs an id and a measureId: ${JSON.stringify(station)}`
+      );
+    }
+    if (ids.has(station.id)) {
+      throw new Error(`Duplicate station id: ${station.id}`);
+    }
+    ids.add(station.id);
+    if (station.maxDepthRiseMetres !== void 0 && !(station.maxDepthRiseMetres > 0)) {
+      throw new Error(
+        `maxDepthRiseMetres must be greater than 0 for station ${station.id}`
+      );
+    }
+  }
+  return stations;
+}
+function parseStations(json) {
+  if (!json) {
+    throw new Error("The STATIONS environment variable is not set");
+  }
+  return validateStations(JSON.parse(json));
 }
 
 // src/storage-stack/store/readings.ts
 var import_client_dynamodb = require("@aws-sdk/client-dynamodb");
-var DEFAULT_STATION = "kenilworth";
 var MAX_CONCURRENT_WRITES = 10;
 var dynamoDbClient = tracer.captureAWSv3Client(new import_client_dynamodb.DynamoDBClient({}));
-async function getLatestReading(station = DEFAULT_STATION) {
+async function getLatestReading(station) {
   let result;
   try {
     result = await dynamoDbClient.send(
@@ -28562,7 +28592,7 @@ async function getLatestReading(station = DEFAULT_STATION) {
   }
   return null;
 }
-async function updateReading(reading, station = DEFAULT_STATION) {
+async function updateReading(station, reading) {
   try {
     await dynamoDbClient.send(
       new import_client_dynamodb.UpdateItemCommand({
@@ -28586,43 +28616,43 @@ async function updateReading(reading, station = DEFAULT_STATION) {
     throw error;
   }
 }
-async function updateReadings(readings) {
+async function updateReadings(station, readings) {
   for (let i = 0; i < readings.length; i += MAX_CONCURRENT_WRITES) {
     const batch = readings.slice(i, i + MAX_CONCURRENT_WRITES);
-    await Promise.all(batch.map((reading) => updateReading(reading)));
+    await Promise.all(batch.map((reading) => updateReading(station, reading)));
   }
-  logger.info("Readings updated", { count: readings.length });
+  logger.info("Readings updated", { station, count: readings.length });
 }
 
 // src/storage-stack/crawler.lambda.ts
 var DEFAULT_READINGS_LIMIT = 96;
 var MAX_LOOKBACK_DAYS = 7;
 var SPIKE_FILTER_WINDOW_MS = 60 * 60 * 1e3;
-var MAX_DEPTH_RISE_METRES = 2;
-function dropSpikes(newReadings, latest) {
+var DEFAULT_MAX_DEPTH_RISE_METRES = 2;
+function dropSpikes(newReadings, latest, maxDepthRiseMetres) {
   const oldestNewReading = newReadings.at(-1);
   if (!latest || !oldestNewReading || latest.date.getTime() <= oldestNewReading.date.getTime() - SPIKE_FILTER_WINDOW_MS) {
     return newReadings;
   }
   const kept = newReadings.filter(
-    (reading) => reading.depth < latest.depth + MAX_DEPTH_RISE_METRES
+    (reading) => reading.depth < latest.depth + maxDepthRiseMetres
   );
   if (kept.length < newReadings.length) {
-    logger.warn("Dropped readings that rose too far above the latest stored reading", {
-      dropped: newReadings.length - kept.length,
-      latestDepth: latest.depth
-    });
+    logger.warn(
+      "Dropped readings that rose too far above the latest stored reading",
+      {
+        dropped: newReadings.length - kept.length,
+        latestDepth: latest.depth,
+        maxDepthRiseMetres
+      }
+    );
   }
   return kept;
 }
-async function handler(event, context) {
-  if (context) {
-    logger.addContext(context);
-  }
-  const readingsLimit = event?.readingsLimit || DEFAULT_READINGS_LIMIT;
+async function crawlStation(station, readingsLimit) {
   const latest = await traced(
     "get latest reading",
-    () => getLatestReading()
+    () => getLatestReading(station.id)
   );
   logger.info("Latest stored reading", {
     date: latest?.date.toISOString() ?? "none"
@@ -28633,13 +28663,13 @@ async function handler(event, context) {
   if (latest && latest.date.getTime() >= oldestDateLookup.getTime()) {
     newReadings = await traced(
       "get readings since",
-      () => getReadingsSince(latest.date)
+      () => getReadingsSince(station.measureId, latest.date)
     );
   } else {
     logger.info("No recent stored reading, backfilling", { readingsLimit });
     newReadings = await traced(
       "get readings limit",
-      () => getReadings(readingsLimit)
+      () => getReadings(station.measureId, readingsLimit)
     );
   }
   logger.info("Retrieved readings", {
@@ -28647,16 +28677,45 @@ async function handler(event, context) {
     newest: newReadings[0]?.date.toISOString(),
     oldest: newReadings.at(-1)?.date.toISOString()
   });
-  const readingsToStore = dropSpikes(newReadings, latest);
+  const readingsToStore = dropSpikes(
+    newReadings,
+    latest,
+    station.maxDepthRiseMetres ?? DEFAULT_MAX_DEPTH_RISE_METRES
+  );
   await traced(
     "update readings",
-    () => updateReadings(readingsToStore)
+    () => updateReadings(station.id, readingsToStore)
   );
+}
+async function handler(event, context) {
+  if (context) {
+    logger.addContext(context);
+  }
+  const stations = parseStations(process.env.STATIONS);
+  const readingsLimit = event?.readingsLimit || DEFAULT_READINGS_LIMIT;
+  const failed = [];
+  for (const station of stations) {
+    logger.appendKeys({ station: station.id });
+    try {
+      await traced(
+        `station ${station.id}`,
+        () => crawlStation(station, readingsLimit)
+      );
+    } catch (error) {
+      logger.error("Crawl failed for station", { error });
+      failed.push(station.id);
+    } finally {
+      logger.removeKeys(["station"]);
+    }
+  }
+  if (failed.length) {
+    throw new Error(`Crawl failed for stations: ${failed.join(", ")}`);
+  }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  DEFAULT_MAX_DEPTH_RISE_METRES,
   DEFAULT_READINGS_LIMIT,
-  MAX_DEPTH_RISE_METRES,
   MAX_LOOKBACK_DAYS,
   SPIKE_FILTER_WINDOW_MS,
   handler

@@ -14,6 +14,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | Stacks in `src/main.ts` | Intro list, Architecture diagram |
 | `src/**/*.role.ts`, or `grant*` calls | IAM table |
 | Crawler fetch or filter logic, or table key schema | Crawl sequence diagram |
+| `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
@@ -51,6 +52,7 @@ src/main.ts                  App entry point: one StorageStack "RiverLevels" in 
 src/storage-stack/
   index.ts                   StorageStack: DynamoDB global table, crawler, SNS publisher
   crawler.lambda.ts          Runs every 10 minutes: fetches new readings and writes them to DynamoDB
+  stations.ts                The crawler's station list and its validation
   sns-publisher.lambda.ts    DynamoDB stream → SNS PublishBatch (sent in chunks of 10)
   *.role.ts                  An IAM role per Lambda, with customer-managed policies
   flood-api-client/          axios client for environment.data.gov.uk
@@ -63,7 +65,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Data and contracts
 
 - **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`.
-- **Source:** measure `2627-level-stage-i-15_min-mASD` (Kenilworth, 15-minute readings). The station `kenilworth` and the measure URL are currently hardcoded.
+- **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
 - **SNS message body** (other systems subscribe to this, so keep it backward compatible): `{"reading_depth": number, "station": string, "timestamp": number}`. A message is published only on `INSERT` stream events.
 - **Stream failures:** the publisher returns `batchItemFailures` so retries resume from the first unpublished record. After 5 retries, the batch goes to `sns-publisher-failure-queue`.
 
