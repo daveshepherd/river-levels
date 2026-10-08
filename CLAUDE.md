@@ -72,7 +72,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- The crawler and its modules (`flood-api-client/`, `store/`) log through the Powertools `logger` and wrap steps in `traced()` from `src/storage-stack/powertools.ts`; don't add `console.log` there. The SNS publisher still uses `console.log`. `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher has its own Logger and Tracer (service `sns-publisher`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.
@@ -80,7 +80,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 
 ## Git and releases
 
-- Use conventional commits (`fix(storage-stack): …`, `feat: …`). Release versions are calculated from them: `fix` gives a patch, `feat` gives a minor.
+- Use conventional commits with **only `feat`, `fix` or `chore`** as the type, with an optional scope (`fix(storage-stack): …`, `chore(docs): …`). The `Validate PR title` check rejects anything else, including `refactor`, `docs`, `test` and `ci`. PRs are squash-merged with the PR title as the commit message, so the title is what counts. Release versions come from the type: `fix` gives a patch, `feat` a minor.
 - Each merge to `main` runs the `release` workflow: it builds, tags, deploys to the `development` environment, then to `production`. Both deploy jobs run the same `yarn deploy`. They differ in the GitHub environment secrets (`AWS_DEPLOYMENT_ROLE_ARN`) and in the `STAGE` env var, which sets the `endor:Stage` tag (see `src/stage.ts`; unset means `local`, and an unknown value fails the synth). They also pass `ALERT_EMAIL` from a GitHub secret; it is required for deployed stages and kept out of the repo because the repo is public.
 - Dependency upgrades arrive as automated `chore(deps)` PRs from projen's `upgrade-main` workflow.
 - `@aws-cdk/integ-runner` and `@aws-cdk/integ-tests-alpha` are pinned in `.projenrc.ts`, so the upgrade workflow skips them and integ snapshots don't change unexpectedly. To bump them, change both pins together, keeping `integ-tests-alpha` on the same version as the installed `aws-cdk-lib` (`<version>-alpha.0`), run `npx projen`, then `yarn integ:update` (deploys to AWS) and commit the regenerated snapshot in the same PR.
