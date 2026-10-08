@@ -1,5 +1,17 @@
 # river-levels
 
+Collects river level readings from the [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/reference), stores them in DynamoDB and publishes each new reading to SNS.
+
+Every 10 minutes a crawler Lambda fetches new readings for each station in [`src/storage-stack/stations.ts`](src/storage-stack/stations.ts) (currently Kenilworth) and writes them to a DynamoDB global table in `eu-west-2`, replicated to `eu-west-1`. A second Lambda reads the table's stream and publishes each new reading to the `river-levels-notifications` SNS topic as:
+
+```json
+{"reading_depth": 0.694, "station": "kenilworth", "timestamp": 1718374500000}
+```
+
+`reading_depth` is in metres above stage datum and `timestamp` is in epoch milliseconds. CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
+
+See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data flow, resources, IAM, deployment and alarms.
+
 ## Getting Started
 
 ```sh
