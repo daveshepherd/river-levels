@@ -34,14 +34,14 @@ This is a projen project (`CdkTypeScriptApp` from `projen-modules`). **`.projenr
 | Task | Command |
 |------|---------|
 | Unit tests (Jest, coverage on) | `npx jest` or `npx jest test/storage-stack` |
-| Type-check `src/` and `test/` | `npx projen typecheck` |
+| Type-check tests and the source they import | `npx tsc --noEmit -p test/tsconfig.json` |
 | Lint | `npx projen eslint` |
 | Bundle Lambdas | `npx projen bundle` |
 | Full build (compile, synth, typecheck, test, eslint, integ snapshot check) | `npx projen build` |
 | Update integ snapshots (**deploys to AWS**) | `yarn integ:update` |
 
 Gotchas:
-- **ts-jest doesn't type-check.** `test/tsconfig.json` sets `isolatedModules`, so `npx jest` passes even with type errors. The `test` task runs `typecheck` first, so `npx projen test` and the build catch them. Running `npx jest` on its own doesn't, so run `npx projen typecheck` after changing types.
+- **ts-jest doesn't type-check.** `test/tsconfig.json` sets `isolatedModules`, so `npx jest` passes even with type errors. The `test` task type-checks first (projen's `typecheckTests`, on by default in projen-modules), and the synth step type-checks `src/main.ts` through ts-node, so `npx projen test` and the build catch them. Running `npx jest` on its own doesn't.
 - **`projen eslint` runs `--fix`.** It rewrites files in place, including untracked work-in-progress. Code style is single quotes, 2-space indent and trailing commas.
 - **Integration tests deploy real stacks** to the user's AWS account and take about 10 minutes. Don't run `integ:update`, `integ:force` or `integ:debug` without asking. The plain `integ` task, which `build` also runs, only compares snapshots and fails if they differ. It never deploys.
 
@@ -81,7 +81,8 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Git and releases
 
 - Use conventional commits with **only `feat`, `fix` or `chore`** as the type, with an optional scope (`fix(storage-stack): …`, `chore(docs): …`). The `Validate PR title` check rejects anything else, including `refactor`, `docs`, `test` and `ci`. PRs are squash-merged with the PR title as the commit message, so the title is what counts. Release versions come from the type: `fix` gives a patch, `feat` a minor.
-- Each merge to `main` runs the `release` workflow: it builds, tags, deploys to the `development` environment, then to `production`. Both deploy jobs run the same `yarn deploy`. They differ in the GitHub environment secrets (`AWS_DEPLOYMENT_ROLE_ARN`) and in the `STAGE` env var, which sets the `endor:Stage` tag (see `src/stage.ts`; unset means `local`, and an unknown value fails the synth). They also pass `ALERT_EMAIL` from a GitHub secret; it is required for deployed stages and kept out of the repo because the repo is public.
+- Each merge to `main` runs the `release` workflow: it builds, tags, deploys to the `development` environment, then to `production`. The deploy jobs are generated from the `deployments` option in `.projenrc.ts` (projen-modules); change environments, regions or env vars there. Both run the same `yarn deploy`. They differ in the GitHub environment secrets (`AWS_DEPLOYMENT_ROLE_ARN`) and in the `STAGE` env var, which sets the `endor:Stage` tag (see `src/stage.ts`; unset means `local`, and an unknown value fails the synth). They also pass `ALERT_EMAIL` from a GitHub secret; it is required for deployed stages and kept out of the repo because the repo is public.
 - Dependency upgrades arrive as automated `chore(deps)` PRs from projen's `upgrade-main` workflow.
-- `@aws-cdk/integ-runner` and `@aws-cdk/integ-tests-alpha` are pinned in `.projenrc.ts`, so the upgrade workflow skips them and integ snapshots don't change unexpectedly. To bump them, change both pins together, keeping `integ-tests-alpha` on the same version as the installed `aws-cdk-lib` (`<version>-alpha.0`), run `npx projen`, then `yarn integ:update` (deploys to AWS) and commit the regenerated snapshot in the same PR.
+- projen-modules pins `@aws-cdk/integ-runner` (its `integRunnerVersion` default) and `@aws-cdk/integ-tests-alpha` (to `${cdkVersion}-alpha.0`), so the upgrade workflow skips them and integ snapshots don't change unexpectedly. To bump them, change `cdkVersion` (or set `integRunnerVersion`) in `.projenrc.ts`, run `npx projen`, then `yarn integ:update` (deploys to AWS) and commit the regenerated snapshot in the same PR.
+- Major versions of `projen-modules` don't arrive through the upgrade workflow (it only takes minor and patch updates); bump them by hand with `yarn add -D projen-modules@^<major>` and `npx projen`.
 - When a change alters the synthesized template, commit the updated integ snapshot with it, or CI fails.
