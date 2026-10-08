@@ -1,5 +1,5 @@
 import { SNSClient, PublishBatchCommand } from '@aws-sdk/client-sns';
-import type { DynamoDBStreamEvent } from 'aws-lambda';
+import type { Context, DynamoDBStreamEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 
@@ -355,6 +355,18 @@ describe('sns-publisher', () => {
       batchItemFailures: [{ itemIdentifier: '110' }],
     });
     expect(snsClientMock).toHaveReceivedCommandTimes(PublishBatchCommand, 2);
+  });
+  it('adds the Lambda context to log entries when one is passed', async () => {
+    process.env.SNS_TOPIC_ARN = 'my-sns-topic';
+    snsClientMock.on(PublishBatchCommand).resolves({
+      Successful: [{ Id: 'kenilworth1718374500000' }],
+      Failed: [],
+    });
+    const context = { functionName: 'sns-publisher', awsRequestId: 'req-1' } as Context;
+
+    await expect(target.handler(buildInsertEvent(1), context)).resolves.toStrictEqual({
+      batchItemFailures: [],
+    });
   });
 });
 
