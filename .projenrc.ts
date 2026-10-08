@@ -9,6 +9,7 @@ const project = new CdkTypeScriptApp({
   codeOwners: ['daveshepherd'],
   copyrightOwner: 'Dave Shepherd',
   deps: [
+    '@aws-lambda-powertools/logger',
     '@aws-lambda-powertools/tracer',
     '@aws-sdk/client-dynamodb',
     '@aws-sdk/client-sns',
@@ -32,6 +33,9 @@ const project = new CdkTypeScriptApp({
   ],
   experimentalIntegRunner: true,
   jestOptions: {
+    jestConfig: {
+      setupFiles: ['<rootDir>/test/setup.ts'],
+    },
     jestVersion: '^30',
   },
   githubOptions: {

@@ -71,13 +71,15 @@ sequenceDiagram
     C->>EA: GET readings?_sorted&_limit=96 (about 24 h of 15-minute readings)
   end
   EA-->>C: readings
-  opt latest stored reading is within 1 h of the newest fetched reading
-    C->>C: drop readings more than 2 m above the latest stored depth (spike filter)
+  opt latest stored reading is less than 1 h before the oldest fetched reading
+    C->>C: drop readings 2 m or more above the latest stored depth (spike filter)
   end
-  par one call per reading
+  loop batches of up to 10, run in parallel within each batch
     C->>DB: UpdateItem SET reading_depth
   end
 ```
+
+The thresholds are named constants at the top of `crawler.lambda.ts`: `DEFAULT_READINGS_LIMIT` (96), `MAX_LOOKBACK_DAYS` (7), `SPIKE_FILTER_WINDOW_MS` (1 hour) and `MAX_DEPTH_RISE_METRES` (2). The spike filter only applies when the new readings follow on from the stored one without a gap, so a real rise after an outage isn't thrown away. The crawler logs a warning when it drops readings.
 
 `UpdateItem` creates or overwrites a reading. A new key produces an `INSERT` stream event. Writing an existing key again produces a `MODIFY` event, which the publisher ignores. So re-fetching readings that are already stored doesn't send duplicate notifications.
 
@@ -163,8 +165,8 @@ flowchart LR
 
 ## Operations
 
-- **Logs:** CloudWatch Logs groups for `crawler-lambda` and `sns-publisher-lambda`.
-- **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes.
+- **Logs:** CloudWatch Logs groups for `crawler-lambda` and `sns-publisher-lambda`. The crawler writes structured JSON through Powertools Logger (service `crawler`), including the Lambda request ID, so it can be queried with CloudWatch Logs Insights. It logs counts and date ranges, not whole payloads.
+- **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 

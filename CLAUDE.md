@@ -70,6 +70,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
+- The crawler and its modules (`flood-api-client/`, `store/`) log through the Powertools `logger` and wrap steps in `traced()` from `src/storage-stack/powertools.ts`; don't add `console.log` there. The SNS publisher still uses `console.log`. `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.
