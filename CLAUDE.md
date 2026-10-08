@@ -14,7 +14,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | Stacks in `src/main.ts` | Intro list, Architecture diagram |
 | `src/**/*.role.ts`, or `grant*` calls | IAM table |
 | Crawler fetch or filter logic, or table key schema | Crawl sequence diagram |
-| `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section |
+| `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
