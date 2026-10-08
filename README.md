@@ -19,6 +19,48 @@ yarn install
 npx projen build
 ```
 
+## CDK
+
+On first run of a CDK installation:
+
+```sh
+npx cdk bootstrap
+```
+
+Build the project
+```sh
+npx projen build
+```
+
+Deploy the CDK stack
+```sh
+npx projen deploy
+```
+
+## Integration Tests
+
+Integration tests are run by [integ-runner](https://github.com/aws/aws-cdk-cli/tree/main/packages/%40aws-cdk/integ-runner) as part of `npx projen test`, which compares each test's snapshot with a fresh synth. Run them with:
+* `npx projen integ` to run the snapshot tests.
+* `npx projen integ:update` to update the snapshots of tests that changed.
+* `npx projen integ:force` to run all tests, even if their snapshots are unchanged.
+* `npx projen integ:watch` to watch the tests.
+* `npx projen integ:debug` to run the tests with verbose diagnostics and keep the artifacts of failed tests.
+
+`@aws-cdk/integ-runner` is pinned to `2.205.6` and `@aws-cdk/integ-tests-alpha` to the release matching `cdkVersion`, so the upgrade workflow never changes their versions: they only change when `cdkVersion` or `integRunnerVersion` is changed. This is intended, as each `@aws-cdk/integ-tests-alpha` release rewrites the assertion code bundled in the snapshots.
+
+integ-runner ignores changes to asset hashes, so a test whose only change is Lambda code is reported as `UNCHANGED` and is not deployed. Run `npx projen integ:force` to exercise new Lambda code end to end.
+
+## Deployment
+
+After each release, the release workflow deploys to these GitHub environments in order, each after the previous one succeeds:
+
+| Environment | Region | Role ARN secret |
+| ----------- | ------ | --------------- |
+| development | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN` |
+| production | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN` |
+
+Each environment needs its role ARN secret, for a role that trusts GitHub's OIDC provider.
+
 ## GitHub Configuration
 
 All pull requests are merged by the [Mergify](https://mergify.com) merge queue, configured in `.mergify.yml`. Once a pull request is approved, or is opened by `daveshepherd`, and its checks pass, Mergify queues it, brings it up to date with the default branch, waits for the checks again and squash merges it. Draft pull requests and those labelled `do-not-merge` are not merged.
@@ -57,24 +99,6 @@ In **Settings → Rules → Rulesets**, create a branch ruleset with enforcement
 Do not enable GitHub's own **Require merge queue** rule, as it competes with Mergify.
 
 If the queue is unavailable and a change has to be merged, add yourself to the bypass list temporarily and remove yourself afterwards.
-
-## CDK
-
-On first run of a CDK installation:
-
-```sh
-npx cdk bootstrap
-```
-
-Build the project
-```sh
-npx projen build
-```
-
-Deploy the CDK stack
-```sh
-npx projen deploy
-```
 
 ## Documentation
 

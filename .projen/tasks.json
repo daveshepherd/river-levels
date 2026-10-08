@@ -331,7 +331,14 @@
       "description": "Run integration tests with verbose diagnostics and failure artifacts",
       "steps": [
         {
-          "exec": "integ-runner $@ --language typescript -vv --inspect-failures",
+          "execArgs": [
+            "integ-runner",
+            "$@",
+            "--language",
+            "typescript",
+            "-vv",
+            "--inspect-failures"
+          ],
           "receiveArgs": true
         }
       ]
@@ -341,7 +348,13 @@
       "description": "Run integration snapshot tests, forcing tests to run even if there's no changes",
       "steps": [
         {
-          "exec": "integ-runner $@ --language typescript --force",
+          "execArgs": [
+            "integ-runner",
+            "$@",
+            "--language",
+            "typescript",
+            "--force"
+          ],
           "receiveArgs": true
         }
       ]
@@ -367,7 +380,13 @@
       "description": "Watch the integration snapshot tests",
       "steps": [
         {
-          "exec": "integ-runner $@ --language typescript --watch",
+          "execArgs": [
+            "integ-runner",
+            "$@",
+            "--language",
+            "typescript",
+            "--watch"
+          ],
           "receiveArgs": true
         }
       ]
@@ -470,7 +489,13 @@
       "description": "Run tests",
       "steps": [
         {
-          "spawn": "typecheck"
+          "name": "Type-check the test suite",
+          "execArgs": [
+            "tsc",
+            "--noEmit",
+            "-p",
+            "test/tsconfig.json"
+          ]
         },
         {
           "execArgs": [
@@ -497,18 +522,6 @@
             "jest",
             "--watch"
           ]
-        }
-      ]
-    },
-    "typecheck": {
-      "name": "typecheck",
-      "description": "Type-check source and test files without emitting",
-      "steps": [
-        {
-          "exec": "tsc --noEmit -p tsconfig.json"
-        },
-        {
-          "exec": "tsc --noEmit -p test/tsconfig.json"
         }
       ]
     },
