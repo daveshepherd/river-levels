@@ -34,6 +34,7 @@ import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
 import { SnsPublisherFunction } from './sns-publisher-function';
 import { SnsPublisherRole } from './sns-publisher.role';
+import { StationConfig, STATIONS, validateStations } from './stations';
 
 export interface StorageStackProps extends StackProps {
   /**
@@ -43,6 +44,10 @@ export interface StorageStackProps extends StackProps {
   alertEmail?: string;
   replicaRegions?: Array<string>;
   setDestroyPolicyToAllResources?: boolean;
+  /**
+   * The stations the crawler collects. Defaults to STATIONS in stations.ts.
+   */
+  stations?: StationConfig[];
 }
 
 export class StorageStack extends Stack {
@@ -82,6 +87,7 @@ export class StorageStack extends Stack {
       architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
+        STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
       },
       logGroup: crawlerLogGroup,
       memorySize: 256,

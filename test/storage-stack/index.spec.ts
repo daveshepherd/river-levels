@@ -45,6 +45,9 @@ describe('StorageStack', () => {
           DYNAMODB_READINGS_TABLE: storageStack.resolve(
             storageStack.riverLevelsTableName,
           ),
+          STATIONS: JSON.stringify([
+            { id: 'kenilworth', measureId: '2627-level-stage-i-15_min-mASD' },
+          ]),
         },
       },
     });
@@ -174,5 +177,34 @@ describe('StorageStack', () => {
         },
       ],
     });
+  });
+
+  test('that the crawler is given the configured stations', () => {
+    const app = new App();
+    const stations = [
+      { id: 'kenilworth', measureId: '2627-level-stage-i-15_min-mASD' },
+      { id: 'warwick', measureId: '2626-level-stage-i-15_min-mASD', maxDepthRiseMetres: 1 },
+    ];
+    const storageStack = new StorageStack(app, 'StorageStack', {
+      env: { region: 'eu-west-2' },
+      stations,
+    });
+
+    Template.fromStack(storageStack).hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: Match.objectLike({ STATIONS: JSON.stringify(stations) }),
+      },
+    });
+  });
+
+  test('that an invalid station list fails the synth', () => {
+    const app = new App();
+    expect(
+      () =>
+        new StorageStack(app, 'StorageStack', {
+          env: { region: 'eu-west-2' },
+          stations: [],
+        }),
+    ).toThrow('At least one station must be configured');
   });
 });

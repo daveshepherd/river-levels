@@ -2,17 +2,19 @@ import axios from 'axios';
 import { logger } from '../powertools';
 import { Reading } from '../reading';
 
-// The Kenilworth river level gauge. See docs/infrastructure.md.
-const READINGS_URL =
-  'https://environment.data.gov.uk/flood-monitoring/id/measures/2627-level-stage-i-15_min-mASD/readings';
+const MEASURES_URL =
+  'https://environment.data.gov.uk/flood-monitoring/id/measures';
 
 interface FloodApiReadingsResponse {
   items: Array<{ dateTime: string; value: number }>;
 }
 
-/** Fetches readings, newest first, with the given query string. */
-async function fetchReadings(query: string): Promise<Reading[]> {
-  const url = `${READINGS_URL}?_sorted&${query}`;
+/** Fetches a measure's readings, newest first, with the given query string. */
+async function fetchReadings(
+  measureId: string,
+  query: string,
+): Promise<Reading[]> {
+  const url = `${MEASURES_URL}/${encodeURIComponent(measureId)}/readings?_sorted&${query}`;
   logger.info('Requesting readings from the flood API', { url });
   let response;
   try {
@@ -30,12 +32,12 @@ async function fetchReadings(query: string): Promise<Reading[]> {
   }));
 }
 
-/** The latest `limit` readings, newest first. */
-export async function getReadings(limit: number) {
-  return fetchReadings(`_limit=${limit}`);
+/** A measure's latest `limit` readings, newest first. */
+export async function getReadings(measureId: string, limit: number) {
+  return fetchReadings(measureId, `_limit=${limit}`);
 }
 
-/** Readings taken since `queryDate`, newest first. */
-export async function getReadingsSince(queryDate = new Date()) {
-  return fetchReadings(`since=${queryDate.toISOString()}`);
+/** A measure's readings taken since `queryDate`, newest first. */
+export async function getReadingsSince(measureId: string, queryDate: Date) {
+  return fetchReadings(measureId, `since=${queryDate.toISOString()}`);
 }

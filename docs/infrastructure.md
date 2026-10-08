@@ -11,7 +11,7 @@ This page describes what the CDK app deploys and how data moves through it. The 
 
 ```mermaid
 flowchart LR
-  ea["Environment Agency<br/>flood-monitoring API<br/>(measure 2627, Kenilworth)"]
+  ea["Environment Agency<br/>flood-monitoring API<br/>(one measure per station)"]
 
   subgraph aws["AWS · RiverLevels stack · eu-west-2"]
     direction LR
@@ -63,23 +63,40 @@ sequenceDiagram
   participant EA as Flood API
 
   EB->>C: scheduled invoke
-  C->>DB: Query station=kenilworth, newest first, limit 1
-  DB-->>C: latest stored reading (or none)
-  alt latest reading is less than 7 days old
-    C->>EA: GET readings?_sorted&since={latest date}
-  else no reading, or it's older than 7 days
-    C->>EA: GET readings?_sorted&_limit=96 (about 24 h of 15-minute readings)
+  loop each station in STATIONS, one at a time
+    C->>DB: Query station={id}, newest first, limit 1
+    DB-->>C: latest stored reading (or none)
+    alt latest reading is less than 7 days old
+      C->>EA: GET measures/{measureId}/readings?_sorted&since={latest date}
+    else no reading, or it's older than 7 days
+      C->>EA: GET measures/{measureId}/readings?_sorted&_limit=96
+    end
+    EA-->>C: readings
+    opt latest stored reading is less than 1 h before the oldest fetched reading
+      C->>C: drop readings maxDepthRiseMetres (default 2 m) or more above the latest stored depth
+    end
+    loop batches of up to 10, run in parallel within each batch
+      C->>DB: UpdateItem SET reading_depth
+    end
   end
-  EA-->>C: readings
-  opt latest stored reading is less than 1 h before the oldest fetched reading
-    C->>C: drop readings 2 m or more above the latest stored depth (spike filter)
-  end
-  loop batches of up to 10, run in parallel within each batch
-    C->>DB: UpdateItem SET reading_depth
+  opt any station failed
+    C-->>EB: fail the invocation (after crawling the rest)
   end
 ```
 
-The thresholds are named constants at the top of `crawler.lambda.ts`: `DEFAULT_READINGS_LIMIT` (96), `MAX_LOOKBACK_DAYS` (7), `SPIKE_FILTER_WINDOW_MS` (1 hour) and `MAX_DEPTH_RISE_METRES` (2). The spike filter only applies when the new readings follow on from the stored one without a gap, so a real rise after an outage isn't thrown away. The crawler logs a warning when it drops readings.
+#### Stations
+
+The crawler's stations are listed in [`src/storage-stack/stations.ts`](../src/storage-stack/stations.ts) and passed to it as the `STATIONS` environment variable (JSON). Each station has:
+
+- `id`: the `station` key in the table and in SNS messages. Keep existing IDs stable, because changing one starts a new series.
+- `measureId`: the Environment Agency flood-monitoring measure, for example `2627-level-stage-i-15_min-mASD` for Kenilworth.
+- `maxDepthRiseMetres` (optional): the spike filter threshold, 2 m by default.
+
+The list is validated at synth time: it must not be empty, IDs must be unique, and thresholds must be positive. Only `kenilworth` is configured today. To add a station, add an entry and deploy. Its first run backfills the last 96 readings.
+
+Stations are crawled one at a time in a single invocation. If one fails, the error is logged with its station ID, the others still run, and the invocation then fails, so the `crawler-errors` alarm fires. Every station shares the crawler's 60-second timeout, so a long list may need a higher timeout.
+
+The thresholds are named constants at the top of `crawler.lambda.ts`: `DEFAULT_READINGS_LIMIT` (96), `MAX_LOOKBACK_DAYS` (7), `SPIKE_FILTER_WINDOW_MS` (1 hour) and `DEFAULT_MAX_DEPTH_RISE_METRES` (2, overridable per station). The spike filter only applies when the new readings follow on from the stored one without a gap, so a real rise after an outage isn't thrown away. The crawler logs a warning when it drops readings.
 
 `UpdateItem` creates or overwrites a reading. A new key produces an `INSERT` stream event. Writing an existing key again produces a `MODIFY` event, which the publisher ignores. So re-fetching readings that are already stored doesn't send duplicate notifications.
 
@@ -117,7 +134,7 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). |
-| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`. |
+| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list). |
 | `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, 3 retry attempts, then `crawler-dead-letter-queue`. |
 | `crawler-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives scheduled invocations EventBridge couldn't deliver to the crawler. |
 | `sns-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 128 MB, 30 s timeout, X-Ray active. Env: `SNS_TOPIC_ARN`. |
