@@ -144,4 +144,16 @@ describe('crawler flood readings api client', () => {
     ];
     expect(actualReadings).toEqual(expectedReadings);
   });
+
+  it('rethrows when the flood API returns an error', async () => {
+    nock('https://environment.data.gov.uk')
+      .get(
+        '/flood-monitoring/id/measures/2627-level-stage-i-15_min-mASD/readings?_sorted&_limit=3',
+      )
+      .reply(503, 'Service Unavailable');
+
+    await expect(target.getReadings(3)).rejects.toThrow(
+      'Request failed with status code 503',
+    );
+  });
 });

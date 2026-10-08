@@ -1,6 +1,8 @@
 import 'aws-sdk-client-mock-jest';
+import type { Context } from 'aws-lambda';
 import * as target from '../../src/storage-stack/crawler.lambda';
 import * as floodApi from '../../src/storage-stack/flood-api-client/readings';
+import { logger } from '../../src/storage-stack/powertools';
 import * as readingStore from '../../src/storage-stack/store/readings';
 
 jest.mock('../../src/storage-stack/flood-api-client/readings');
@@ -218,5 +220,52 @@ describe('crawler', () => {
         depth: 0.831,
       },
     ]);
+  });
+
+  it('keeps a large rise when it follows a gap in the stored readings', async () => {
+    const latestReadingDate = new Date();
+    latestReadingDate.setHours(latestReadingDate.getHours() - 3);
+    readingStoreMock.getLatestReading.mockResolvedValue({
+      date: latestReadingDate,
+      depth: 0.6,
+    });
+    const afterGap = [
+      { date: new Date(Date.now() - 15 * 60 * 1000), depth: 3.2 },
+      { date: new Date(Date.now() - 30 * 60 * 1000), depth: 3.1 },
+    ];
+    floodApiMock.getReadingsSince.mockResolvedValue(afterGap);
+
+    await target.handler();
+
+    expect(readingStore.updateReadings).toHaveBeenCalledWith(afterGap);
+  });
+
+  it('fails without fetching readings when the latest reading lookup fails', async () => {
+    readingStoreMock.getLatestReading.mockRejectedValue(new Error('query failed'));
+
+    await expect(target.handler()).rejects.toThrow('query failed');
+    expect(floodApi.getReadingsSince).not.toHaveBeenCalled();
+    expect(floodApi.getReadings).not.toHaveBeenCalled();
+    expect(readingStore.updateReadings).not.toHaveBeenCalled();
+  });
+
+  it('fails without writing when the flood API fails', async () => {
+    readingStoreMock.getLatestReading.mockResolvedValue(null);
+    floodApiMock.getReadings.mockRejectedValue(new Error('API unavailable'));
+
+    await expect(target.handler()).rejects.toThrow('API unavailable');
+    expect(readingStore.updateReadings).not.toHaveBeenCalled();
+  });
+
+  it('adds the Lambda context to log entries when one is passed', async () => {
+    readingStoreMock.getLatestReading.mockResolvedValue(null);
+    floodApiMock.getReadings.mockResolvedValue([]);
+    const addContext = jest.spyOn(logger, 'addContext');
+    const context = { functionName: 'crawler', awsRequestId: 'req-1' } as Context;
+
+    await target.handler(undefined, context);
+
+    expect(addContext).toHaveBeenCalledWith(context);
+    addContext.mockRestore();
   });
 });

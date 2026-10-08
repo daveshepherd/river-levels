@@ -202,7 +202,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "cbd5eacc06cfd4d050902148b56ac17848178ff014fe4c277f0757bcd820ee73.zip"
+     "S3Key": "9d4d149b4b395095853ca59e150a0706466c82a45ec0471632144780f6cfffd2.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {

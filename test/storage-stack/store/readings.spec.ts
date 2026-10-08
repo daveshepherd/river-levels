@@ -111,4 +111,53 @@ describe('readings store', () => {
       ),
     ).toBeTruthy();
   });
+
+  it('returns null when the stored item is missing fields', async () => {
+    dynamoDBClientMock.on(QueryCommand).resolvesOnce({
+      Items: [{ station: { S: 'kenilworth' }, timestamp: { N: '1577836800000' } }],
+    });
+
+    await expect(target.getLatestReading()).resolves.toBeNull();
+  });
+
+  it('rethrows when the latest reading query fails', async () => {
+    dynamoDBClientMock.on(QueryCommand).rejects(new Error('query failed'));
+
+    await expect(target.getLatestReading()).rejects.toThrow('query failed');
+  });
+
+  it('rethrows when a reading update fails', async () => {
+    dynamoDBClientMock.on(UpdateItemCommand).rejects(new Error('update failed'));
+
+    await expect(
+      target.updateReadings([{ date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 }]),
+    ).rejects.toThrow('update failed');
+  });
+
+  it('makes no calls when there are no readings', async () => {
+    await target.updateReadings([]);
+
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 0);
+  });
+
+  it(`writes no more than ${target.MAX_CONCURRENT_WRITES} readings at once`, async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    dynamoDBClientMock.on(UpdateItemCommand).callsFake(async () => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setImmediate(resolve));
+      inFlight--;
+      return {};
+    });
+    const readings = Array.from({ length: 25 }, (_, i) => ({
+      date: new Date(1577836800000 + i * 900000),
+      depth: 0.8,
+    }));
+
+    await target.updateReadings(readings);
+
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 25);
+    expect(maxInFlight).toBe(target.MAX_CONCURRENT_WRITES);
+  });
 });
