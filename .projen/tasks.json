@@ -92,6 +92,7 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/storage-stack/crawler.lambda/index.js",
+            "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*"
           ]
@@ -110,6 +111,7 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/storage-stack/crawler.lambda/index.js",
+            "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",
             "--watch"
@@ -129,6 +131,7 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/storage-stack/sns-publisher.lambda/index.js",
+            "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*"
           ]
@@ -147,6 +150,7 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/storage-stack/sns-publisher.lambda/index.js",
+            "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",
             "--watch"
