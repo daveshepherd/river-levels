@@ -1,10 +1,7 @@
 import {
   Aspects,
   CfnOutput,
-  CfnResource,
   Duration,
-  IAspect,
-  RemovalPolicy,
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
@@ -28,7 +25,8 @@ import {
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ITopic, Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { Construct, IConstruct } from 'constructs';
+import { Construct } from 'constructs';
+import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import { StorageAlarms } from './alarms';
 import { CrawlerFunction } from './crawler-function';
 import { CrawlerRole } from './crawler.role';
@@ -54,6 +52,7 @@ export class StorageStack extends Stack {
   public readonly alertsTopic: ITopic;
   public readonly crawlerFunctionName: string;
   public readonly riverLevelsNotificationsTopic: ITopic;
+  public readonly riverLevelsTable: TableV2;
   public readonly riverLevelsTableName: string;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
@@ -74,6 +73,7 @@ export class StorageStack extends Stack {
         })
         : [],
     });
+    this.riverLevelsTable = riverLevelsTable;
     this.riverLevelsTableName = riverLevelsTable.tableName;
 
     const executionRole = new CrawlerRole(this, 'crawler-role', {
@@ -188,12 +188,5 @@ export class StorageStack extends Stack {
     new CfnOutput(this, 'RiverLevelsTable', {
       value: riverLevelsTable.tableArn,
     });
-  }
-}
-class ApplyDestroyPolicyAspect implements IAspect {
-  public visit(node: IConstruct): void {
-    if (node instanceof CfnResource) {
-      node.applyRemovalPolicy(RemovalPolicy.DESTROY);
-    }
   }
 }

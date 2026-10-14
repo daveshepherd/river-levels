@@ -55,6 +55,7 @@ junit.xml
 /cdk.out/
 .cdk.staging/
 .parcel-cache/
+!/src/api-stack/api-publisher-function.ts
 !/src/storage-stack/crawler-function.ts
 !/src/storage-stack/sns-publisher-function.ts
 !/CODEOWNERS

@@ -16,6 +16,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | Crawler fetch or filter logic, or table key schema | Crawl sequence diagram |
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
+| The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
 
@@ -48,7 +49,8 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: one StorageStack "RiverLevels" in eu-west-2, replica in eu-west-1
+src/main.ts                  App entry point: StorageStack "RiverLevels" and ApiStack "RiverLevelsApi" in eu-west-2 (replica in eu-west-1)
+src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
   index.ts                   StorageStack: DynamoDB global table, crawler, SNS publisher
   crawler.lambda.ts          Runs every 10 minutes: fetches new readings and writes them to DynamoDB
@@ -57,7 +59,10 @@ src/storage-stack/
   *.role.ts                  An IAM role per Lambda, with customer-managed policies
   flood-api-client/          axios client for environment.data.gov.uk
   store/                     DynamoDB reads and writes
-src/api-stack/               Work in progress (S3 bucket so far; not wired into main.ts)
+src/api-stack/
+  index.ts                   ApiStack: API bucket, publisher queue and dead-letter queue, publisher, alarm
+  api-publisher.lambda.ts    SQS batches of new-reading notifications → stations/{id}/status.json and chart.json in S3
+  status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
 test/<stack>/                Jest specs mirror src/. integ.*.ts are integ-runner tests
 test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ```
@@ -66,6 +71,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 
 - **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`.
 - **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
+- **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days.
 - **SNS message body** (other systems subscribe to this, so keep it backward compatible): `{"reading_depth": number, "station": string, "timestamp": number}`. A message is published only on `INSERT` stream events.
 - **Stream failures:** the publisher returns `batchItemFailures` so retries resume from the first unpublished record. After 5 retries, the batch goes to `sns-publisher-failure-queue`.
 

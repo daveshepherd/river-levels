@@ -9,6 +9,7 @@ const project = new CdkTypeScriptApp({
     '@aws-lambda-powertools/logger',
     '@aws-lambda-powertools/tracer',
     '@aws-sdk/client-dynamodb',
+    '@aws-sdk/client-s3',
     '@aws-sdk/client-sns',
     'axios',
   ],
@@ -71,6 +72,10 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
   trustedAuthors: ['daveshepherd'],
   workflowPackageCache: true,
 });
+
+// The app has more than one stack (RiverLevels, RiverLevelsApi), and cdk
+// deploy needs --all or stack names to deploy more than one.
+project.cdkTasks.deploy.reset('cdk deploy --all', { receiveArgs: true });
 
 project
   .tryFindObjectFile('test/tsconfig.json')

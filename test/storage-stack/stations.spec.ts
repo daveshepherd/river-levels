@@ -13,6 +13,7 @@ describe('stations', () => {
     expect(STATIONS).toContainEqual({
       id: 'kenilworth',
       measureId: '2627-level-stage-i-15_min-mASD',
+      ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
     });
   });
 
@@ -28,6 +29,16 @@ describe('stations', () => {
         { id: 'a', measureId: 'm2' },
       ],
       'Duplicate station id: a',
+    ],
+    [
+      'ford thresholds the wrong way round',
+      [{ id: 'a', measureId: 'm', ford: { floodedAboveMetres: 1.4, impassableAboveMetres: 1.23 } }],
+      'ford.floodedAboveMetres must be below ford.impassableAboveMetres for station a',
+    ],
+    [
+      'equal ford thresholds',
+      [{ id: 'a', measureId: 'm', ford: { floodedAboveMetres: 1, impassableAboveMetres: 1 } }],
+      'ford.floodedAboveMetres must be below ford.impassableAboveMetres for station a',
     ],
     [
       'a zero threshold',
