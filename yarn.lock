@@ -79,10 +79,10 @@
     "@aws/lambda-invoke-store" "0.3.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1151.0":
-  version "3.1151.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1151.0.tgz#014806c689a04b544ddb5832541011254cef959b"
-  integrity sha512-kWsWKCbL/53ABtNTUSJLLicEG4xE2CAXllPIp8iq8LDafxjAp/dZa82/z0s2eHpDGnbImjXBCYjhOZBGlFf/qQ==
+"@aws-sdk/client-dynamodb@^3.1152.0":
+  version "3.1152.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1152.0.tgz#52a76d0d0ad47a03d6cb6e493df5c3699b00a9c6"
+  integrity sha512-Dr3jy9vbi8ay9C9NBF508KYTYQyKOveBrY776M6tcJxz1rtDx58wgmUpbDJtVcTdrZEextPTQPdfkHEEUdjBeg==
   dependencies:
     "@aws-sdk/core" "^3.978.3"
     "@aws-sdk/credential-provider-node" "^3.972.86"
@@ -95,10 +95,10 @@
     "@smithy/types" "^4.19.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sns@^3.1151.0":
-  version "3.1151.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1151.0.tgz#88b84ebb24e860b63f924be065a4934506a14646"
-  integrity sha512-wYvVqK/ekEFutNUSUcfYaVdyHGpgsIbVMqGGnhBSbsgD2Og4dIo3rKsbkwI1J/ojGrDsEsXsvCD8Br9vqZtr1g==
+"@aws-sdk/client-sns@^3.1152.0":
+  version "3.1152.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1152.0.tgz#d3946e1803b1a0bdbbd1a00460c5b2de17d51fa6"
+  integrity sha512-o2f/Fld/y0mSBsj0S8lShYNrfTrMCDjT8q7NMoKwWgUYYTkwjG9fOT1AJkd091lj3dP6njrQV7XbA8NZfL+RcQ==
   dependencies:
     "@aws-sdk/core" "^3.978.3"
     "@aws-sdk/credential-provider-node" "^3.972.86"
@@ -618,12 +618,7 @@
     "@simple-libs/stream-utils" "^2.0.0"
     verkit "^0.5.0"
 
-"@conventional-changelog/template@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@conventional-changelog/template/-/template-1.2.1.tgz#8f673635d6ec8289bc5d5a1264629fd1e88b8d4f"
-  integrity sha512-TzlTVpKPjaqW6qOYjQcYUDuGsLCNsvFHVBXkYGTAnf5V37jCWrE5haKNXzz0WZUtVHjrpV76L1buANjwXMfT8w==
-
-"@conventional-changelog/template@^1.4.0":
+"@conventional-changelog/template@1.4.0", "@conventional-changelog/template@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@conventional-changelog/template/-/template-1.4.0.tgz#30a8680f2ab8d3a60a08e86bebb33fe8f0f8f100"
   integrity sha512-aalGyl7dbB5PArRebDIX43ZvBlXrYm9uWzGJ26t+4SzJVPsOuvfILGGbw5X4yX7i50YEmJ8zvbiWnqH/AAnZqg==
@@ -1036,9 +1031,9 @@
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
 "@jest/react-is-19@npm:react-is@^19.2.5":
-  version "19.3.0"
-  resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.3.0.tgz#716028d67e9993d23a2d353c6d08a3c1ef2bbeb4"
-  integrity sha512-UpMYezM4v5/18F28aC66AEsjXIgE02kyEMH6yLdgLXu/UTfa1Ntwck/nNLrbqJsEXW7gPb0coNO9FQse9WTovA==
+  version "19.3.1"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.3.1.tgz#81f7f7e431fc9b5bd9781b0a9f19997f08dee51b"
+  integrity sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==
 
 "@jest/reporters@30.5.2":
   version "30.5.2"
@@ -2428,7 +2423,7 @@ chalk@^4.0.0, chalk@^4.1.2:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-chalk@^6.0.0:
+chalk@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-6.0.1.tgz#077d4667ad6e608c9687782caed3d534d7f9abc3"
   integrity sha512-/Ce6KNm3vIbWdMlNna6RVIZ/ICQxnJxCicet5LBKK9ZffBkqzDw0xh9EiKSljdRtiIQ1S1z4YgcscUUGzNCWrA==
@@ -2507,13 +2502,13 @@ comment-json@4.2.2:
     repeat-string "^1.6.1"
 
 commit-and-tag-version@^13:
-  version "13.2.2"
-  resolved "https://registry.yarnpkg.com/commit-and-tag-version/-/commit-and-tag-version-13.2.2.tgz#3a8065887a1f932c29ad82f35c31d7bbee8bd73d"
-  integrity sha512-2aFnMSpVZRRV37VTw4Ej6t0LqJ+gdWII01EgPDbItbQ4HvyX4rXX+wlVCKSv9XBUCi36S3K6CWKEtkRHsMCIHg==
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/commit-and-tag-version/-/commit-and-tag-version-13.3.0.tgz#51e44aa256b1a3973d3bdf91e905c46a0633854d"
+  integrity sha512-jq+FeeY/kJ8sDriOe4A1xOiXSMuS9BYt9r4hhtH6Itx3+VkWSjdQa3y0SjXiTX0j7KmvShV3DbKR+ll2E38n1A==
   dependencies:
     "@conventional-changelog/git-client" "3.1.0"
-    "@conventional-changelog/template" "1.2.1"
-    chalk "^6.0.0"
+    "@conventional-changelog/template" "1.4.0"
+    chalk "^6.0.1"
     conventional-changelog "8.1.0"
     conventional-changelog-config-spec "2.1.0"
     conventional-changelog-conventionalcommits "10.4.0"
@@ -2769,9 +2764,9 @@ eastasianwidth@^0.2.0:
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
 electron-to-chromium@^1.5.439:
-  version "1.5.455"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.455.tgz#5a1349a3858c120fcf7107529d29a7c394eea9a3"
-  integrity sha512-EDKY1GvJLJC0UQpk+zWxnXp315azNHIns3arXVNUQUOLaon6GtIzBBXWvNno7bVoDXRPnEAV2uwgMCb+RvG5hQ==
+  version "1.5.456"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.456.tgz#cfa8b3b4c44450b8a28df4a7bc8be377cae1b691"
+  integrity sha512-8hboqI6xesozteFb8aa7OGknvxUtTeRJLz0FoePysUEh/oWbddykIGdgpEJRbPRg/nIMfBf2DFos+H2MtvJl2A==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
