@@ -4902,10 +4902,10 @@ pretty-format@30.5.1, pretty-format@^30.0.0:
     "@jest/schemas" "30.5.0"
     ansi-styles "^5.2.0"
 
-projen-modules@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-5.1.0.tgz#1e4c6be71609d71fe536ad667e3928c8540dab40"
-  integrity sha512-I2bh3EhMVxHmUE53Xdtvn67ThVspUR44MZ8tKx1M6/00NklvE2apthHcPL/8x34+j3IVXP/XNpNNDIlrLSJoAA==
+projen-modules@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-5.5.0.tgz#6cc217c407b9021f754760bf5af4c5d513488e0b"
+  integrity sha512-epBcRP8slUEjdxBolqcuq/nbnFBBvZv3L4EOyBLtwdg6YQlQGI/b1qHSljxQZZJQ65481dNWnAIHl2lkP1FIKg==
 
 projen@^0.104.5:
   version "0.104.5"
