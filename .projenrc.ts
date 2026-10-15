@@ -77,14 +77,8 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
   // Sole maintainer, who can't approve their own pull requests: the queue
   // merges these authors' PRs without an approval. Everyone else needs one.
   trustedAuthors: ['daveshepherd'],
-  // Match the Lambda runtime in CI and in the README's prerequisites
-  workflowNodeVersion: '24.x',
   workflowPackageCache: true,
 });
-
-// The app has more than one stack (RiverLevels, RiverLevelsApi), and cdk
-// deploy needs --all or stack names to deploy more than one.
-project.cdkTasks.deploy.reset('cdk deploy --all', { receiveArgs: true });
 
 project
   .tryFindObjectFile('test/tsconfig.json')
