@@ -1,0 +1,150 @@
+{
+  "/ApiTest/DefaultTest/DeployAssert/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommandfb06b4359df0ed8b5eb6ffc9c1a4323c/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81Role37ABCE73"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommande965f193b6c04e394a62f854384a721b/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/AssertionResults": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AssertionResultsAwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction76b3e830a873425f8453eddd85c86925Role918961BB"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction76b3e830a873425f8453eddd85c86925Handler81461ECE"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aRoleB84BD8CE"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand3da61a04b02aaad89e81d474a561a00e/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand3da61a04b02aaad89e81d474a561a00e/AssertionResults": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AssertionResultsAwsApiCallawssdkclients3GetObjectCommand3da61a04b02aaad89e81d474a561a00e"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommandfb06b4359df0ed8b5eb6ffc9c1a4323c/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclientdynamodbPutItemCommandfb06b4359df0ed8b5eb6ffc9c1a4323c"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommande965f193b6c04e394a62f854384a721b/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclientsnsPublishCommande965f193b6c04e394a62f854384a721b"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/WaitFor/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForRole0B47EFED"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/WaitFor/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitFor1EBE87C1"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand3da61a04b02aaad89e81d474a561a00e/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand3da61a04b02aaad89e81d474a561a00e"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/WaitFor/IsCompleteProvider/Invoke": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForIsCompleteProviderInvokeE0E00471"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/WaitFor/TimeoutProvider/Invoke": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForTimeoutProviderInvokeEB25BED6"
+    }
+  ]
+}

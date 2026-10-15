@@ -202,7 +202,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "e0afec7a192424eca76d41c07c6fa4a9dd2d31cc1a64f1ef4d69cc424aaea93a.zip"
+     "S3Key": "0a51bcd2541add1f50a9faad84a92bf10d782d60adaf5b88fa6bccf777c1e86f.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -210,7 +210,7 @@
       "DYNAMODB_READINGS_TABLE": {
        "Ref": "riverlevelstableA1F25F33"
       },
-      "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\"}]",
+      "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\",\"ford\":{\"floodedAboveMetres\":1.23,\"impassableAboveMetres\":1.4}}]",
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
      }
     },
@@ -717,7 +717,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "f595bd538a74a41547ae7eb2e16190a1bc8bfc1f1c5cc773aced9cbd196b933b.zip"
+     "S3Key": "fa57cab29d8cf545abd8779775858303da9280c8b6dbbf0f81319792b5fc8a93.zip"
     },
     "Description": "src/storage-stack/sns-publisher.lambda.ts",
     "Environment": {

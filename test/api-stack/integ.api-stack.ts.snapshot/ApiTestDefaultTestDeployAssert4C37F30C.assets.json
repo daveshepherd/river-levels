@@ -1,0 +1,33 @@
+{
+  "version": "54.0.0",
+  "files": {
+    "1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420": {
+      "source": {
+        "path": "asset.1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420.bundle",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-current_region-5025c1ba": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420.zip",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "082e11a2501f9ca6b5adfc9b7ed2849f4aac13af498ce1bcd319f6609cb6537c": {
+      "displayName": "ApiTestDefaultTestDeployAssert4C37F30C Template",
+      "source": {
+        "path": "ApiTestDefaultTestDeployAssert4C37F30C.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-4f443686": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "082e11a2501f9ca6b5adfc9b7ed2849f4aac13af498ce1bcd319f6609cb6537c.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
