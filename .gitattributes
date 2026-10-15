@@ -19,6 +19,7 @@
 /.projen/tasks.json linguist-generated
 /cdk.json linguist-generated
 /CODEOWNERS linguist-generated
+/docs/github-configuration.md linguist-generated
 /LICENSE linguist-generated
 /package.json linguist-generated
 /projenrc/tsconfig.json linguist-generated linguist-language=JSON-with-Comments

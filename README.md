@@ -23,6 +23,11 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 
 ## Getting Started
 
+Prerequisites:
+* Node.js 24
+* Yarn 1 (classic)
+* AWS credentials for the target account, needed to deploy and for the integration test tasks that deploy (`integ:update`, `integ:force`, `integ:watch`)
+
 ```sh
 yarn install
 npx projen build
@@ -30,30 +35,32 @@ npx projen build
 
 ## CDK
 
-On first run of a CDK installation:
+Bootstrap each AWS account and region once:
 
 ```sh
 npx cdk bootstrap
 ```
 
-Build the project
-```sh
-npx projen build
-```
+Deploy the app:
 
-Deploy the CDK stack
 ```sh
 npx projen deploy
 ```
 
+If the app has more than one stack, name the stacks to deploy or pass `--all`, as in `npx projen deploy --all`.
+
 ## Integration Tests
 
-Integration tests are run by [integ-runner](https://github.com/aws/aws-cdk-cli/tree/main/packages/%40aws-cdk/integ-runner) as part of `npx projen test`, which compares each test's snapshot with a fresh synth. Run them with:
-* `npx projen integ` to run the snapshot tests.
-* `npx projen integ:update` to update the snapshots of tests that changed.
-* `npx projen integ:force` to run all tests, even if their snapshots are unchanged.
-* `npx projen integ:watch` to watch the tests.
-* `npx projen integ:debug` to run the tests with verbose diagnostics and keep the artifacts of failed tests.
+Integration tests are run by [integ-runner](https://github.com/aws/aws-cdk-cli/tree/main/packages/%40aws-cdk/integ-runner).
+
+These tasks only compare snapshots, so they need no AWS credentials and deploy nothing. `npx projen test`, and so `npx projen build`, runs `integ`:
+* `npx projen integ` synthesizes each test and compares it with its snapshot.
+* `npx projen integ:debug` does the same with verbose diagnostics, keeping the generated snapshots of tests that differ.
+
+These tasks deploy to AWS, in the account and region of the current AWS credentials. Each test's stacks are real, so the tasks take minutes and incur AWS costs:
+* `npx projen integ:update` deploys the tests whose snapshots differ, runs their assertions, destroys the stacks and, if they pass, updates the snapshots.
+* `npx projen integ:force` deploys every test in the same way, even if its snapshot is unchanged.
+* `npx projen integ:watch` deploys a single test and redeploys it as its code changes, like `cdk deploy --watch`.
 
 `@aws-cdk/integ-runner` is pinned to `2.205.6` and `@aws-cdk/integ-tests-alpha` to the release matching `cdkVersion`, so the upgrade workflow never changes their versions: they only change when `cdkVersion` or `integRunnerVersion` is changed. This is intended, as each `@aws-cdk/integ-tests-alpha` release rewrites the assertion code bundled in the snapshots.
 
@@ -63,48 +70,21 @@ integ-runner ignores changes to asset hashes, so a test whose only change is Lam
 
 After each release, the release workflow deploys to these GitHub environments in order, each after the previous one succeeds:
 
-| Environment | Region | Role ARN secret |
-| ----------- | ------ | --------------- |
-| development | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN` |
-| production | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN` |
+| Environment | Region | Secrets |
+| ----------- | ------ | ------- |
+| development | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN`, `ALERT_EMAIL` |
+| production | eu-west-2 | `AWS_DEPLOYMENT_ROLE_ARN`, `ALERT_EMAIL` |
 
-Each environment needs its role ARN secret, for a role that trusts GitHub's OIDC provider.
+Each environment needs these secrets set, the first being the ARN of a role that trusts GitHub's OIDC provider.
+
+## Contributing
+
+Pull request titles must follow [Conventional Commits](https://www.conventionalcommits.org), with one of the types `feat`, `fix` or `chore`, such as `feat: describe the change`. The **Validate PR title** check fails until the title does.
+
+Once a pull request is approved, or is opened by `daveshepherd`, and its checks pass, the [Mergify](https://mergify.com) merge queue squash merges it, with its title as the commit message. Draft pull requests and those labelled `do-not-merge` are not merged.
+
+The type decides the next release: `feat` releases a minor version and `fix` a patch version, while a breaking change, marked by `!` after the type (such as `feat!: ...`) or a `BREAKING CHANGE:` footer, releases a major version. Other types still release a patch version. While the version is below 1.0.0, a breaking change releases a minor version and `feat` a patch version.
 
 ## GitHub Configuration
 
-All pull requests are merged by the [Mergify](https://mergify.com) merge queue, configured in `.mergify.yml`. Once a pull request is approved, or is opened by `daveshepherd`, and its checks pass, Mergify queues it, brings it up to date with the default branch, waits for the checks again and squash merges it. Draft pull requests and those labelled `do-not-merge` are not merged.
-
-The repository must be configured as below so that nothing can be merged without going through the queue.
-
-### Mergify
-
-Install the [Mergify GitHub App](https://github.com/apps/mergify) and give it access to this repository.
-
-### Pull request settings
-
-In **Settings → General → Pull Requests**:
-* Allow squash merging only (untick merge commits and rebase merging), matching the queue's merge method.
-* Untick **Allow auto-merge**, because GitHub's own auto-merge merges outside the queue.
-* Tick **Automatically delete head branches**.
-
-### Actions settings
-
-In **Settings → Actions → General**, set **Approval for running fork pull request workflows from contributors** to **Require approval for all external contributors**. A pull request from a fork runs its own copy of the workflows, so it can change how the required checks pass.
-
-### Code scanning
-
-CodeQL runs from `.github/workflows/codeql.yml`, which is managed by projen. In **Settings → Advanced Security**, leave CodeQL **Default setup** off, because it cannot run alongside this workflow. Under **Protection rules**, keep the **Check run failure threshold** at **High or higher** for security alerts and **Errors** for other alerts, as this decides whether the `CodeQL` check fails. Private repositories also need GitHub Code Security enabled there for code scanning results to be uploaded. CodeQL does not scan the integ-runner snapshots (`**/*.snapshot/**`): their assets are generated bundles of dependencies whose file names change on every `integ:update`, so alerts on them can neither be fixed in the repository nor dismissed for good. The source they are built from is still scanned.
-
-### Branch ruleset
-
-In **Settings → Rules → Rulesets**, create a branch ruleset with enforcement **Active** that targets the default branch, and set:
-* **Bypass list**: the **Mergify** app only, in **Exempt** mode. Do not add admins or other roles, as anyone on this list can merge without the queue.
-* **Restrict updates**: only bypass actors can update the branch, so pull requests cannot be merged from the GitHub UI or CLI and commits cannot be pushed directly.
-* **Restrict deletions** and **Block force pushes**.
-* **Require a pull request before merging**, with 0 required approvals, because Mergify requires approvals itself for authors other than `daveshepherd` and is exempt from this rule. Tick **Dismiss stale pull request approvals when new commits are pushed**, so that commits pushed after an approval need approving again before the queue merges them.
-* **Require status checks to pass**, listing the checks that `.mergify.yml` waits for: `build`. Leave **Require branches to be up to date before merging** unticked, as the queue already updates and retests each pull request.
-* **Require code scanning results**, with the tool **CodeQL**, security alerts set to **High or higher** and alerts set to **Errors**. Mergify is exempt from this rule, so `.mergify.yml` also waits for the `CodeQL` check instead.
-
-Do not enable GitHub's own **Require merge queue** rule, as it competes with Mergify.
-
-If the queue is unavailable and a change has to be merged, add yourself to the bypass list temporarily and remove yourself afterwards.
+The one-off configuration that this repository needs on GitHub, such as the Mergify merge queue and the branch ruleset, is described in [docs/github-configuration.md](docs/github-configuration.md).

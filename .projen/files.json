@@ -16,6 +16,7 @@
     ".projen/tasks.json",
     "cdk.json",
     "CODEOWNERS",
+    "docs/github-configuration.md",
     "LICENSE",
     "projenrc/tsconfig.json",
     "README.md",
