@@ -47,7 +47,7 @@ Deploy the app:
 npx projen deploy
 ```
 
-If the app has more than one stack, name the stacks to deploy or pass `--all`, as in `npx projen deploy --all`.
+This deploys every stack in the app. To deploy a single stack, name it, as in `npx cdk deploy <stack>`.
 
 ## Integration Tests
 
@@ -83,7 +83,7 @@ Pull request titles must follow [Conventional Commits](https://www.conventionalc
 
 Once a pull request is approved, or is opened by `daveshepherd`, and its checks pass, the [Mergify](https://mergify.com) merge queue squash merges it, with its title as the commit message. Draft pull requests and those labelled `do-not-merge` are not merged.
 
-The type decides the next release: `feat` releases a minor version and `fix` a patch version, while a breaking change, marked by `!` after the type (such as `feat!: ...`) or a `BREAKING CHANGE:` footer, releases a major version. Other types still release a patch version. While the version is below 1.0.0, a breaking change releases a minor version and `feat` a patch version.
+The type decides the next release: `feat` releases a minor version and `fix` a patch version, while a breaking change, marked by `!` after the type (such as `feat!: ...`) or a `BREAKING CHANGE:` footer, releases a major version. Other types still release a patch version.
 
 ## GitHub Configuration
 
