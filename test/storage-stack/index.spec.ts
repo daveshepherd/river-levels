@@ -46,7 +46,11 @@ describe('StorageStack', () => {
             storageStack.riverLevelsTableName,
           ),
           STATIONS: JSON.stringify([
-            { id: 'kenilworth', measureId: '2627-level-stage-i-15_min-mASD' },
+            {
+              id: 'kenilworth',
+              measureId: '2627-level-stage-i-15_min-mASD',
+              ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
+            },
           ]),
         },
       },

@@ -1,0 +1,154 @@
+{
+ "Resources": {
+  "readingstableB815496E": {
+   "Type": "AWS::DynamoDB::GlobalTable",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "station",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "station",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "Replicas": [
+     {
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": {
+       "Ref": "AWS::Region"
+      },
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "notificationsBCF85F58": {
+   "Type": "AWS::SNS::Topic",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "notificationsPolicy7560F28F": {
+   "Type": "AWS::SNS::TopicPolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sns:Publish",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": "*",
+       "Resource": {
+        "Ref": "notificationsBCF85F58"
+       },
+       "Sid": "AllowPublishThroughSSLOnly"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Topics": [
+     {
+      "Ref": "notificationsBCF85F58"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  }
+ },
+ "Outputs": {
+  "PublishOutputRefnotificationsBCF85F58AAFD6DB5": {
+   "Value": {
+    "Ref": "notificationsBCF85F58"
+   }
+  },
+  "PublishOutputFnGetAttreadingstableB815496EArnA3979F95": {
+   "Value": {
+    "Fn::GetAtt": [
+     "readingstableB815496E",
+     "Arn"
+    ]
+   }
+  },
+  "PublishOutputRefreadingstableB815496E57727300": {
+   "Value": {
+    "Ref": "readingstableB815496E"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

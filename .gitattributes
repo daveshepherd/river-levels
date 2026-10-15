@@ -23,6 +23,7 @@
 /package.json linguist-generated
 /projenrc/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /README.md linguist-generated
+/src/api-stack/api-publisher-function.ts linguist-generated
 /src/storage-stack/crawler-function.ts linguist-generated
 /src/storage-stack/sns-publisher-function.ts linguist-generated
 /test/tsconfig.json linguist-generated linguist-language=JSON-with-Comments

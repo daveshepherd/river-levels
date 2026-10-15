@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { App, Tags } from 'aws-cdk-lib';
+import { ApiStack } from './api-stack';
 import { resolveStage } from './stage';
 import { StorageStack } from './storage-stack';
 
@@ -13,20 +14,28 @@ if (stage !== 'local' && !alertEmail) {
   );
 }
 
+const env = { region: 'eu-west-2' };
+
 const storageStack = new StorageStack(app, 'RiverLevels', {
   alertEmail,
-  env: {
-    region: 'eu-west-2',
-  },
+  env,
   replicaRegions: ['eu-west-1'],
 });
-Tags.of(storageStack).add('endor:ManagedBy', 'cdk');
-Tags.of(storageStack).add('endor:Stage', stage);
+
+new ApiStack(app, 'RiverLevelsApi', {
+  alertsTopic: storageStack.alertsTopic,
+  env,
+  notificationsTopic: storageStack.riverLevelsNotificationsTopic,
+  readingsTable: storageStack.riverLevelsTable,
+});
+
+Tags.of(app).add('endor:ManagedBy', 'cdk');
+Tags.of(app).add('endor:Stage', stage);
 
 let version = 'local';
 if (existsSync('./dist/releasetag.txt')) {
   version = readFileSync('./dist/releasetag.txt', 'utf-8');
 }
-Tags.of(storageStack).add('endor:Version', version);
+Tags.of(app).add('endor:Version', version);
 
 app.synth();

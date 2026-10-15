@@ -130,6 +130,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-s3",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sns",
       "type": "runtime"
     },

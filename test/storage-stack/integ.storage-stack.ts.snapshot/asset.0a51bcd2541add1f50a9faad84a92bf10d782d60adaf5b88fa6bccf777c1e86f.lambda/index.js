@@ -28548,6 +28548,14 @@ function validateStations(stations) {
         `maxDepthRiseMetres must be greater than 0 for station ${station.id}`
       );
     }
+    if (station.ford) {
+      const { floodedAboveMetres, impassableAboveMetres } = station.ford;
+      if (!Number.isFinite(floodedAboveMetres) || !Number.isFinite(impassableAboveMetres) || floodedAboveMetres >= impassableAboveMetres) {
+        throw new Error(
+          `ford.floodedAboveMetres must be below ford.impassableAboveMetres for station ${station.id}`
+        );
+      }
+    }
   }
   return stations;
 }

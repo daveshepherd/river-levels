@@ -1,12 +1,12 @@
 {
-  "version": "54.0.0",
+  "version": "55.0.0",
   "testCases": {
     "DataStoreTest/DefaultTest": {
       "stacks": [
         "IntegrationTestStorageStack"
       ],
       "regions": [
-        "${Token[AWS.Region.10]}"
+        "${Token[AWS.Region.8]}"
       ],
       "allowDestroy": [
         "AWS::IAM::Policy"
@@ -23,5 +23,5 @@
     }
   },
   "enableLookups": true,
-  "minimumCliVersion": "2.1144.0"
+  "minimumCliVersion": "2.1145.0"
 }

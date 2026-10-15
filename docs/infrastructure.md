@@ -3,7 +3,9 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** one, `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts))
+- **Stacks:** two, both deployed by `cdk deploy --all`:
+  - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
+  - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland)
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -27,6 +29,14 @@ flowchart LR
     alerts["SNS topic<br/>river-levels-alerts"]
   end
 
+  subgraph api["AWS · RiverLevelsApi stack · eu-west-2"]
+    direction LR
+    apiqueue["SQS<br/>api-publisher-queue"]
+    apidlq["SQS<br/>api-publisher-dead-letter-queue"]
+    apipublisher["api-publisher Lambda<br/>arm64 · 256 MB · 60 s"]
+    bucket[("S3<br/>api-bucket<br/>stations/{id}/status.json<br/>stations/{id}/chart.json")]
+  end
+
   replica[("DynamoDB replica<br/>eu-west-1")]
   subs["Subscribers<br/>(outside this repo)"]
   email["Alert email<br/>(ALERT_EMAIL)"]
@@ -41,12 +51,18 @@ flowchart LR
   publisher -- "PublishBatch, 10 per call" --> topic
   stream -. "after 5 failed retries" .-> dlq
   topic --> subs
+  topic -- "raw message delivery" --> apiqueue
+  apiqueue -- "batches, 60 s window" --> apipublisher
+  apiqueue -. "after 5 receives" .-> apidlq
+  apipublisher -- "Query latest 12 / last year" --> table
+  apipublisher -- "PutObject" --> bucket
+  apidlq -. "metrics" .-> alarms
   crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
   alarms -- "ALARM and OK" --> alerts
   alerts --> email
 ```
 
-The stack also creates a CloudWatch log group per Lambda (one-year retention) and one IAM role per Lambda. X-Ray tracing is on for both Lambdas and the SNS topic.
+Each stack also creates a CloudWatch log group per Lambda (one-year retention) and one IAM role per Lambda. X-Ray tracing is on for all three Lambdas and the notifications topic.
 
 ## How a reading gets from the API to a subscriber
 
@@ -127,6 +143,24 @@ flowchart TD
 
 The failure queue holds stream positions (shard and sequence numbers), not the readings themselves. To recover a batch, read its records from the table or the stream while they're still available. Stream records expire after 24 hours.
 
+### 3. Publish station files: on every batch of new readings
+
+The `RiverLevelsApi` stack keeps a status file and a chart file for each station in S3. These replace the original flood-readings service's `/status` and `/chart` API, in the same JSON shapes, for the kenilworthford.com website.
+
+- `api-publisher-queue` is subscribed to `river-levels-notifications` with raw message delivery, so each message is the SNS message body.
+- [`api-publisher.lambda.ts`](../src/api-stack/api-publisher.lambda.ts) reads the queue in batches of up to 100, waiting up to 60 seconds to fill one. It groups messages by station and rebuilds each station's files **once per batch**, so a crawler backfill doesn't rebuild them dozens of times.
+- For each station it writes:
+  - `stations/{id}/status.json`: worked out by [`status.ts`](../src/api-stack/status.ts) from the latest 12 readings (3 hours), for example `{"depth":1.3,"direction":"rising","rate":"fast","state":"flooded","lastUpdate":"2020-01-01T15:15:00.000Z"}`.
+    - `direction` compares the latest depth with the mean of the 12, to 2 decimal places.
+    - `rate` comes from their standard deviation: 0.01 m or less is `slow`, up to 0.03 m is `moderate`, more is `fast`, and `none` when the direction is `none`.
+    - `state` is only there for stations with a `ford` in `stations.ts`: `clear` up to `floodedAboveMetres`, `flooded` up to `impassableAboveMetres`, then `impassable`. Kenilworth's thresholds are 1.23 m and 1.4 m.
+    - The logic is ported from flood-readings and was checked against its `mathjs` implementation.
+  - `stations/{id}/chart.json`: every reading from the last 365 days as `[[timestamp, depth], ...]`, oldest first.
+- Both files are written with `Content-Type: application/json` and `Cache-Control: max-age=300`.
+- If a station fails, only its messages are reported back for retry, and the other stations are still published. After 5 receives a message goes to `api-publisher-dead-letter-queue`, which raises the `api-publisher-dead-letters` alarm. Messages for stations that aren't configured are ignored.
+
+The bucket isn't public yet. Serving it at `api.kenilworthford.com` through CloudFront is the next step.
+
 ## Resources
 
 Logical names as they appear in the CloudFormation template.
@@ -145,7 +179,19 @@ Logical names as they appear in the CloudFormation template.
 | `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. |
 | `crawler-log-group`, `sns-publisher-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
-**Stack output:** `RiverLevelsTable`, the table ARN.
+`RiverLevelsApi` stack:
+
+| Resource | Type | Key settings |
+|----------|------|--------------|
+| `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. |
+| `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
+| `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
+| `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
+| `api-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | `api-publisher-queue`, batch size 100, 60 s batching window, `ReportBatchItemFailures`. |
+| `api-publisher-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
+| `api-publisher-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+
+**Stack outputs:** `RiverLevelsTable` (the table ARN) from `RiverLevels`, and `ApiBucket` (the bucket name) from `RiverLevelsApi`.
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 
@@ -159,6 +205,9 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `sns-publisher-role` | `dynamodb:DescribeStream`, `GetRecords`, `GetShardIterator`, `ListStreams` | the table stream |
 | `sns-publisher-role` | `sns:Publish` | the topic |
 | `sns-publisher-role` | `sqs:SendMessage`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | the failure queue |
+| `api-publisher-role` | `dynamodb:Query` | the table |
+| `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
+| `api-publisher-role` | `sqs:ReceiveMessage`, `DeleteMessage`, `ChangeMessageVisibility`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | `api-publisher-queue` |
 
 ## Deployment
 
@@ -173,24 +222,25 @@ flowchart LR
 ```
 
 - The deploy jobs check out the released commit and download the release job's `dist` artifact, which provides `releasetag.txt` for the `endor:Version` tag. They don't rebuild or re-run tests: the release job already did that for the same commit, and `cdk deploy` bundles the Lambdas through the `build` hook in `cdk.json`.
-- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
+- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys both stacks, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
 - Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. PRs from `trustedAuthors` (the sole maintainer) need no approval; everyone else's need one, and fork PRs also need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in the README's GitHub Configuration section.
 - The deploy jobs come from the `deployments` option in `.projenrc.ts`, which projen-modules turns into jobs on the release workflow.
 - The workflow is generated from [`.projenrc.ts`](../.projenrc.ts). Change it there, not in `.github/workflows/`.
-- The integ snapshot check compares the synthesized template with [`test/storage-stack/integ.storage-stack.ts.snapshot/`](../test/storage-stack/integ.storage-stack.ts.snapshot). Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
+- The integ snapshot check compares the synthesized templates with the committed snapshots in `test/storage-stack/` and `test/api-stack/`. Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
 
 ## Operations
 
 - **Logs:** CloudWatch Logs groups for `crawler-lambda` and `sns-publisher-lambda`. The crawler writes structured JSON through Powertools Logger (service `crawler`), including the Lambda request ID, so it can be queried with CloudWatch Logs Insights. It logs counts and date ranges, not whole payloads.
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
+- **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
 ### Alarms
 
-All alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) and email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
+The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) and the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts). All of them email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
 
 | Alarm | Fires when | Where to look |
 |-------|-----------|---------------|
@@ -199,3 +249,4 @@ All alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts
 | `crawler-dead-letters` | `crawler-dead-letter-queue` has any messages | EventBridge couldn't invoke the crawler; check its permissions and throttling |
 | `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
 | `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |
+| `api-publisher-dead-letters` | `api-publisher-dead-letter-queue` has any messages | Publisher logs (service `api-publisher`); DynamoDB or S3 errors |

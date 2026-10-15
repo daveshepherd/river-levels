@@ -1,0 +1,86 @@
+{
+  "/IntegrationTestApiFixtures/readings-table": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "partitionKey": {
+          "name": "*",
+          "type": "S"
+        },
+        "pointInTimeRecoverySpecification": {
+          "pointInTimeRecoveryEnabled": true
+        },
+        "sortKey": {
+          "name": "*",
+          "type": "N"
+        }
+      }
+    }
+  ],
+  "/IntegrationTestApiFixtures/notifications": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestApiFixtures/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestApiFixtures/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestApiFixtures/readings-table/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "readingstableB815496E"
+    }
+  ],
+  "/IntegrationTestApiFixtures/notifications/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "notificationsBCF85F58"
+    }
+  ],
+  "/IntegrationTestApiFixtures/notifications/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiFixtures/Publish/Output{\"Ref\":\"notificationsBCF85F58\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefnotificationsBCF85F58AAFD6DB5"
+    }
+  ],
+  "/IntegrationTestApiFixtures/Publish/Output{\"Fn::GetAtt\":[\"readingstableB815496E\",\"Arn\"]}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputFnGetAttreadingstableB815496EArnA3979F95"
+    }
+  ],
+  "/IntegrationTestApiFixtures/Publish/Output{\"Ref\":\"readingstableB815496E\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefreadingstableB815496E57727300"
+    }
+  ],
+  "/IntegrationTestApiFixtures/notifications/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "notificationsPolicy7560F28F"
+    }
+  ]
+}

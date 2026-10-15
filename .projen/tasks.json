@@ -73,10 +73,52 @@
       "description": "Prepare assets",
       "steps": [
         {
+          "spawn": "bundle:api-stack/api-publisher.lambda"
+        },
+        {
           "spawn": "bundle:storage-stack/crawler.lambda"
         },
         {
           "spawn": "bundle:storage-stack/sns-publisher.lambda"
+        }
+      ]
+    },
+    "bundle:api-stack/api-publisher.lambda": {
+      "name": "bundle:api-stack/api-publisher.lambda",
+      "description": "Create a JavaScript bundle from src/api-stack/api-publisher.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/api-stack/api-publisher.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/api-stack/api-publisher.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
+        }
+      ]
+    },
+    "bundle:api-stack/api-publisher.lambda:watch": {
+      "name": "bundle:api-stack/api-publisher.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/api-stack/api-publisher.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/api-stack/api-publisher.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/api-stack/api-publisher.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
         }
       ]
     },
@@ -226,10 +268,7 @@
       "description": "Deploys your CDK app to the AWS cloud",
       "steps": [
         {
-          "execArgs": [
-            "cdk",
-            "deploy"
-          ],
+          "exec": "cdk deploy --all",
           "receiveArgs": true
         }
       ]
@@ -562,7 +601,7 @@
             "--peer",
             "--no-deprecated",
             "--dep=dev,prod,peer,optional",
-            "--filter=@types/aws-lambda,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,nock,projen,projen-modules,source-map-support,ts-node,typescript,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-sns,axios"
+            "--filter=@types/aws-lambda,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,nock,projen,projen-modules,source-map-support,ts-node,typescript,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-s3,@aws-sdk/client-sns,axios"
           ]
         },
         {
@@ -601,6 +640,7 @@
             "@aws-lambda-powertools/logger",
             "@aws-lambda-powertools/tracer",
             "@aws-sdk/client-dynamodb",
+            "@aws-sdk/client-s3",
             "@aws-sdk/client-sns",
             "aws-cdk-lib",
             "axios",

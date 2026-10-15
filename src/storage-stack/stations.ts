@@ -1,3 +1,14 @@
+/**
+ * Depths at which a ford on the river becomes unsafe to drive through, in
+ * metres above stage datum (the same scale as the station's readings).
+ */
+export interface FordConfig {
+  /** Above this depth the ford is flooded, but may still be passable. */
+  floodedAboveMetres: number;
+  /** Above this depth the ford is impassable. Must be above floodedAboveMetres. */
+  impassableAboveMetres: number;
+}
+
 /** A river level gauge the crawler collects readings for. */
 export interface StationConfig {
   /**
@@ -16,6 +27,11 @@ export interface StationConfig {
    * treated as gauge errors and dropped. Defaults to 2.
    */
   maxDepthRiseMetres?: number;
+  /**
+   * The ford this gauge reports on. When set, the station's published status
+   * includes whether the ford is clear, flooded or impassable.
+   */
+  ford?: FordConfig;
 }
 
 /** The stations the deployed crawler collects. */
@@ -23,6 +39,9 @@ export const STATIONS: StationConfig[] = [
   {
     id: 'kenilworth',
     measureId: '2627-level-stage-i-15_min-mASD',
+    // Kenilworth ford (kenilworthford.com), from the original flood-readings
+    // service.
+    ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
   },
 ];
 
@@ -52,6 +71,18 @@ export function validateStations(stations: unknown): StationConfig[] {
       throw new Error(
         `maxDepthRiseMetres must be greater than 0 for station ${station.id}`,
       );
+    }
+    if (station.ford) {
+      const { floodedAboveMetres, impassableAboveMetres } = station.ford;
+      if (
+        !Number.isFinite(floodedAboveMetres) ||
+        !Number.isFinite(impassableAboveMetres) ||
+        floodedAboveMetres >= impassableAboveMetres
+      ) {
+        throw new Error(
+          `ford.floodedAboveMetres must be below ford.impassableAboveMetres for station ${station.id}`,
+        );
+      }
     }
   }
   return stations as StationConfig[];
