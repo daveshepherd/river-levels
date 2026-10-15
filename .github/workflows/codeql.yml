@@ -29,6 +29,9 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: none
+          config: |-
+            paths-ignore:
+              - "**/*.snapshot/**"
       - name: Perform CodeQL Analysis
         id: perform_codeql_analysis
         uses: github/codeql-action/analyze@v4
