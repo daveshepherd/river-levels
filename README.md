@@ -90,7 +90,7 @@ In **Settings → Actions → General**, set **Approval for running fork pull re
 
 ### Code scanning
 
-CodeQL runs from `.github/workflows/codeql.yml`, which is managed by projen. In **Settings → Advanced Security**, leave CodeQL **Default setup** off, because it cannot run alongside this workflow. Under **Protection rules**, keep the **Check run failure threshold** at **High or higher** for security alerts and **Errors** for other alerts, as this decides whether the `CodeQL` check fails. Private repositories also need GitHub Code Security enabled there for code scanning results to be uploaded.
+CodeQL runs from `.github/workflows/codeql.yml`, which is managed by projen. In **Settings → Advanced Security**, leave CodeQL **Default setup** off, because it cannot run alongside this workflow. Under **Protection rules**, keep the **Check run failure threshold** at **High or higher** for security alerts and **Errors** for other alerts, as this decides whether the `CodeQL` check fails. Private repositories also need GitHub Code Security enabled there for code scanning results to be uploaded. CodeQL does not scan the integ-runner snapshots (`**/*.snapshot/**`): their assets are generated bundles of dependencies whose file names change on every `integ:update`, so alerts on them can neither be fixed in the repository nor dismissed for good. The source they are built from is still scanned.
 
 ### Branch ruleset
 
