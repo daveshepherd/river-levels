@@ -79,7 +79,7 @@
     "cdk_nag": {
      "rules_to_suppress": [
       {
-       "reason": "the bucket holds generated, public data and is only written by the publisher; access logging will come with the CloudFront distribution",
+       "reason": "the bucket holds generated, public data, is only written by the publisher and only read by CloudFront; access logs would add cost without a use",
        "id": "AwsSolutions-S1"
       }
      ]
@@ -166,6 +166,50 @@
          ]
         }
        ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Condition": {
+        "StringEquals": {
+         "AWS:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":cloudfront::",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":distribution/",
+            {
+             "Ref": "apidistribution146B80A5"
+            }
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "apibucketE65E1D51",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
       }
      ],
      "Version": "2012-10-17"
@@ -596,7 +640,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "175e84f558aa44b5595c9714e209116d9f9de717280b1e001b34ee39d0cb549b.zip"
+     "S3Key": "9801063b640bc219bf3c7bc164471fd95ec922f225075192caa1e211f2dd297a.zip"
     },
     "Description": "src/api-stack/api-publisher.lambda.ts",
     "Environment": {
@@ -684,6 +728,147 @@
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
+  },
+  "apilegacypathsE8AF88B6": {
+   "Type": "AWS::CloudFront::Function",
+   "Properties": {
+    "AutoPublish": true,
+    "FunctionCode": "function handler(event) {\n  var request = event.request;\n  var rewrites = {\"/status\":\"/stations/kenilworth/status.json\",\"/chart\":\"/stations/kenilworth/chart.json\"};\n  var target = rewrites[request.uri.replace(/\\/$/, '')];\n  if (target) {\n    request.uri = target;\n  }\n  return request;\n}",
+    "FunctionConfig": {
+     "Comment": "Maps /status and /chart to a station's files",
+     "Runtime": "cloudfront-js-2.0"
+    },
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       {
+        "Ref": "AWS::Region"
+       },
+       "IntegrationTestAkapilegacy-paths969D7F16"
+      ]
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "apidistributionOrigin1S3OriginAccessControlBF1226AA": {
+   "Type": "AWS::CloudFront::OriginAccessControl",
+   "Properties": {
+    "OriginAccessControlConfig": {
+     "Name": "IntegrationTestApiStackapidiOrigin1S3OriginAccessControl6FC45D9B",
+     "OriginAccessControlOriginType": "s3",
+     "SigningBehavior": "always",
+     "SigningProtocol": "sigv4"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "apidistribution146B80A5": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Comment": "River levels station files",
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD",
+       "OPTIONS"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "CachedMethods": [
+       "GET",
+       "HEAD",
+       "OPTIONS"
+      ],
+      "Compress": true,
+      "FunctionAssociations": [
+       {
+        "EventType": "viewer-request",
+        "FunctionARN": {
+         "Fn::GetAtt": [
+          "apilegacypathsE8AF88B6",
+          "FunctionARN"
+         ]
+        }
+       }
+      ],
+      "ResponseHeadersPolicyId": "60669652-455b-4ae9-85a4-c4c02393f86c",
+      "TargetOriginId": "IntegrationTestApiStackapidistributionOrigin1CC648DC3",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2and3",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "apibucketE65E1D51",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "IntegrationTestApiStackapidistributionOrigin1CC648DC3",
+       "OriginAccessControlId": {
+        "Fn::GetAtt": [
+         "apidistributionOrigin1S3OriginAccessControlBF1226AA",
+         "Id"
+        ]
+       },
+       "S3OriginConfig": {
+        "OriginAccessIdentity": ""
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_100"
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "the station files are public data, so there is no reason to restrict them by country",
+       "id": "AwsSolutions-CFR1"
+      },
+      {
+       "reason": "the distribution serves small, cached, read-only public files; a WAF would cost more than the rest of the stack",
+       "id": "AwsSolutions-CFR2"
+      },
+      {
+       "reason": "the distribution serves public, read-only files; access logs would add cost without a use",
+       "id": "AwsSolutions-CFR3"
+      },
+      {
+       "reason": "the default cloudfront.net certificate cannot set a minimum TLS version; the custom domain certificate will require TLS 1.2",
+       "id": "AwsSolutions-CFR4"
+      }
+     ]
+    }
+   }
   }
  },
  "Outputs": {
@@ -692,9 +877,25 @@
     "Ref": "apibucketE65E1D51"
    }
   },
+  "ApiDomainName": {
+   "Value": {
+    "Fn::GetAtt": [
+     "apidistribution146B80A5",
+     "DomainName"
+    ]
+   }
+  },
   "PublishOutputRefapibucketE65E1D51AEE84AA4": {
    "Value": {
     "Ref": "apibucketE65E1D51"
+   }
+  },
+  "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092": {
+   "Value": {
+    "Fn::GetAtt": [
+     "apidistribution146B80A5",
+     "DomainName"
+    ]
    }
   }
  },
