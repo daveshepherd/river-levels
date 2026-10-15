@@ -35,11 +35,13 @@ flowchart LR
     apidlq["SQS<br/>api-publisher-dead-letter-queue"]
     apipublisher["api-publisher Lambda<br/>arm64 · 256 MB · 60 s"]
     bucket[("S3<br/>api-bucket<br/>stations/{id}/status.json<br/>stations/{id}/chart.json")]
+    cdn["CloudFront<br/>api/distribution<br/>legacy-paths function"]
   end
 
   replica[("DynamoDB replica<br/>eu-west-1")]
   subs["Subscribers<br/>(outside this repo)"]
   email["Alert email<br/>(ALERT_EMAIL)"]
+  website["kenilworthford.com<br/>website"]
 
   rule -- "invoke (3 retries)" --> crawler
   rule -. "invoke failed after retries" .-> crawlerdlq
@@ -56,6 +58,8 @@ flowchart LR
   apiqueue -. "after 5 receives" .-> apidlq
   apipublisher -- "Query latest 12 / last year" --> table
   apipublisher -- "PutObject" --> bucket
+  cdn -- "GetObject (origin access control)" --> bucket
+  website -- "GET /status, /chart" --> cdn
   apidlq -. "metrics" .-> alarms
   crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
   alarms -- "ALARM and OK" --> alerts
@@ -159,7 +163,19 @@ The `RiverLevelsApi` stack keeps a status file and a chart file for each station
 - Both files are written with `Content-Type: application/json` and `Cache-Control: max-age=300`.
 - If a station fails, only its messages are reported back for retry, and the other stations are still published. After 5 receives a message goes to `api-publisher-dead-letter-queue`, which raises the `api-publisher-dead-letters` alarm. Messages for stations that aren't configured are ignored.
 
-The bucket isn't public yet. Serving it at `api.kenilworthford.com` through CloudFront is the next step.
+### 4. Serve station files: CloudFront
+
+The `api/distribution` CloudFront distribution serves the bucket, which stays private: CloudFront reads it through origin access control, and the bucket policy only allows CloudFront to `GetObject`.
+
+- **Paths:** the `legacy-paths` CloudFront Function (viewer request) maps the original flood-readings API's paths to the `legacyStationId` station, `kenilworth`:
+  - `/status` serves `stations/kenilworth/status.json`
+  - `/chart` serves `stations/kenilworth/chart.json`
+
+  Every other path is passed through, so `/stations/{id}/status.json` and `chart.json` serve any station. A missing file returns `403`, because CloudFront can't list the bucket.
+- **CORS:** the managed `SimpleCORS` response headers policy adds `Access-Control-Allow-Origin: *` when a request has an `Origin` header, as the original API did.
+- **Caching:** the managed `CachingOptimized` policy honours the files' `Cache-Control: max-age=300`, so CloudFront and browsers cache for 5 minutes. Responses are compressed.
+- **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
+- **Domain:** for now, only its `*.cloudfront.net` domain, output as `ApiDomainName`. `api.kenilworthford.com` and `api.dev.kenilworthford.com` will follow, with their own hosted zones and certificate. The minimum TLS version will be set to 1.2 then.
 
 ## Resources
 
@@ -183,7 +199,9 @@ Logical names as they appear in the CloudFormation template.
 
 | Resource | Type | Key settings |
 |----------|------|--------------|
-| `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. |
+| `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it. |
+| `api/distribution` | `AWS::CloudFront::Distribution` | Origin: `api-bucket` through origin access control. Managed `CachingOptimized` cache policy and `SimpleCORS` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
+| `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
 | `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
 | `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
@@ -191,7 +209,7 @@ Logical names as they appear in the CloudFormation template.
 | `api-publisher-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `api-publisher-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
-**Stack outputs:** `RiverLevelsTable` (the table ARN) from `RiverLevels`, and `ApiBucket` (the bucket name) from `RiverLevelsApi`.
+**Stack outputs:** `RiverLevelsTable` (the table ARN) from `RiverLevels`, and `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`.
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 

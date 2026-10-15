@@ -1,5 +1,6 @@
 import { App, Stack } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { CachePolicy, ResponseHeadersPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { ApiStack, ApiStackProps } from '../../src/api-stack';
@@ -78,6 +79,7 @@ describe('ApiStack', () => {
 
   test('that the publisher is given the bucket, table and stations', () => {
     const { stack, template } = synth({
+      legacyStationId: 'a',
       stations: [{ id: 'a', measureId: 'm' }],
     });
 
@@ -148,5 +150,64 @@ describe('ApiStack', () => {
     expect(() => synth({ stations: [] })).toThrow(
       'At least one station must be configured',
     );
+  });
+
+  test('that the distribution serves the bucket over HTTPS through origin access control', () => {
+    const { stack, template } = synth();
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        HttpVersion: 'http2and3',
+        PriceClass: 'PriceClass_100',
+        DefaultCacheBehavior: Match.objectLike({
+          AllowedMethods: ['GET', 'HEAD', 'OPTIONS'],
+          CachePolicyId: CachePolicy.CACHING_OPTIMIZED.cachePolicyId,
+          Compress: true,
+          ResponseHeadersPolicyId:
+            ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS.responseHeadersPolicyId,
+          ViewerProtocolPolicy: 'redirect-to-https',
+          FunctionAssociations: [
+            Match.objectLike({ EventType: 'viewer-request' }),
+          ],
+        }),
+        Origins: [
+          Match.objectLike({
+            DomainName: stack.resolve(stack.apiBucket.bucketRegionalDomainName),
+            OriginAccessControlId: Match.anyValue(),
+          }),
+        ],
+      }),
+    });
+    template.resourceCountIs('AWS::CloudFront::OriginAccessControl', 1);
+  });
+
+  test('that only CloudFront can read the bucket', () => {
+    const { template } = synth();
+
+    template.hasResourceProperties('AWS::S3::BucketPolicy', {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: 's3:GetObject',
+            Effect: 'Allow',
+            Principal: { Service: 'cloudfront.amazonaws.com' },
+          }),
+        ]),
+      },
+    });
+  });
+
+  test('that the domain name is a stack output', () => {
+    const { template } = synth();
+
+    template.hasOutput('ApiDomainName', {
+      Value: { 'Fn::GetAtt': [Match.anyValue(), 'DomainName'] },
+    });
+  });
+
+  test('that the legacy station must be one of the stations', () => {
+    expect(() =>
+      synth({ legacyStationId: 'elsewhere' }),
+    ).toThrow('legacyStationId elsewhere is not one of the configured stations');
   });
 });

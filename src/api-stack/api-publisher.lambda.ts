@@ -2,6 +2,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import type { Context, SQSBatchResponse, SQSEvent } from 'aws-lambda';
 import { logger, tracer } from './powertools';
 import { getLatestReadings, getReadingsSince } from './readings';
+import { stationKeys } from './station-keys';
 import { getStationStatus, STATUS_READINGS } from './status';
 import { parseStations, StationConfig } from '../storage-stack/stations';
 
@@ -14,13 +15,6 @@ export const CACHE_CONTROL = 'max-age=300';
 // Created once per Lambda container and reused across invocations.
 const s3Client = tracer.captureAWSv3Client(new S3Client({}));
 
-/** The S3 keys a station's files are published to. */
-export function stationKeys(stationId: string) {
-  return {
-    status: `stations/${stationId}/status.json`,
-    chart: `stations/${stationId}/chart.json`,
-  };
-}
 
 async function putJson(key: string, body: unknown) {
   await s3Client.send(

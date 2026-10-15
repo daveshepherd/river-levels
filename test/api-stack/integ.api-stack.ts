@@ -108,6 +108,41 @@ integ.assertions
           Body: Match.serializedJson([[timestamp, 1.3]]),
         }),
       ),
+  )
+  // The same files through CloudFront, at the original API's paths
+  .next(
+    integ.assertions
+      .httpApiCall(
+        `https://${stackUnderTest.distribution.distributionDomainName}/status`,
+        { headers: { Origin: 'https://kenilworthford.com' } },
+      )
+      .expect(
+        ExpectedResult.objectLike({
+          status: 200,
+          headers: Match.objectLike({
+            'access-control-allow-origin': ['*'],
+            'content-type': ['application/json'],
+          }),
+          body: Match.objectLike({ depth: 1.3, state: 'flooded' }),
+        }),
+      )
+      .waitForAssertions({
+        totalTimeout: Duration.minutes(5),
+        interval: Duration.seconds(15),
+        backoffRate: 2,
+      }),
+  )
+  .next(
+    integ.assertions
+      .httpApiCall(
+        `https://${stackUnderTest.distribution.distributionDomainName}/chart`,
+      )
+      .expect(
+        ExpectedResult.objectLike({
+          status: 200,
+          body: [[timestamp, 1.3]],
+        }),
+      ),
   );
 
 NagSuppressions.addStackSuppressions(stackUnderTest, [
@@ -138,7 +173,7 @@ NagSuppressions.addResourceSuppressionsByPath(
     {
       id: 'AwsSolutions-S1',
       reason:
-        'the bucket holds generated, public data and is only written by the publisher; access logging will come with the CloudFront distribution',
+        'the bucket holds generated, public data, is only written by the publisher and only read by CloudFront; access logs would add cost without a use',
     },
   ],
 );
@@ -150,6 +185,28 @@ NagSuppressions.addResourceSuppressionsByPath(
       id: 'AwsSolutions-SQS3',
       reason:
         'this queue is the dead-letter queue for the API publisher queue, so it does not need a DLQ of its own',
+    },
+  ],
+);
+NagSuppressions.addResourceSuppressionsByPath(
+  stackUnderTest,
+  '/IntegrationTestApiStack/api/distribution/Resource',
+  [
+    {
+      id: 'AwsSolutions-CFR1',
+      reason: 'the station files are public data, so there is no reason to restrict them by country',
+    },
+    {
+      id: 'AwsSolutions-CFR2',
+      reason: 'the distribution serves small, cached, read-only public files; a WAF would cost more than the rest of the stack',
+    },
+    {
+      id: 'AwsSolutions-CFR3',
+      reason: 'the distribution serves public, read-only files; access logs would add cost without a use',
+    },
+    {
+      id: 'AwsSolutions-CFR4',
+      reason: 'the default cloudfront.net certificate cannot set a minimum TLS version; the custom domain certificate will require TLS 1.2',
     },
   ],
 );
