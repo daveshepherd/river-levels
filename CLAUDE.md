@@ -16,7 +16,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | Crawler fetch or filter logic, or table key schema | Crawl sequence diagram |
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
-| The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables |
+| The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
 
