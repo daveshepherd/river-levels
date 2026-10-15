@@ -54,7 +54,7 @@ const project = new CdkTypeScriptApp({
   packageManager: NodePackageManager.YARN_CLASSIC,
   projenrcTs: true,
   readme: {
-    description: `Collects river level readings from the [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/reference), stores them in DynamoDB and publishes each new reading to SNS.
+    description: `Collects river level readings from the [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/reference), stores them in DynamoDB, publishes each new reading to SNS, and keeps a status and chart file for each station for the [kenilworthford.com](https://kenilworthford.com) website.
 
 Every 10 minutes a crawler Lambda fetches new readings for each station in [\`src/storage-stack/stations.ts\`](src/storage-stack/stations.ts) (currently Kenilworth) and writes them to a DynamoDB global table in \`eu-west-2\`, replicated to \`eu-west-1\`. A second Lambda reads the table's stream and publishes each new reading to the \`river-levels-notifications\` SNS topic as:
 
@@ -62,7 +62,14 @@ Every 10 minutes a crawler Lambda fetches new readings for each station in [\`sr
 {"reading_depth": 0.694, "station": "kenilworth", "timestamp": 1718374500000}
 \`\`\`
 
-\`reading_depth\` is in metres above stage datum and \`timestamp\` is in epoch milliseconds. CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
+\`reading_depth\` is in metres above stage datum and \`timestamp\` is in epoch milliseconds.
+
+The \`RiverLevelsApi\` stack queues those notifications and, once per batch, rewrites each station's files in S3. They will replace the original flood-readings service's \`/status\` and \`/chart\` API once they're served through CloudFront:
+
+- \`stations/{id}/status.json\`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is \`clear\`, \`flooded\` or \`impassable\`
+- \`stations/{id}/chart.json\`: every reading from the last year, as \`[[timestamp, depth], ...]\`
+
+CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
 
 See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data flow, resources, IAM, deployment and alarms.`,
   },
@@ -86,8 +93,4 @@ project
   .tryFindObjectFile('test/tsconfig.json')
   ?.addOverride('compilerOptions.skipLibCheck', true);
 
-project.readme?.addSection(
-  'Documentation',
-  '- [Infrastructure](docs/infrastructure.md): architecture, data flow, resources, IAM and deployment',
-);
 project.synth();
