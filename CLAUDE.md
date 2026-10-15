@@ -44,7 +44,7 @@ This is a projen project (`CdkTypeScriptApp` from `projen-modules`). **`.projenr
 Gotchas:
 - **ts-jest doesn't type-check.** `test/tsconfig.json` sets `isolatedModules`, so `npx jest` passes even with type errors. The `test` task type-checks first (projen's `typecheckTests`, on by default in projen-modules), and the synth step type-checks `src/main.ts` through ts-node, so `npx projen test` and the build catch them. Running `npx jest` on its own doesn't.
 - **`projen eslint` runs `--fix`.** It rewrites files in place, including untracked work-in-progress. Code style is single quotes, 2-space indent and trailing commas.
-- **Integration tests deploy real stacks** to the user's AWS account and take about 10 minutes. Don't run `integ:update`, `integ:force` or `integ:debug` without asking. The plain `integ` task, which `build` also runs, only compares snapshots and fails if they differ. It never deploys.
+- **Integration tests deploy real stacks** to the user's AWS account and take about 10 minutes. Don't run `integ:update`, `integ:force` or `integ:watch` without asking: they deploy. The plain `integ` task, which `build` also runs, and `integ:debug` (verbose, keeps failed build output) only compare snapshots and fail if they differ. They never deploy.
 
 ## Layout
 
