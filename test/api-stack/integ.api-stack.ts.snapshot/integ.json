@@ -6,7 +6,7 @@
         "IntegrationTestApiStack"
       ],
       "regions": [
-        "${Token[AWS.Region.12]}"
+        "${Token[AWS.Region.5]}"
       ],
       "cdkCommandOptions": {
         "destroy": {

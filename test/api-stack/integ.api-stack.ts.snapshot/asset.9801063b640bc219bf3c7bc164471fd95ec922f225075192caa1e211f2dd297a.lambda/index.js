@@ -7546,8 +7546,7 @@ var api_publisher_lambda_exports = {};
 __export(api_publisher_lambda_exports, {
   CACHE_CONTROL: () => CACHE_CONTROL,
   CHART_DAYS: () => CHART_DAYS,
-  handler: () => handler,
-  stationKeys: () => stationKeys
+  handler: () => handler
 });
 module.exports = __toCommonJS(api_publisher_lambda_exports);
 var import_client_s3 = require("@aws-sdk/client-s3");
@@ -10868,6 +10867,14 @@ async function getReadingsSince(station, since) {
   return readings;
 }
 
+// src/api-stack/station-keys.ts
+function stationKeys(stationId) {
+  return {
+    status: `stations/${stationId}/status.json`,
+    chart: `stations/${stationId}/chart.json`
+  };
+}
+
 // src/api-stack/status.ts
 var STATUS_READINGS = 12;
 function roundTo2(value) {
@@ -10977,12 +10984,6 @@ function parseStations(json) {
 var CHART_DAYS = 365;
 var CACHE_CONTROL = "max-age=300";
 var s3Client = tracer.captureAWSv3Client(new import_client_s3.S3Client({}));
-function stationKeys(stationId) {
-  return {
-    status: `stations/${stationId}/status.json`,
-    chart: `stations/${stationId}/chart.json`
-  };
-}
 async function putJson(key, body) {
   await s3Client.send(
     new import_client_s3.PutObjectCommand({
@@ -11064,8 +11065,7 @@ async function handler(event, context) {
 0 && (module.exports = {
   CACHE_CONTROL,
   CHART_DAYS,
-  handler,
-  stationKeys
+  handler
 });
 /*! Bundled license information:
 

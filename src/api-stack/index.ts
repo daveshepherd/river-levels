@@ -6,6 +6,7 @@ import {
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
+import { Distribution } from 'aws-cdk-lib/aws-cloudfront';
 import {
   Alarm,
   ComparisonOperator,
@@ -28,6 +29,7 @@ import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import { ApiPublisherFunction } from './api-publisher-function';
 import { ApiPublisherRole } from './api-publisher.role';
+import { ApiDistribution } from './distribution';
 import {
   StationConfig,
   STATIONS,
@@ -43,20 +45,34 @@ export interface ApiStackProps extends StackProps {
   alertsTopic?: ITopic;
   /** The stations to publish. Defaults to STATIONS in stations.ts. */
   stations?: StationConfig[];
+  /**
+   * The station served at /status and /chart, the paths of the original
+   * flood-readings API that the kenilworthford.com website reads.
+   * @default 'kenilworth'
+   */
+  legacyStationId?: string;
   setDestroyPolicyToAllResources?: boolean;
 }
 
 /**
  * Publishes each station's status and chart as JSON files in S3, regenerated
- * whenever new readings arrive. These replace the original flood-readings
- * service's /status and /chart API.
+ * whenever new readings arrive, and serves them through CloudFront. These
+ * replace the original flood-readings service's /status and /chart API.
  */
 export class ApiStack extends Stack {
   public readonly apiBucket: Bucket;
+  public readonly distribution: Distribution;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
     const destroy = props.setDestroyPolicyToAllResources ?? false;
+    const stations = validateStations(props.stations ?? STATIONS);
+    const legacyStationId = props.legacyStationId ?? 'kenilworth';
+    if (!stations.some((station) => station.id === legacyStationId)) {
+      throw new Error(
+        `legacyStationId ${legacyStationId} is not one of the configured stations`,
+      );
+    }
 
     this.apiBucket = new Bucket(this, 'api-bucket', {
       autoDeleteObjects: destroy,
@@ -93,7 +109,7 @@ export class ApiStack extends Stack {
       environment: {
         API_BUCKET: this.apiBucket.bucketName,
         DYNAMODB_READINGS_TABLE: props.readingsTable.tableName,
-        STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
+        STATIONS: JSON.stringify(stations),
       },
       logGroup: new LogGroup(this, 'api-publisher-log-group', {
         retention: RetentionDays.ONE_YEAR,
@@ -130,9 +146,17 @@ export class ApiStack extends Stack {
       alarm.addOkAction(action);
     }
 
+    this.distribution = new ApiDistribution(this, 'api', {
+      bucket: this.apiBucket,
+      legacyStationId,
+    }).distribution;
+
     if (destroy) {
       Aspects.of(this).add(new ApplyDestroyPolicyAspect());
     }
     new CfnOutput(this, 'ApiBucket', { value: this.apiBucket.bucketName });
+    new CfnOutput(this, 'ApiDomainName', {
+      value: this.distribution.distributionDomainName,
+    });
   }
 }

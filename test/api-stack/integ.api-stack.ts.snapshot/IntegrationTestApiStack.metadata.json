@@ -182,6 +182,12 @@
       "data": "ApiBucket"
     }
   ],
+  "/IntegrationTestApiStack/ApiDomainName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiDomainName"
+    }
+  ],
   "/IntegrationTestApiStack/BootstrapVersion": [
     {
       "type": "aws:cdk:logicalId",
@@ -379,10 +385,51 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/api/legacy-paths": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "code": "*",
+        "comment": "*",
+        "runtime": "*"
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/api/distribution": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "comment": "*",
+        "defaultBehavior": {
+          "allowedMethods": "*",
+          "cachedMethods": "*",
+          "cachePolicy": "*",
+          "compress": true,
+          "functionAssociations": [
+            {
+              "eventType": "viewer-request",
+              "function": "*"
+            }
+          ],
+          "origin": "*",
+          "responseHeadersPolicy": "*",
+          "viewerProtocolPolicy": "redirect-to-https"
+        },
+        "httpVersion": "http2and3",
+        "priceClass": "PriceClass_100"
+      }
+    }
+  ],
   "/IntegrationTestApiStack/Publish/Output{\"Ref\":\"apibucketE65E1D51\"}": [
     {
       "type": "aws:cdk:logicalId",
       "data": "PublishOutputRefapibucketE65E1D51AEE84AA4"
+    }
+  ],
+  "/IntegrationTestApiStack/Publish/Output{\"Fn::GetAtt\":[\"apidistribution146B80A5\",\"DomainName\"]}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092"
     }
   ],
   "/IntegrationTestApiStack/api-bucket/Policy/Resource": [
@@ -443,6 +490,30 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "apipublisherlambdaSqsEventSourceIntegrationTestApiStackapipublisherqueueBA5A4318C7405B7E"
+    }
+  ],
+  "/IntegrationTestApiStack/api/legacy-paths/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apilegacypathsE8AF88B6"
+    }
+  ],
+  "/IntegrationTestApiStack/api/distribution/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apidistribution146B80A5"
+    }
+  ],
+  "/IntegrationTestApiStack/api/distribution/Origin1/S3OriginAccessControl": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestApiStack/api/distribution/Origin1/S3OriginAccessControl/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apidistributionOrigin1S3OriginAccessControlBF1226AA"
     }
   ]
 }

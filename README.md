@@ -12,7 +12,7 @@ Every 10 minutes a crawler Lambda fetches new readings for each station in [`src
 
 `reading_depth` is in metres above stage datum and `timestamp` is in epoch milliseconds.
 
-The `RiverLevelsApi` stack queues those notifications and, once per batch, rewrites each station's files in S3. They will replace the original flood-readings service's `/status` and `/chart` API once they're served through CloudFront:
+The `RiverLevelsApi` stack queues those notifications and, once per batch, rewrites each station's files in S3. CloudFront serves them, at the original flood-readings service's `/status` and `/chart` paths for Kenilworth, and will replace that service's API once `api.kenilworthford.com` points at it:
 
 - `stations/{id}/status.json`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is `clear`, `flooded` or `impassable`
 - `stations/{id}/chart.json`: every reading from the last year, as `[[timestamp, depth], ...]`
