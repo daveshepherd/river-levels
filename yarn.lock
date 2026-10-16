@@ -1947,35 +1947,35 @@
   integrity sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA==
 
 "@vitest/expect@>1.6.0":
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-5.0.4.tgz#762cfdc8678aeef6c424bfdc74ea92431343b340"
-  integrity sha512-1Cko3Uav9doH3l+dmIBntzy9kcLM6c0Q7B9qMUgFqhDNgeJiYW57CUn1EIlWZlZ97Uaqj7SYSfu2ezwvDhE3og==
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-5.0.5.tgz#7e089424a503671e76dc4838aef4cd95ac19da6b"
+  integrity sha512-mDBbYrXKpc+4TcSDwBW6adCMtPnide6Z1g8bI6gL0tY+nhdBxtGoOFW/kMrLDt6lJg3xjEUBkrY9yIPlgzpuig==
   dependencies:
     "@standard-schema/spec" "^1.1.0"
     "@types/chai" "^5.2.2"
-    "@vitest/spy" "5.0.4"
-    "@vitest/utils" "5.0.4"
+    "@vitest/spy" "5.0.5"
+    "@vitest/utils" "5.0.5"
     chai "^6.3.0"
     tinyrainbow "^3.2.0"
 
-"@vitest/pretty-format@5.0.4":
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/@vitest/pretty-format/-/pretty-format-5.0.4.tgz#2526452722953910424eff75c933128ae37472e1"
-  integrity sha512-kh/bp0oLr6w18kt4MFn5/zS+Hpc5k3bsf6S2m2Qksj7sKHrnc7Tu90UVYyiXnRvkYruN6kSCHQ3RR+SBE6FinA==
+"@vitest/pretty-format@5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@vitest/pretty-format/-/pretty-format-5.0.5.tgz#0eb1b65ab31ee0a9bcd948591c0659d994092314"
+  integrity sha512-24sSdIlMA9DVPXnYiB9siwU0bTd887Y9jX3+vabztCSsvHwo7ipvJ/a2L3Rljw8+2rK1f5fCj3h5U9I/Jsqgbw==
   dependencies:
     tinyrainbow "^3.2.0"
 
-"@vitest/spy@5.0.4":
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-5.0.4.tgz#1b1a14019d14f7f8bf9ab1ea854c78d4d98c0200"
-  integrity sha512-MZKk/gSkm2q+ICobMxCpH1mA+cCAWm8WV7UhxlqGjq/sJ3AGc1BqFOs5CRVXxH78wQtme9q/NAAgBquj4AcyMw==
+"@vitest/spy@5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-5.0.5.tgz#d5629d07a1182899f2159f700d0cd4e73785d6b9"
+  integrity sha512-lwJRExuH417257Q5wv9QYugN9IMJkoxcrKrYxGPQkBzl7wlNpTUxD/5yNX4ESKVUIShKPgkGchYPFMWOOk0wzw==
 
-"@vitest/utils@5.0.4":
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-5.0.4.tgz#1048a551269c629b7e14d2b281ec7502e9adbdf9"
-  integrity sha512-hgpnyMuMqCz2PARmk3v62FxUr8jHIkY13ygvUeh8s+dmQxfnvkB/sgtoZFzG4lMitnEdnrg/lCvDbtVzuAsGWQ==
+"@vitest/utils@5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-5.0.5.tgz#09f387421188b7ed145d238a1db8dc036a320e04"
+  integrity sha512-/rBu7gzLDQI/SC79Tn98b5DwOgaHU/Gt4I9OVeP3YofzNaYtbImRCOJQmT1S6vOJg9gEIlWC+r3QxKkjuSa1nQ==
   dependencies:
-    "@vitest/pretty-format" "5.0.4"
+    "@vitest/pretty-format" "5.0.5"
     convert-source-map "^2.0.0"
     tinyrainbow "^3.2.0"
 
@@ -2326,9 +2326,9 @@ balanced-match@^4.0.2:
   integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
 
 baseline-browser-mapping@^2.11.26:
-  version "2.11.28"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.28.tgz#784efec0fa3965c28a0bbb755f40604ace1c9db0"
-  integrity sha512-br0LOmjJqr6Rt4AEkadbcNf67Zpo7EPwKsWbjnRrJIa1QYFHQBqM4C7F2WTbV8ahTEcg1Eo+Y0aWjjORInYFyA==
+  version "2.11.29"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.29.tgz#dbed0ed2c17943aa4427863c91300865d9d8ca23"
+  integrity sha512-YeesxhUmR4h5y5V8KF8iBCqJb8YFrBJ++XBTeGcWIaQOYXGN19JM0FoiOjAhwuDoln8owMgXcWBmgHtYSkky2w==
 
 bowser@^2.11.0:
   version "2.14.1"
@@ -2804,9 +2804,9 @@ eastasianwidth@^0.2.0:
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
 electron-to-chromium@^1.5.439:
-  version "1.5.456"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.456.tgz#cfa8b3b4c44450b8a28df4a7bc8be377cae1b691"
-  integrity sha512-8hboqI6xesozteFb8aa7OGknvxUtTeRJLz0FoePysUEh/oWbddykIGdgpEJRbPRg/nIMfBf2DFos+H2MtvJl2A==
+  version "1.5.457"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.457.tgz#90198ca2f187be9410a2c3c394db204eb76e78aa"
+  integrity sha512-RNKsgErRmkzRgC8nOV1wzFhSbfGlYJ6k4LT/aE7oFrDYaQgHhTh5oTp0ZgSbRRybKR8HlZIdCWc38Y+CDTk1Jw==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -4907,10 +4907,10 @@ projen-modules@^5.7.1:
   resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-5.7.1.tgz#8153dc4242386cb766b871ebafb8aa9015e65901"
   integrity sha512-t8ggrrXqhabghP43ipi1P3gKECmb2E2/Fo07pWBdOn5qQUFrpAHB8mAoYVFDtK1exm0prtb49rj0C6hFhVFExg==
 
-projen@^0.104.5:
-  version "0.104.5"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.104.5.tgz#82ac439aab422d279dfef54d5699ed05e69b6a3d"
-  integrity sha512-t0Ja/zrLpbcJcuu2duNQZ65NxxQbgUOnrUGDztoRV7dEEU5MWn8/dXlxnYXyj50ftyNxl42zoPyrVw53q0DQZA==
+projen@^0.104.8:
+  version "0.104.8"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.104.8.tgz#fdf0f17b97c343079abcc9e5fbc507a64188c723"
+  integrity sha512-+aP/lwF00aclH+CLMta1ikb4Vzb2jrCQlK4usDevnvpSS0r/uG+CFj08RED813u3Y++xvKJK3Kwn58ctKLq45g==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
