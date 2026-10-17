@@ -2804,9 +2804,9 @@ eastasianwidth@^0.2.0:
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
 electron-to-chromium@^1.5.439:
-  version "1.5.457"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.457.tgz#90198ca2f187be9410a2c3c394db204eb76e78aa"
-  integrity sha512-RNKsgErRmkzRgC8nOV1wzFhSbfGlYJ6k4LT/aE7oFrDYaQgHhTh5oTp0ZgSbRRybKR8HlZIdCWc38Y+CDTk1Jw==
+  version "1.5.458"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.458.tgz#fdc608c8ee26eeb4fa20b3447378c6c83a806a76"
+  integrity sha512-/hIH2gRSmxrf4/X4Nw/t/Wc8PVS22l8/3HnWjWTWsTOM5dsnMUPZF/+u+yr3LqweNuTBJE1rq6qAQzKkZVwMfA==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -4902,10 +4902,10 @@ pretty-format@30.5.1, pretty-format@^30.0.0:
     "@jest/schemas" "30.5.0"
     ansi-styles "^5.2.0"
 
-projen-modules@^5.7.1:
-  version "5.7.1"
-  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-5.7.1.tgz#8153dc4242386cb766b871ebafb8aa9015e65901"
-  integrity sha512-t8ggrrXqhabghP43ipi1P3gKECmb2E2/Fo07pWBdOn5qQUFrpAHB8mAoYVFDtK1exm0prtb49rj0C6hFhVFExg==
+projen-modules@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/projen-modules/-/projen-modules-5.7.2.tgz#3004b96644f339eeb77d5b739232e08d1e1e34bc"
+  integrity sha512-HYighkjgnDnBJinxTIoapbfSp4wRtXFRadtYBNduDgMtb1+24/r9Qz6o5Vs7ahCROXqRQwd+t5IfeG6SLOARaw==
 
 projen@^0.104.8:
   version "0.104.8"
