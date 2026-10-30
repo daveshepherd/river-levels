@@ -3,9 +3,10 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** two, both deployed by `cdk deploy --all`:
+- **Stacks:** three, all deployed by `cdk deploy --all`:
   - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
+  - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland)
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -38,6 +39,12 @@ flowchart LR
     cdn["CloudFront<br/>api/distribution<br/>legacy-paths function"]
   end
 
+  subgraph domain["AWS · RiverLevelsApiDomain stack · us-east-1"]
+    zone["Route 53 hosted zone<br/>api-zone<br/>api.kenilworthford.com"]
+  end
+
+  parentzone["kenilworthford.com zone<br/>(endor-infrastructure)"]
+
   replica[("DynamoDB replica<br/>eu-west-1")]
   subs["Subscribers<br/>(outside this repo)"]
   email["Alert email<br/>(ALERT_EMAIL)"]
@@ -60,6 +67,7 @@ flowchart LR
   apipublisher -- "PutObject" --> bucket
   cdn -- "GetObject (origin access control)" --> bucket
   website -- "GET /status, /chart" --> cdn
+  parentzone -. "NS delegation (to do)" .-> zone
   apidlq -. "metrics" .-> alarms
   crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
   alarms -- "ALARM and OK" --> alerts
@@ -175,7 +183,25 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
 - **CORS:** the managed `SimpleCORS` response headers policy adds `Access-Control-Allow-Origin: *` when a request has an `Origin` header, as the original API did.
 - **Caching:** the managed `CachingOptimized` policy honours the files' `Cache-Control: max-age=300`, so CloudFront and browsers cache for 5 minutes. Responses are compressed.
 - **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
-- **Domain:** for now, only its `*.cloudfront.net` domain, output as `ApiDomainName`. `api.kenilworthford.com` and `api.dev.kenilworthford.com` will follow, with their own hosted zones and certificate. The minimum TLS version will be set to 1.2 then.
+- **Domain:** for now, only its `*.cloudfront.net` domain, output as `ApiDomainName`. The custom domains are being set up; see [API domains](#api-domains).
+
+### API domains
+
+Each stage's account owns a public hosted zone for its API domain, in the `RiverLevelsApiDomain` stack ([`apiDomainName()`](../src/stage.ts)):
+
+| Stage | Domain | Parent zone (endor-infrastructure) |
+|-------|--------|------------------------------------|
+| `development` | `api.dev.kenilworthford.com` | `dev.kenilworthford.com` |
+| `production` | `api.kenilworthford.com` | `kenilworthford.com` |
+| `local` | `api.local.kenilworthford.com` | none; only used for local synths |
+
+The parent zones are in the endor account and managed by Terraform. They delegate each domain to its zone with `NS` records for the stack's `NameServers` output. The zone is retained if the stack is deleted, because a new zone would get new name servers and break the delegation.
+
+Status of the move from flood-readings' API:
+1. Done: CloudFront distribution, at its `*.cloudfront.net` domain.
+2. Done: hosted zones, not yet delegated.
+3. To do: a us-east-1 certificate validated in the zone (TLS 1.2 minimum), the domain as the distribution's alternate name, and alias records.
+4. To do: in endor-infrastructure, remove the old `api` CloudFront module and its records, and add the `NS` delegation. The API is unavailable for a few minutes while this happens. Development goes first.
 
 ## Resources
 
@@ -209,7 +235,16 @@ Logical names as they appear in the CloudFormation template.
 | `api-publisher-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `api-publisher-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
-**Stack outputs:** `RiverLevelsTable` (the table ARN) from `RiverLevels`, and `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`.
+`RiverLevelsApiDomain` stack (us-east-1):
+
+| Resource | Type | Key settings |
+|----------|------|--------------|
+| `api-zone` | `AWS::Route53::HostedZone` | Public zone for the stage's API domain. Retained when the stack is deleted. |
+
+**Stack outputs:**
+- `RiverLevelsTable` (the table ARN) from `RiverLevels`
+- `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
+- `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 
@@ -240,7 +275,8 @@ flowchart LR
 ```
 
 - The deploy jobs check out the released commit and download the release job's `dist` artifact, which provides `releasetag.txt` for the `endor:Version` tag. They don't rebuild or re-run tests: the release job already did that for the same commit, and `cdk deploy` bundles the Lambdas through the `build` hook in `cdk.json`.
-- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys both stacks, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
+- **Each account is CDK-bootstrapped in both `eu-west-2` and `us-east-1`**, because `RiverLevelsApiDomain` deploys to us-east-1. The bootstrap (`CDKToolkit` stacks, qualifier `hnb659fds`, version 32) is managed by Terraform in endor-infrastructure's `modules/cdk_bootstrap`. **Don't run `cdk bootstrap` against these accounts**, as it would drift from Terraform. To upgrade, regenerate the template there. The GitHub deploy role can assume the bootstrap roles in any region.
+- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys all three stacks, including `RiverLevelsApiDomain` in us-east-1, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
 - Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. PRs from `trustedAuthors` (the sole maintainer) need no approval; everyone else's need one, and fork PRs also need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in [`docs/github-configuration.md`](github-configuration.md), which projen generates.
