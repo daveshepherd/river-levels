@@ -20,3 +20,19 @@ export function resolveStage(env: NodeJS.ProcessEnv = process.env): Stage {
   }
   return stage as Stage;
 }
+
+const API_DOMAIN_NAMES: Record<Stage, string> = {
+  // Only used for local synths and deploys from a developer's machine
+  local: 'api.local.kenilworthford.com',
+  development: 'api.dev.kenilworthford.com',
+  production: 'api.kenilworthford.com',
+};
+
+/**
+ * The domain the station files are served at for a stage. Each stage's
+ * account owns a hosted zone for it, delegated from the kenilworthford.com
+ * or dev.kenilworthford.com zone in endor-infrastructure.
+ */
+export function apiDomainName(stage: Stage): string {
+  return API_DOMAIN_NAMES[stage];
+}

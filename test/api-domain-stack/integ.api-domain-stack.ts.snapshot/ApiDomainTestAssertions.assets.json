@@ -1,0 +1,35 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420": {
+      "source": {
+        "path": "asset.1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420.bundle",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-us-east-1-aa27d204": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+        }
+      }
+    },
+    "f11060f7a7af1b7eafa5443748e283eab03f6391c9fe03c7d596b1940034d70e": {
+      "displayName": "ApiDomainTestAssertions Template",
+      "source": {
+        "path": "ApiDomainTestAssertions.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-us-east-1-2aad4fc3": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "f11060f7a7af1b7eafa5443748e283eab03f6391c9fe03c7d596b1940034d70e.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

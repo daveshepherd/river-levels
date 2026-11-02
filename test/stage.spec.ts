@@ -1,4 +1,4 @@
-import { resolveStage } from '../src/stage';
+import { apiDomainName, resolveStage } from '../src/stage';
 
 describe('resolveStage', () => {
   test('that it defaults to local when STAGE is not set', () => {
@@ -20,5 +20,15 @@ describe('resolveStage', () => {
     expect(() => resolveStage({ STAGE: 'prod' })).toThrow(
       'Unknown STAGE "prod". Expected one of: local, development, production',
     );
+  });
+});
+
+describe('apiDomainName', () => {
+  test.each([
+    ['local', 'api.local.kenilworthford.com'],
+    ['development', 'api.dev.kenilworthford.com'],
+    ['production', 'api.kenilworthford.com'],
+  ] as const)('that the %s API is served at %s', (stage, domain) => {
+    expect(apiDomainName(stage)).toBe(domain);
   });
 });

@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from 'fs';
 import { App, Tags } from 'aws-cdk-lib';
+import { ApiDomainStack } from './api-domain-stack';
 import { ApiStack } from './api-stack';
-import { resolveStage } from './stage';
+import { apiDomainName, resolveStage } from './stage';
 import { StorageStack } from './storage-stack';
 
 const app = new App();
@@ -27,6 +28,12 @@ new ApiStack(app, 'RiverLevelsApi', {
   env,
   notificationsTopic: storageStack.riverLevelsNotificationsTopic,
   readingsTable: storageStack.riverLevelsTable,
+});
+
+// us-east-1, where the API's CloudFront certificate has to be
+new ApiDomainStack(app, 'RiverLevelsApiDomain', {
+  domainName: apiDomainName(stage),
+  env: { region: 'us-east-1' },
 });
 
 Tags.of(app).add('endor:ManagedBy', 'cdk');

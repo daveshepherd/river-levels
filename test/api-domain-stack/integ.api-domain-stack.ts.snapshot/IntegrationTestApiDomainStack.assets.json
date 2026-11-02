@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "dbf398247760afd1bc1e2b85ae2549e4e3aade773b99e0c5887f4bdb7475eb9a": {
+      "displayName": "IntegrationTestApiDomainStack Template",
+      "source": {
+        "path": "IntegrationTestApiDomainStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-us-east-1-1a8a6a47": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "dbf398247760afd1bc1e2b85ae2549e4e3aade773b99e0c5887f4bdb7475eb9a.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
