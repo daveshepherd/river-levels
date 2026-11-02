@@ -1,0 +1,58 @@
+{
+  "/ApiDomainTestAssertions": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "ApiDomainTestAssertions.template.json"
+    }
+  ],
+  "/ApiDomainTestAssertions/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/ApiDomainTestAssertions/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/ApiDomainTestAssertions/AwsApiCallRoute53GetHostedZone7c1a3949bf283961b0a6c4b28ffb0e33/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/ApiDomainTestAssertions/AwsApiCallRoute53GetHostedZone7c1a3949bf283961b0a6c4b28ffb0e33/AssertionResults": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AssertionResultsAwsApiCallRoute53GetHostedZone7c1a3949bf283961b0a6c4b28ffb0e33"
+    }
+  ],
+  "/ApiDomainTestAssertions/SingletonFunction1488541a7b23466481b69b4408076b81/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81Role37ABCE73"
+    }
+  ],
+  "/ApiDomainTestAssertions/SingletonFunction1488541a7b23466481b69b4408076b81/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F"
+    }
+  ],
+  "/ApiDomainTestAssertions/AwsApiCallRoute53GetHostedZone7c1a3949bf283961b0a6c4b28ffb0e33/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallRoute53GetHostedZone7c1a3949bf283961b0a6c4b28ffb0e33"
+    }
+  ]
+}

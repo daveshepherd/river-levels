@@ -1,0 +1,85 @@
+{
+ "Resources": {
+  "apizoneBE9FEB00": {
+   "Type": "AWS::Route53::HostedZone",
+   "Properties": {
+    "HostedZoneConfig": {
+     "Comment": "River levels station files API"
+    },
+    "HostedZoneTags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Name": "api.integ.river-levels.example."
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  }
+ },
+ "Outputs": {
+  "NameServers": {
+   "Description": "Delegate the domain to these name servers with NS records in the parent zone",
+   "Value": {
+    "Fn::Join": [
+     ",",
+     {
+      "Fn::GetAtt": [
+       "apizoneBE9FEB00",
+       "NameServers"
+      ]
+     }
+    ]
+   }
+  },
+  "HostedZoneId": {
+   "Value": {
+    "Ref": "apizoneBE9FEB00"
+   }
+  },
+  "PublishOutputRefapizoneBE9FEB003FD3D35C": {
+   "Value": {
+    "Ref": "apizoneBE9FEB00"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

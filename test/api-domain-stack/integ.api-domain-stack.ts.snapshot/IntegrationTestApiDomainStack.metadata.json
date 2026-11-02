@@ -1,0 +1,60 @@
+{
+  "/IntegrationTestApiDomainStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestApiDomainStack.template.json"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/api-zone": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "comment": "*",
+        "zoneName": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "comment": "*",
+        "zoneName": "*"
+      }
+    }
+  ],
+  "/IntegrationTestApiDomainStack/NameServers": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NameServers"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/HostedZoneId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HostedZoneId"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/api-zone/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apizoneBE9FEB00"
+    }
+  ],
+  "/IntegrationTestApiDomainStack/Publish/Output{\"Ref\":\"apizoneBE9FEB00\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefapizoneBE9FEB003FD3D35C"
+    }
+  ]
+}

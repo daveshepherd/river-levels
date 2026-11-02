@@ -1,0 +1,14 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "ApiDomainTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestApiDomainStack"
+      ],
+      "assertionStack": "ApiDomainTestAssertions",
+      "assertionStackName": "ApiDomainTestAssertions"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}
