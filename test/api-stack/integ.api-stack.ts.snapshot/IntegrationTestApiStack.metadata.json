@@ -1,4 +1,10 @@
 {
+  "/IntegrationTestApiStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestApiStack.template.json"
+    }
+  ],
   "/IntegrationTestApiStack/api-bucket": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -395,6 +401,22 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/api/cors": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "comment": "*",
+        "corsBehavior": {
+          "accessControlAllowCredentials": false,
+          "accessControlAllowHeaders": "*",
+          "accessControlAllowMethods": "*",
+          "accessControlAllowOrigins": "*",
+          "accessControlMaxAge": "*",
+          "originOverride": true
+        }
+      }
+    }
+  ],
   "/IntegrationTestApiStack/api/distribution": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -496,6 +518,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "apilegacypathsE8AF88B6"
+    }
+  ],
+  "/IntegrationTestApiStack/api/cors/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apicors5E8B7895"
     }
   ],
   "/IntegrationTestApiStack/api/distribution/Resource": [

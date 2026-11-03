@@ -1,4 +1,10 @@
 {
+  "/IntegrationTestApiFixtures": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestApiFixtures.template.json"
+    }
+  ],
   "/IntegrationTestApiFixtures/readings-table": [
     {
       "type": "aws:cdk:analytics:construct",
