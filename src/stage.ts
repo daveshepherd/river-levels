@@ -48,7 +48,7 @@ export function apiDomainName(stage: Stage): string {
  */
 const API_CUSTOM_DOMAIN_ENABLED: Record<Stage, boolean> = {
   local: false,
-  development: false,
+  development: true,
   production: false,
 };
 

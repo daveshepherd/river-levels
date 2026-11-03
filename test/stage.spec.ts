@@ -38,10 +38,11 @@ describe('apiDomainName', () => {
 });
 
 describe('apiCustomDomainEnabled', () => {
-  test.each(['local', 'development', 'production'] as const)(
-    'that %s does not serve at its API domain until its cutover',
-    (stage) => {
-      expect(apiCustomDomainEnabled(stage)).toBe(false);
-    },
-  );
+  test.each([
+    ['local', false],
+    ['development', true],
+    ['production', false],
+  ] as const)('that %s serving at its API domain is %s', (stage, enabled) => {
+    expect(apiCustomDomainEnabled(stage)).toBe(enabled);
+  });
 });
