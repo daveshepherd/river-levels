@@ -36,3 +36,22 @@ const API_DOMAIN_NAMES: Record<Stage, string> = {
 export function apiDomainName(stage: Stage): string {
   return API_DOMAIN_NAMES[stage];
 }
+
+/**
+ * Whether a stage serves the station files at its API domain, with a
+ * certificate and alias records, rather than only at the CloudFront domain.
+ *
+ * Turn a stage on as part of its cutover: the certificate only validates once
+ * endor-infrastructure delegates the domain to the stage's hosted zone, which
+ * also removes the original flood-readings API's distribution from it. See
+ * "API domains" in docs/infrastructure.md.
+ */
+const API_CUSTOM_DOMAIN_ENABLED: Record<Stage, boolean> = {
+  local: false,
+  development: false,
+  production: false,
+};
+
+export function apiCustomDomainEnabled(stage: Stage): boolean {
+  return API_CUSTOM_DOMAIN_ENABLED[stage];
+}

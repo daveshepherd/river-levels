@@ -29,7 +29,7 @@ import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import { ApiPublisherFunction } from './api-publisher-function';
 import { ApiPublisherRole } from './api-publisher.role';
-import { ApiDistribution } from './distribution';
+import { ApiCustomDomain, ApiDistribution } from './distribution';
 import {
   StationConfig,
   STATIONS,
@@ -51,6 +51,12 @@ export interface ApiStackProps extends StackProps {
    * @default 'kenilworth'
    */
   legacyStationId?: string;
+  /**
+   * Serve the station files at a custom domain as well as the CloudFront
+   * domain. The certificate and hosted zone come from the ApiDomainStack in
+   * us-east-1, so both stacks need crossRegionReferences.
+   */
+  customDomain?: ApiCustomDomain;
   setDestroyPolicyToAllResources?: boolean;
 }
 
@@ -148,6 +154,7 @@ export class ApiStack extends Stack {
 
     this.distribution = new ApiDistribution(this, 'api', {
       bucket: this.apiBucket,
+      customDomain: props.customDomain,
       legacyStationId,
     }).distribution;
 

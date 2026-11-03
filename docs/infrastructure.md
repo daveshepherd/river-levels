@@ -41,6 +41,7 @@ flowchart LR
 
   subgraph domain["AWS · RiverLevelsApiDomain stack · us-east-1"]
     zone["Route 53 hosted zone<br/>api-zone<br/>api.kenilworthford.com"]
+    cert["ACM certificate<br/>api-certificate<br/>(when the stage's custom domain is on)"]
   end
 
   parentzone["kenilworthford.com zone<br/>(endor-infrastructure)"]
@@ -68,6 +69,9 @@ flowchart LR
   cdn -- "GetObject (origin access control)" --> bucket
   website -- "GET /status, /chart" --> cdn
   parentzone -. "NS delegation (to do)" .-> zone
+  cert -. "validated in" .-> zone
+  cdn -. "custom domain, TLS 1.2 (when on)" .-> cert
+  zone -. "alias A/AAAA (when on)" .-> cdn
   apidlq -. "metrics" .-> alarms
   crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
   alarms -- "ALARM and OK" --> alerts
@@ -183,7 +187,7 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
 - **CORS:** the managed `SimpleCORS` response headers policy adds `Access-Control-Allow-Origin: *` when a request has an `Origin` header, as the original API did.
 - **Caching:** the managed `CachingOptimized` policy honours the files' `Cache-Control: max-age=300`, so CloudFront and browsers cache for 5 minutes. Responses are compressed.
 - **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
-- **Domain:** for now, only its `*.cloudfront.net` domain, output as `ApiDomainName`. The custom domains are being set up; see [API domains](#api-domains).
+- **Domain:** always its `*.cloudfront.net` domain, output as `ApiDomainName`. A stage whose custom domain is on also serves at its API domain, with a TLS 1.2 minimum; see [API domains](#api-domains).
 
 ### API domains
 
@@ -197,11 +201,32 @@ Each stage's account owns a public hosted zone for its API domain, in the `River
 
 The parent zones are in the endor account and managed by Terraform. They delegate each domain to its zone with `NS` records for the stack's `NameServers` output. The zone is retained if the stack is deleted, because a new zone would get new name servers and break the delegation.
 
+Whether a stage serves at its domain is switched per stage by `apiCustomDomainEnabled()` in [`src/stage.ts`](../src/stage.ts). It's off for every stage until that stage's cutover. When it's on:
+
+- `RiverLevelsApiDomain` creates `api-certificate`, an ACM certificate for the domain, DNS-validated with a record in `api-zone`.
+- `RiverLevelsApi` adds the domain to `api/distribution` with that certificate and a TLS 1.2 minimum (`TLSv1.2_2021`, SNI). It also creates `api/alias-a` and `api/alias-aaaa`, alias records at the zone apex pointing at the distribution.
+- The certificate and zone are in us-east-1 and the distribution is in eu-west-2, so both stacks set `crossRegionReferences`. CDK passes the values through SSM parameters, using a `Custom::CrossRegionExportWriter` in `RiverLevelsApiDomain` and a `Custom::CrossRegionExportReader` in `RiverLevelsApi`.
+
 Status of the move from flood-readings' API:
 1. Done: CloudFront distribution, at its `*.cloudfront.net` domain.
 2. Done: hosted zones, not yet delegated.
-3. To do: a us-east-1 certificate validated in the zone (TLS 1.2 minimum), the domain as the distribution's alternate name, and alias records.
-4. To do: in endor-infrastructure, remove the old `api` CloudFront module and its records, and add the `NS` delegation. The API is unavailable for a few minutes while this happens. Development goes first.
+3. Done: certificate, domain and alias records, switched off in every stage.
+4. To do: cut over development, then production, as below.
+
+#### Cutting over a stage
+
+Do development first and check the website, then production. The API is unavailable from step 2 until step 3's deploy finishes, about 20–30 minutes, so pick a quiet time, not when the river is high. The website's service worker caches `/status`, so visitors may see the last status meanwhile.
+
+1. **Prepare both changes, without merging or applying either.**
+   - **endor-infrastructure,** in `applications/<dev|prod>-kenilworthford/`:
+     - Remove the `api` module in `api.tf`. That removes the original API's CloudFront distribution, its certificate and its `A`/`AAAA` records.
+     - Add an `NS` record named `api.<dev.>kenilworthford.com` in the `dns_zone` zone. Its values are the stage's `RiverLevelsApiDomain` `NameServers` output, with a TTL of 300.
+   - **river-levels:** set the stage to `true` in `apiCustomDomainEnabled()`.
+2. **Apply the Terraform change, and wait for it to finish.** Deleting the old distribution takes several minutes. CloudFront won't let two distributions share a domain, even across accounts, so river-levels can't claim it until the old one is gone.
+3. **Merge the river-levels change.** The release deploys the stage. Its certificate validates within minutes, because the zone is now delegated. The distribution then gets the domain and the alias records are created. Merging before step 2 finishes makes the deploy fail and roll back, which is safe: re-run it after the apply.
+4. **Check** `https://api.<dev.>kenilworthford.com/status` and `/chart`, and the website.
+
+The website needs no change: its `apiEndpoint` stays `https://api.<dev.>kenilworthford.com`.
 
 ## Resources
 
@@ -227,6 +252,7 @@ Logical names as they appear in the CloudFormation template.
 |----------|------|--------------|
 | `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it. |
 | `api/distribution` | `AWS::CloudFront::Distribution` | Origin: `api-bucket` through origin access control. Managed `CachingOptimized` cache policy and `SimpleCORS` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
+| `api/alias-a`, `api/alias-aaaa` | `AWS::Route53::RecordSet` | Only when the stage's custom domain is on. Alias records at the domain's apex, in `api-zone`, pointing at the distribution. |
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
 | `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
@@ -240,6 +266,7 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `api-zone` | `AWS::Route53::HostedZone` | Public zone for the stage's API domain. Retained when the stack is deleted. |
+| `api-certificate` | `AWS::CertificateManager::Certificate` | Only when the stage's custom domain is on. The domain, DNS-validated in `api-zone`. |
 
 **Stack outputs:**
 - `RiverLevelsTable` (the table ARN) from `RiverLevels`
