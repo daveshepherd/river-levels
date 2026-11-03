@@ -1,4 +1,8 @@
-import { apiDomainName, resolveStage } from '../src/stage';
+import {
+  apiCustomDomainEnabled,
+  apiDomainName,
+  resolveStage,
+} from '../src/stage';
 
 describe('resolveStage', () => {
   test('that it defaults to local when STAGE is not set', () => {
@@ -31,4 +35,13 @@ describe('apiDomainName', () => {
   ] as const)('that the %s API is served at %s', (stage, domain) => {
     expect(apiDomainName(stage)).toBe(domain);
   });
+});
+
+describe('apiCustomDomainEnabled', () => {
+  test.each(['local', 'development', 'production'] as const)(
+    'that %s does not serve at its API domain until its cutover',
+    (stage) => {
+      expect(apiCustomDomainEnabled(stage)).toBe(false);
+    },
+  );
 });

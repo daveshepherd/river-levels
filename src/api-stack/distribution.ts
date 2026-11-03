@@ -1,3 +1,4 @@
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   AllowedMethods,
   CachedMethods,
@@ -10,9 +11,17 @@ import {
   HttpVersion,
   PriceClass,
   ResponseHeadersPolicy,
+  SecurityPolicyProtocol,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import {
+  AaaaRecord,
+  ARecord,
+  IHostedZone,
+  RecordTarget,
+} from 'aws-cdk-lib/aws-route53';
+import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { stationKeys } from './station-keys';
@@ -36,11 +45,23 @@ export function legacyPathsFunctionCode(stationId: string) {
 }`;
 }
 
+/** A custom domain for the distribution, such as api.kenilworthford.com. */
+export interface ApiCustomDomain {
+  /** The domain, which is also the hosted zone's apex. */
+  domainName: string;
+  /** A us-east-1 certificate for the domain. */
+  certificate: ICertificate;
+  /** The domain's hosted zone, where the alias records are created. */
+  hostedZone: IHostedZone;
+}
+
 export interface ApiDistributionProps {
   /** The bucket the station files are published to. */
   bucket: IBucket;
   /** The station served at the original API's /status and /chart paths. */
   legacyStationId: string;
+  /** Serve at a custom domain as well as the CloudFront domain. */
+  customDomain?: ApiCustomDomain;
 }
 
 /**
@@ -61,7 +82,15 @@ export class ApiDistribution extends Construct {
       runtime: FunctionRuntime.JS_2_0,
     });
 
+    const { customDomain } = props;
     this.distribution = new Distribution(this, 'distribution', {
+      ...(customDomain
+        ? {
+          certificate: customDomain.certificate,
+          domainNames: [customDomain.domainName],
+          minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
+        }
+        : {}),
       comment: 'River levels station files',
       defaultBehavior: {
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
@@ -84,5 +113,16 @@ export class ApiDistribution extends Construct {
       // North America and Europe, which covers a UK site's visitors
       priceClass: PriceClass.PRICE_CLASS_100,
     });
+
+    if (customDomain) {
+      const target = RecordTarget.fromAlias(
+        new CloudFrontTarget(this.distribution),
+      );
+      new ARecord(this, 'alias-a', { target, zone: customDomain.hostedZone });
+      new AaaaRecord(this, 'alias-aaaa', {
+        target,
+        zone: customDomain.hostedZone,
+      });
+    }
   }
 }
