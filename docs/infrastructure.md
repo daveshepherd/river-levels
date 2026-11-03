@@ -211,7 +211,8 @@ Status of the move from flood-readings' API:
 1. Done: CloudFront distribution, at its `*.cloudfront.net` domain.
 2. Done: hosted zones, not yet delegated.
 3. Done: certificate, domain and alias records, switched off in every stage.
-4. To do: cut over development, then production, as below.
+4. Development: switched on, after endor-infrastructure removed the old API distribution and delegated `api.dev.kenilworthford.com`.
+5. To do: cut over production, as below.
 
 #### Cutting over a stage
 
