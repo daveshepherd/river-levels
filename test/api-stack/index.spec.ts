@@ -1,6 +1,6 @@
 import { App, Stack } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { CachePolicy, ResponseHeadersPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { ApiStack, ApiStackProps } from '../../src/api-stack';
@@ -163,8 +163,7 @@ describe('ApiStack', () => {
           AllowedMethods: ['GET', 'HEAD', 'OPTIONS'],
           CachePolicyId: CachePolicy.CACHING_OPTIMIZED.cachePolicyId,
           Compress: true,
-          ResponseHeadersPolicyId:
-            ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS.responseHeadersPolicyId,
+          ResponseHeadersPolicyId: { Ref: Match.stringLikeRegexp('apicors') },
           ViewerProtocolPolicy: 'redirect-to-https',
           FunctionAssociations: [
             Match.objectLike({ EventType: 'viewer-request' }),
@@ -209,5 +208,22 @@ describe('ApiStack', () => {
     expect(() =>
       synth({ legacyStationId: 'elsewhere' }),
     ).toThrow('legacyStationId elsewhere is not one of the configured stations');
+  });
+
+  test('that the CORS policy allows any origin and any request header', () => {
+    const { template } = synth();
+
+    template.hasResourceProperties('AWS::CloudFront::ResponseHeadersPolicy', {
+      ResponseHeadersPolicyConfig: Match.objectLike({
+        CorsConfig: {
+          AccessControlAllowCredentials: false,
+          AccessControlAllowHeaders: { Items: ['*'] },
+          AccessControlAllowMethods: { Items: ['GET', 'HEAD', 'OPTIONS'] },
+          AccessControlAllowOrigins: { Items: ['*'] },
+          AccessControlMaxAgeSec: 86400,
+          OriginOverride: true,
+        },
+      }),
+    });
   });
 });

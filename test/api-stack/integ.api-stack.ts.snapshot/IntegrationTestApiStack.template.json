@@ -763,6 +763,39 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
+  "apicors5E8B7895": {
+   "Type": "AWS::CloudFront::ResponseHeadersPolicy",
+   "Properties": {
+    "ResponseHeadersPolicyConfig": {
+     "Comment": "Allow any origin to read the station files",
+     "CorsConfig": {
+      "AccessControlAllowCredentials": false,
+      "AccessControlAllowHeaders": {
+       "Items": [
+        "*"
+       ]
+      },
+      "AccessControlAllowMethods": {
+       "Items": [
+        "GET",
+        "HEAD",
+        "OPTIONS"
+       ]
+      },
+      "AccessControlAllowOrigins": {
+       "Items": [
+        "*"
+       ]
+      },
+      "AccessControlMaxAgeSec": 86400,
+      "OriginOverride": true
+     },
+     "Name": "IntegrationTestApiStackapicors9DAF1601"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
   "apidistributionOrigin1S3OriginAccessControlBF1226AA": {
    "Type": "AWS::CloudFront::OriginAccessControl",
    "Properties": {
@@ -805,7 +838,9 @@
         }
        }
       ],
-      "ResponseHeadersPolicyId": "60669652-455b-4ae9-85a4-c4c02393f86c",
+      "ResponseHeadersPolicyId": {
+       "Ref": "apicors5E8B7895"
+      },
       "TargetOriginId": "IntegrationTestApiStackapidistributionOrigin1CC648DC3",
       "ViewerProtocolPolicy": "redirect-to-https"
      },

@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   AllowedMethods,
@@ -82,6 +83,22 @@ export class ApiDistribution extends Construct {
       runtime: FunctionRuntime.JS_2_0,
     });
 
+    // Access-Control-Allow-Origin: * on every response, as the original API
+    // returned. The managed SimpleCORS policy allows no request headers, so
+    // CloudFront left the CORS headers off requests carrying ones Chrome adds
+    // itself, such as cache-control and pragma on a reload.
+    const cors = new ResponseHeadersPolicy(this, 'cors', {
+      comment: 'Allow any origin to read the station files',
+      corsBehavior: {
+        accessControlAllowCredentials: false,
+        accessControlAllowHeaders: ['*'],
+        accessControlAllowMethods: ['GET', 'HEAD', 'OPTIONS'],
+        accessControlAllowOrigins: ['*'],
+        accessControlMaxAge: Duration.days(1),
+        originOverride: true,
+      },
+    });
+
     const { customDomain } = props;
     this.distribution = new Distribution(this, 'distribution', {
       ...(customDomain
@@ -105,8 +122,7 @@ export class ApiDistribution extends Construct {
           },
         ],
         origin: S3BucketOrigin.withOriginAccessControl(props.bucket),
-        // Access-Control-Allow-Origin: *, as the original API returned
-        responseHeadersPolicy: ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+        responseHeadersPolicy: cors,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       httpVersion: HttpVersion.HTTP2_AND_3,

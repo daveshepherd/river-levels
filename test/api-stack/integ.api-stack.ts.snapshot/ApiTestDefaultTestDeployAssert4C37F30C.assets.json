@@ -1,5 +1,5 @@
 {
-  "version": "54.0.0",
+  "version": "55.0.0",
   "files": {
     "1cb5e40306bc513c36dbb4ed026180fe885d152140a0f128cd7eed538f3b9420": {
       "source": {
@@ -14,16 +14,16 @@
         }
       }
     },
-    "34f930c1fe2e081ccd811307497bc70350d60fb0171b10883abf7ff65dbc92e9": {
+    "88db22f7e95a56d4126cd83fb417f621e5ff2d29597879367b5fcf3cf419266a": {
       "displayName": "ApiTestDefaultTestDeployAssert4C37F30C Template",
       "source": {
         "path": "ApiTestDefaultTestDeployAssert4C37F30C.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-current_region-98b6612f": {
+        "current_account-current_region-5b5f5b61": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
-          "objectKey": "34f930c1fe2e081ccd811307497bc70350d60fb0171b10883abf7ff65dbc92e9.json",
+          "objectKey": "88db22f7e95a56d4126cd83fb417f621e5ff2d29597879367b5fcf3cf419266a.json",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
         }
       }
