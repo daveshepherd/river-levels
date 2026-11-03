@@ -184,7 +184,7 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
   - `/chart` serves `stations/kenilworth/chart.json`
 
   Every other path is passed through, so `/stations/{id}/status.json` and `chart.json` serve any station. A missing file returns `403`, because CloudFront can't list the bucket.
-- **CORS:** the managed `SimpleCORS` response headers policy adds `Access-Control-Allow-Origin: *` when a request has an `Origin` header, as the original API did.
+- **CORS:** a custom response headers policy (`api/cors`) adds `Access-Control-Allow-Origin: *` for any origin, allowing any request header, `GET`/`HEAD`/`OPTIONS`, and overriding the origin's headers. That matches the original API, which sent it on every response. The managed `SimpleCORS` policy was replaced because it allows no request headers: CloudFront then left CORS headers off requests carrying headers Chrome adds itself, such as `cache-control` and `pragma` on a reload.
 - **Caching:** the managed `CachingOptimized` policy honours the files' `Cache-Control: max-age=300`, so CloudFront and browsers cache for 5 minutes. Responses are compressed.
 - **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
 - **Domain:** always its `*.cloudfront.net` domain, output as `ApiDomainName`. A stage whose custom domain is on also serves at its API domain, with a TLS 1.2 minimum; see [API domains](#api-domains).
@@ -252,8 +252,9 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it. |
-| `api/distribution` | `AWS::CloudFront::Distribution` | Origin: `api-bucket` through origin access control. Managed `CachingOptimized` cache policy and `SimpleCORS` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
+| `api/distribution` | `AWS::CloudFront::Distribution` | Origin: `api-bucket` through origin access control. Managed `CachingOptimized` cache policy and the `api/cors` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
 | `api/alias-a`, `api/alias-aaaa` | `AWS::Route53::RecordSet` | Only when the stage's custom domain is on. Alias records at the domain's apex, in `api-zone`, pointing at the distribution. |
+| `api/cors` | `AWS::CloudFront::ResponseHeadersPolicy` | `Access-Control-Allow-Origin: *`, any request header, `GET`/`HEAD`/`OPTIONS`, 1-day max age, origin override. |
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
 | `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |

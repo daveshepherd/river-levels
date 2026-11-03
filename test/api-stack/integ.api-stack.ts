@@ -132,6 +132,29 @@ integ.assertions
         backoffRate: 2,
       }),
   )
+  // Chrome adds cache-control and pragma itself on reloads; the CORS header
+  // must still be there
+  .next(
+    integ.assertions
+      .httpApiCall(
+        `https://${stackUnderTest.distribution.distributionDomainName}/status`,
+        {
+          headers: {
+            'Origin': 'https://kenilworthford.com',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+          },
+        },
+      )
+      .expect(
+        ExpectedResult.objectLike({
+          status: 200,
+          headers: Match.objectLike({
+            'access-control-allow-origin': ['*'],
+          }),
+        }),
+      ),
+  )
   .next(
     integ.assertions
       .httpApiCall(
