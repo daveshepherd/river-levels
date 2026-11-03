@@ -41,7 +41,7 @@ describe('apiCustomDomainEnabled', () => {
   test.each([
     ['local', false],
     ['development', true],
-    ['production', false],
+    ['production', true],
   ] as const)('that %s serving at its API domain is %s', (stage, enabled) => {
     expect(apiCustomDomainEnabled(stage)).toBe(enabled);
   });
