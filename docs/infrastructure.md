@@ -3,10 +3,11 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** three, all deployed by `cdk deploy --all`:
+- **Stacks:** four, all deployed by `cdk deploy --all`:
   - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
+  - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)): posts ford state changes to X. It imports the `station-status` topic from `RiverLevelsApi` and the alerts topic from `RiverLevels`.
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland)
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -37,7 +38,19 @@ flowchart LR
     apipublisher["api-publisher Lambda<br/>arm64 · 256 MB · 60 s"]
     bucket[("S3<br/>api-bucket<br/>stations/{id}/status.json<br/>stations/{id}/chart.json")]
     cdn["CloudFront<br/>api/distribution<br/>legacy-paths function"]
+    statustopic["SNS topic<br/>station-status"]
   end
+
+  subgraph notifications["AWS · RiverLevelsNotifications stack · eu-west-2"]
+    direction LR
+    xqueue["SQS<br/>x-notifier-queue"]
+    xdlq["SQS<br/>x-notifier-dead-letter-queue"]
+    xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
+    xstate[("DynamoDB<br/>x-notifier-state")]
+    xsecret["Secrets Manager<br/>x-credentials"]
+  end
+
+  xaccount["X account"]
 
   subgraph domain["AWS · RiverLevelsApiDomain stack · us-east-1"]
     zone["Route 53 hosted zone<br/>api-zone<br/>api.kenilworthford.com"]
@@ -66,6 +79,14 @@ flowchart LR
   apiqueue -. "after 5 receives" .-> apidlq
   apipublisher -- "Query latest 12 / last year" --> table
   apipublisher -- "PutObject" --> bucket
+  apipublisher -- "each station's status, every batch" --> statustopic
+  statustopic -- "raw message delivery" --> xqueue
+  xqueue -- "batches of 10" --> xnotifier
+  xqueue -. "after 5 receives" .-> xdlq
+  xnotifier -- "last posted state" --> xstate
+  xnotifier -- "credentials" --> xsecret
+  xnotifier -- "post on a state change (post mode)" --> xaccount
+  xdlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
   website -- "GET /status, /chart" --> cdn
   parentzone -. "NS delegation (to do)" .-> zone
@@ -189,6 +210,54 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
 - **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
 - **Domain:** always its `*.cloudfront.net` domain, output as `ApiDomainName`. A stage whose custom domain is on also serves at its API domain, with a TLS 1.2 minimum; see [API domains](#api-domains).
 
+### 5. Notifications: posting ford state changes to X
+
+After writing a station's `status.json`, the API publisher also publishes the status to the `station-status` SNS topic, once per batch, whether or not anything changed:
+
+```json
+{"station":"kenilworth","depth":1.3,"direction":"rising","rate":"fast","state":"flooded","lastUpdate":"2020-01-01T15:15:00.000Z"}
+```
+
+The `RiverLevelsNotifications` stack's [`x-notifier`](../src/notifications-stack/x-notifier.lambda.ts) reads them through `x-notifier-queue`. For each station in a batch, it takes the newest status and compares its ford `state` with the last state posted, which is kept in the `x-notifier-state` table ([`decide.ts`](../src/notifications-stack/decide.ts)):
+
+- **Nothing recorded yet:** records the state without posting, so a deploy doesn't announce the current state.
+- **Same state:** nothing.
+- **Changed, less than 60 minutes after the last post:** held back. A state that flips back and forth near a threshold isn't posted over and over. A change that persists is posted once the hour is up, because the status arrives with every batch.
+- **Changed, otherwise:** posted. The post's wording ([`messages.ts`](../src/notifications-stack/messages.ts)) is ported from flood-readings, with one of several variants picked at random:
+  - rising to flooded
+  - rising to impassable (from either state)
+  - dropping from impassable to flooded
+  - dropping to clear
+
+  The post ends with "See <website> for more details." when the station's `ford.website` is set.
+
+The decision only looks at the status, worked out from the latest readings, so copying historical readings into the table can't trigger posts.
+
+Before posting, the notifier claims the change with a conditional write to the state table, so two invocations can't both post it. If posting fails, it restores the previous record and reports the station's messages for retry. After 5 attempts they go to `x-notifier-dead-letter-queue`, which raises the `x-notifier-dead-letters` alarm.
+
+**Modes** (`xNotifierMode()` in [`src/stage.ts`](../src/stage.ts)):
+- `log`: runs everything and records state, but logs the post instead of sending it.
+- `post`: posts to the X account whose credentials are in the stage's `x-credentials` secret.
+
+Every stage is in `log` until its secret is filled in. Development uses a test X account; production uses the kenilworthford.com account.
+
+**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials:
+
+```sh
+aws secretsmanager put-secret-value --secret-id <XCredentialsSecretArn output> \
+  --secret-string '{"appKey":"…","appSecret":"…","accessToken":"…","accessSecret":"…"}'
+```
+
+In `post` mode, a missing value fails the post, which retries and then raises the dead-letter alarm.
+
+#### Switching production over from flood-readings
+
+flood-readings' crawler posts the same announcements today, so production's notifier stays in `log` mode until it takes over:
+
+1. **Watch the logs.** With production in `log` mode, check the `x-notifier` logs (service `x-notifier`) at the next state change: "Would post (log mode)" with the expected text, and nothing during the cooldown.
+2. **Set production's `x-credentials` secret** to the account flood-readings posts as. Its values are in flood-readings' `.env.prod.yml`: `TWITTER_API_KEY` is `appKey`, `TWITTER_API_SECRET` is `appSecret`, `TWITTER_ACCESS_TOKEN` is `accessToken`, and `TWITTER_ACCESS_SECRET` is `accessSecret`.
+3. **At the same time:** merge a river-levels change setting production to `post`, and stop flood-readings posting, by setting its `TWITTER_API_KEY` to `disabled` and redeploying it, or by retiring its crawler.
+
 ### API domains
 
 Each stage's account owns a public hosted zone for its API domain, in the `RiverLevelsApiDomain` stack ([`apiDomainName()`](../src/stage.ts)):
@@ -270,10 +339,23 @@ Logical names as they appear in the CloudFormation template.
 | `api-zone` | `AWS::Route53::HostedZone` | Public zone for the stage's API domain. Retained when the stack is deleted. |
 | `api-certificate` | `AWS::CertificateManager::Certificate` | Only when the stage's custom domain is on. The domain, DNS-validated in `api-zone`. |
 
+`RiverLevelsNotifications` stack:
+
+| Resource | Type | Key settings |
+|----------|------|--------------|
+| `x-notifier-state` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S); attributes `state` and `postedAt` (epoch ms, 0 if only recorded). Point-in-time recovery. Retained when the stack is deleted. |
+| `x-credentials` | `AWS::SecretsManager::Secret` | X OAuth 1.0a credentials, set by hand. Created with empty values and never overwritten. Retained when the stack is deleted. |
+| `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
+| `x-notifier-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
+| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
+| `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+
 **Stack outputs:**
 - `RiverLevelsTable` (the table ARN) from `RiverLevels`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
+- `XCredentialsSecretArn` from `RiverLevelsNotifications`
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 
@@ -289,6 +371,10 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `sns-publisher-role` | `sqs:SendMessage`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | the failure queue |
 | `api-publisher-role` | `dynamodb:Query` | the table |
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
+| `api-publisher-role` | `sns:Publish` | `station-status` |
+| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state` |
+| `x-notifier-role` | `secretsmanager:GetSecretValue` | `x-credentials` |
+| `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
 | `api-publisher-role` | `sqs:ReceiveMessage`, `DeleteMessage`, `ChangeMessageVisibility`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | `api-publisher-queue` |
 
 ## Deployment
@@ -319,11 +405,12 @@ flowchart LR
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
+- **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
 ### Alarms
 
-The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) and the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts). All of them email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
+The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). All of them email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
 
 | Alarm | Fires when | Where to look |
 |-------|-----------|---------------|
@@ -333,3 +420,4 @@ The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/a
 | `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
 | `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |
 | `api-publisher-dead-letters` | `api-publisher-dead-letter-queue` has any messages | Publisher logs (service `api-publisher`); DynamoDB or S3 errors |
+| `x-notifier-dead-letters` | `x-notifier-dead-letter-queue` has any messages | Notifier logs (service `x-notifier`); usually a missing `x-credentials` value or an X API error |

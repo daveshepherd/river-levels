@@ -2,6 +2,7 @@ import {
   apiCustomDomainEnabled,
   apiDomainName,
   resolveStage,
+  xNotifierMode,
 } from '../src/stage';
 
 describe('resolveStage', () => {
@@ -45,4 +46,13 @@ describe('apiCustomDomainEnabled', () => {
   ] as const)('that %s serving at its API domain is %s', (stage, enabled) => {
     expect(apiCustomDomainEnabled(stage)).toBe(enabled);
   });
+});
+
+describe('xNotifierMode', () => {
+  test.each(['local', 'development', 'production'] as const)(
+    'that %s only logs until its credentials are set',
+    (stage) => {
+      expect(xNotifierMode(stage)).toBe('log');
+    },
+  );
 });

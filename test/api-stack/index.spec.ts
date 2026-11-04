@@ -114,6 +114,11 @@ describe('ApiStack', () => {
               ],
             },
           },
+          {
+            Action: 'sns:Publish',
+            Effect: 'Allow',
+            Resource: stack.resolve(stack.statusTopic.topicArn),
+          },
         ],
       },
     });

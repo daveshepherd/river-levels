@@ -21,6 +21,7 @@
     "projenrc/tsconfig.json",
     "README.md",
     "src/api-stack/api-publisher-function.ts",
+    "src/notifications-stack/x-notifier-function.ts",
     "src/storage-stack/crawler-function.ts",
     "src/storage-stack/sns-publisher-function.ts",
     "test/tsconfig.json",

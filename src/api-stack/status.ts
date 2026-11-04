@@ -90,6 +90,11 @@ export function getRate(depths: number[], direction: Direction): Rate {
   return 'fast';
 }
 
+/** A station's status, as published to the station-status topic. */
+export interface StationStatusMessage extends StationStatus {
+  station: string;
+}
+
 /**
  * Works out a station's status from its latest readings, newest first.
  * Returns null when there are no readings.

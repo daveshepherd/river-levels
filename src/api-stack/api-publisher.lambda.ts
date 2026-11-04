@@ -1,9 +1,14 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 import type { Context, SQSBatchResponse, SQSEvent } from 'aws-lambda';
 import { logger, tracer } from './powertools';
 import { getLatestReadings, getReadingsSince } from './readings';
 import { stationKeys } from './station-keys';
-import { getStationStatus, STATUS_READINGS } from './status';
+import {
+  getStationStatus,
+  StationStatusMessage,
+  STATUS_READINGS,
+} from './status';
 import { parseStations, StationConfig } from '../storage-stack/stations';
 
 /** How far back the chart goes. */
@@ -14,7 +19,7 @@ export const CACHE_CONTROL = 'max-age=300';
 
 // Created once per Lambda container and reused across invocations.
 const s3Client = tracer.captureAWSv3Client(new S3Client({}));
-
+const snsClient = tracer.captureAWSv3Client(new SNSClient({}));
 
 async function putJson(key: string, body: unknown) {
   await s3Client.send(
@@ -39,6 +44,15 @@ async function publishStation(station: StationConfig) {
     return;
   }
   await putJson(keys.status, status);
+  // Every batch, not only on changes, so notifiers can post a state that
+  // settles after their cooldown
+  const message: StationStatusMessage = { station: station.id, ...status };
+  await snsClient.send(
+    new PublishCommand({
+      Message: JSON.stringify(message),
+      TopicArn: process.env.STATUS_TOPIC_ARN,
+    }),
+  );
 
   const since = new Date();
   since.setDate(since.getDate() - CHART_DAYS);
@@ -58,7 +72,8 @@ async function publishStation(station: StationConfig) {
 /**
  * Receives new-reading notifications from the river-levels-notifications
  * topic (through SQS, with raw message delivery) and republishes the status
- * and chart of each station they mention, once per batch.
+ * and chart of each station they mention, once per batch. Each station's
+ * status is also published to the station-status topic.
  *
  * A station that fails has its messages reported back for retry; the others
  * are still published.

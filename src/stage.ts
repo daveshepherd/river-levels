@@ -55,3 +55,22 @@ const API_CUSTOM_DOMAIN_ENABLED: Record<Stage, boolean> = {
 export function apiCustomDomainEnabled(stage: Stage): boolean {
   return API_CUSTOM_DOMAIN_ENABLED[stage];
 }
+
+/** Whether the X notifier posts, or only logs what it would post. */
+export type NotifierMode = 'log' | 'post';
+
+/**
+ * Each stage's X notifier mode. Development posts to a test X account and
+ * production to the real one, each once its credentials secret is set.
+ * Production switches to 'post' at the same time flood-readings stops
+ * posting. See "Notifications" in docs/infrastructure.md.
+ */
+const X_NOTIFIER_MODES: Record<Stage, NotifierMode> = {
+  local: 'log',
+  development: 'log',
+  production: 'log',
+};
+
+export function xNotifierMode(stage: Stage): NotifierMode {
+  return X_NOTIFIER_MODES[stage];
+}

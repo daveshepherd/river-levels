@@ -2,10 +2,12 @@ import { existsSync, readFileSync } from 'fs';
 import { App, Tags } from 'aws-cdk-lib';
 import { ApiDomainStack } from './api-domain-stack';
 import { ApiStack } from './api-stack';
+import { NotificationsStack } from './notifications-stack';
 import {
   apiCustomDomainEnabled,
   apiDomainName,
   resolveStage,
+  xNotifierMode,
 } from './stage';
 import { StorageStack } from './storage-stack';
 
@@ -39,7 +41,7 @@ const apiDomainStack = new ApiDomainStack(app, 'RiverLevelsApiDomain', {
   env: { region: 'us-east-1' },
 });
 
-new ApiStack(app, 'RiverLevelsApi', {
+const apiStack = new ApiStack(app, 'RiverLevelsApi', {
   alertsTopic: storageStack.alertsTopic,
   crossRegionReferences: true,
   customDomain:
@@ -53,6 +55,13 @@ new ApiStack(app, 'RiverLevelsApi', {
   env,
   notificationsTopic: storageStack.riverLevelsNotificationsTopic,
   readingsTable: storageStack.riverLevelsTable,
+});
+
+new NotificationsStack(app, 'RiverLevelsNotifications', {
+  alertsTopic: storageStack.alertsTopic,
+  env,
+  mode: xNotifierMode(stage),
+  statusTopic: apiStack.statusTopic,
 });
 
 Tags.of(app).add('endor:ManagedBy', 'cdk');

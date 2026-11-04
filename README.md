@@ -17,6 +17,8 @@ The `RiverLevelsApi` stack queues those notifications and, once per batch, rewri
 - `stations/{id}/status.json`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is `clear`, `flooded` or `impassable`
 - `stations/{id}/chart.json`: every reading from the last year, as `[[timestamp, depth], ...]`
 
+Each station's status is also published to a `station-status` topic, and a notifier posts each ford state change (clear, flooded, impassable) to X, at most once an hour per station.
+
 CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
 
 See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data flow, resources, IAM, deployment and alarms.

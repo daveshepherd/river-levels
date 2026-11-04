@@ -8,6 +8,8 @@
     "bundle": "projen bundle",
     "bundle:api-stack/api-publisher.lambda": "projen bundle:api-stack/api-publisher.lambda",
     "bundle:api-stack/api-publisher.lambda:watch": "projen bundle:api-stack/api-publisher.lambda:watch",
+    "bundle:notifications-stack/x-notifier.lambda": "projen bundle:notifications-stack/x-notifier.lambda",
+    "bundle:notifications-stack/x-notifier.lambda:watch": "projen bundle:notifications-stack/x-notifier.lambda:watch",
     "bundle:storage-stack/crawler.lambda": "projen bundle:storage-stack/crawler.lambda",
     "bundle:storage-stack/crawler.lambda:watch": "projen bundle:storage-stack/crawler.lambda:watch",
     "bundle:storage-stack/sns-publisher.lambda": "projen bundle:storage-stack/sns-publisher.lambda",
@@ -72,10 +74,12 @@
     "@aws-lambda-powertools/tracer": "^2.36.0",
     "@aws-sdk/client-dynamodb": "^3.1161.0",
     "@aws-sdk/client-s3": "^3.1161.0",
+    "@aws-sdk/client-secrets-manager": "^3.1161.0",
     "@aws-sdk/client-sns": "^3.1161.0",
     "aws-cdk-lib": "^2.272.0",
     "axios": "^1.21.0",
-    "constructs": "^10.5.1"
+    "constructs": "^10.5.1",
+    "twitter-api-v2": "^1.31.0"
   },
   "devEngines": {
     "packageManager": {

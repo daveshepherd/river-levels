@@ -14,6 +14,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { ITableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { Alias } from 'aws-cdk-lib/aws-kms';
 import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -22,7 +23,7 @@ import {
   Bucket,
   BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
-import { ITopic } from 'aws-cdk-lib/aws-sns';
+import { ITopic, Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -68,6 +69,8 @@ export interface ApiStackProps extends StackProps {
 export class ApiStack extends Stack {
   public readonly apiBucket: Bucket;
   public readonly distribution: Distribution;
+  /** Each station's status, published once per batch of new readings. */
+  public readonly statusTopic: Topic;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
@@ -106,9 +109,16 @@ export class ApiStack extends Stack {
       new SqsSubscription(queue, { rawMessageDelivery: true }),
     );
 
+    this.statusTopic = new Topic(this, 'station-status', {
+      displayName: 'river-levels-station-status',
+      enforceSSL: true,
+      masterKey: Alias.fromAliasName(this, 'aws-managed-sns-key', 'alias/aws/sns'),
+    });
+
     const role = new ApiPublisherRole(this, 'api-publisher-role', {
       apiBucketArn: this.apiBucket.bucketArn,
       dynamoDbTableArn: props.readingsTable.tableArn,
+      statusTopicArn: this.statusTopic.topicArn,
     });
     const publisher = new ApiPublisherFunction(this, 'api-publisher-lambda', {
       architecture: Architecture.ARM_64,
@@ -116,6 +126,7 @@ export class ApiStack extends Stack {
         API_BUCKET: this.apiBucket.bucketName,
         DYNAMODB_READINGS_TABLE: props.readingsTable.tableName,
         STATIONS: JSON.stringify(stations),
+        STATUS_TOPIC_ARN: this.statusTopic.topicArn,
       },
       logGroup: new LogGroup(this, 'api-publisher-log-group', {
         retention: RetentionDays.ONE_YEAR,

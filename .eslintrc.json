@@ -159,6 +159,7 @@
           "**/test/**",
           "**/build-tools/**",
           "src/api-stack/api-publisher.lambda.ts",
+          "src/notifications-stack/x-notifier.lambda.ts",
           "src/storage-stack/crawler.lambda.ts",
           "src/storage-stack/sns-publisher.lambda.ts",
           ".projenrc.ts",

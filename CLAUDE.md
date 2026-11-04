@@ -17,6 +17,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables, and the README overview in `.projenrc.ts` (`readme.description`) |
+| The X notifier, its decision rules or wording, or `xNotifierMode()` | "Notifications" section, Resources and IAM tables, Operations |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
 
@@ -51,8 +52,8 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: StorageStack "RiverLevels" and ApiStack "RiverLevelsApi" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
-src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName() and apiCustomDomainEnabled() per stage
+src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi" and NotificationsStack "RiverLevelsNotifications" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled() and xNotifierMode() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
   index.ts                   StorageStack: DynamoDB global table, crawler, SNS publisher
@@ -68,6 +69,10 @@ src/api-stack/
   status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
   distribution.ts            CloudFront in front of the bucket; legacy-paths function maps /status and /chart
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
+src/notifications-stack/
+  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
+  x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
+  decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
 test/<stack>/                Jest specs mirror src/. integ.*.ts are integ-runner tests
 test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ```
@@ -77,13 +82,14 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 - **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`.
 - **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
 - **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days. CloudFront also serves Kenilworth's at `/status` and `/chart`, the paths the website calls; keep those working.
+- **Station status messages** on the `station-status` topic: `{station, depth, direction, rate, state?, lastUpdate}`, published once per batch per station, whether or not anything changed.
 - **SNS message body** (other systems subscribe to this, so keep it backward compatible): `{"reading_depth": number, "station": string, "timestamp": number}`. A message is published only on `INSERT` stream events.
 - **Stream failures:** the publisher returns `batchItemFailures` so retries resume from the first unpublished record. After 5 retries, the batch goes to `sns-publisher-failure-queue`.
 
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher has its own Logger and Tracer (service `sns-publisher`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.

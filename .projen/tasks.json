@@ -76,6 +76,9 @@
           "spawn": "bundle:api-stack/api-publisher.lambda"
         },
         {
+          "spawn": "bundle:notifications-stack/x-notifier.lambda"
+        },
+        {
           "spawn": "bundle:storage-stack/crawler.lambda"
         },
         {
@@ -114,6 +117,45 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/api-stack/api-publisher.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/x-notifier.lambda": {
+      "name": "bundle:notifications-stack/x-notifier.lambda",
+      "description": "Create a JavaScript bundle from src/notifications-stack/x-notifier.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/x-notifier.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/x-notifier.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/x-notifier.lambda:watch": {
+      "name": "bundle:notifications-stack/x-notifier.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/notifications-stack/x-notifier.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/x-notifier.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/x-notifier.lambda/index.js",
             "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",
@@ -605,7 +647,7 @@
             "--peer",
             "--no-deprecated",
             "--dep=dev,prod,peer,optional",
-            "--filter=@types/aws-lambda,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,nock,projen,projen-modules,source-map-support,ts-node,typescript,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-s3,@aws-sdk/client-sns,axios"
+            "--filter=@types/aws-lambda,aws-sdk-client-mock,aws-sdk-client-mock-jest,cdk-nag,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,nock,projen,projen-modules,source-map-support,ts-node,typescript,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-s3,@aws-sdk/client-secrets-manager,@aws-sdk/client-sns,axios,twitter-api-v2"
           ]
         },
         {
@@ -645,10 +687,12 @@
             "@aws-lambda-powertools/tracer",
             "@aws-sdk/client-dynamodb",
             "@aws-sdk/client-s3",
+            "@aws-sdk/client-secrets-manager",
             "@aws-sdk/client-sns",
             "aws-cdk-lib",
             "axios",
-            "constructs"
+            "constructs",
+            "twitter-api-v2"
           ]
         },
         {
