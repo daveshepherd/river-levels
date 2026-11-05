@@ -17,7 +17,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables, and the README overview in `.projenrc.ts` (`readme.description`) |
-| The X notifier, its decision rules or wording, or `xNotifierMode()` | "Notifications" section, Resources and IAM tables, Operations |
+| The X notifier, its decision rules or wording, the smoke test, or `xNotifierMode()` / `xSmokeTestEnabled()` | "Notifications" section, Resources and IAM tables, Operations |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
 
@@ -53,7 +53,7 @@ Gotchas:
 
 ```
 src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi" and NotificationsStack "RiverLevelsNotifications" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
-src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled() and xNotifierMode() per stage
+src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
   index.ts                   StorageStack: DynamoDB global table, crawler, SNS publisher
@@ -72,6 +72,7 @@ src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted
 src/notifications-stack/
   index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
   x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
+  x-smoke-test.lambda.ts     Development only: a CDK trigger runs it on deploy to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
 test/<stack>/                Jest specs mirror src/. integ.*.ts are integ-runner tests
 test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
@@ -89,7 +90,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.

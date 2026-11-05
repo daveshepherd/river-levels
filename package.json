@@ -10,6 +10,8 @@
     "bundle:api-stack/api-publisher.lambda:watch": "projen bundle:api-stack/api-publisher.lambda:watch",
     "bundle:notifications-stack/x-notifier.lambda": "projen bundle:notifications-stack/x-notifier.lambda",
     "bundle:notifications-stack/x-notifier.lambda:watch": "projen bundle:notifications-stack/x-notifier.lambda:watch",
+    "bundle:notifications-stack/x-smoke-test.lambda": "projen bundle:notifications-stack/x-smoke-test.lambda",
+    "bundle:notifications-stack/x-smoke-test.lambda:watch": "projen bundle:notifications-stack/x-smoke-test.lambda:watch",
     "bundle:storage-stack/crawler.lambda": "projen bundle:storage-stack/crawler.lambda",
     "bundle:storage-stack/crawler.lambda:watch": "projen bundle:storage-stack/crawler.lambda:watch",
     "bundle:storage-stack/sns-publisher.lambda": "projen bundle:storage-stack/sns-publisher.lambda",

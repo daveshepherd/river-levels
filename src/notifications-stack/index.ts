@@ -20,11 +20,14 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { ITopic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { Trigger } from 'aws-cdk-lib/triggers';
 import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import type { NotifierMode } from '../stage';
 import { XNotifierFunction } from './x-notifier-function';
 import { XNotifierRole } from './x-notifier.role';
+import { XSmokeTestFunction } from './x-smoke-test-function';
+import { XSmokeTestRole } from './x-smoke-test.role';
 import {
   StationConfig,
   STATIONS,
@@ -40,6 +43,15 @@ export interface NotificationsStackProps extends StackProps {
   alertsTopic?: ITopic;
   /** The stations, for each ford's website link. Defaults to STATIONS in stations.ts. */
   stations?: StationConfig[];
+  /**
+   * Post a smoke test to X, and delete it, on each deploy, failing the deploy
+   * if that doesn't work. Only for a stage whose credentials secret is set,
+   * and that posts to a test account.
+   */
+  smokeTest?: {
+    /** Identifies the release in the post. It must change on each deploy, as the smoke test only runs when its function changes. */
+    release: string;
+  };
   setDestroyPolicyToAllResources?: boolean;
 }
 
@@ -120,6 +132,31 @@ export class NotificationsStack extends Stack {
         reportBatchItemFailures: true,
       }),
     );
+
+    if (props.smokeTest) {
+      const smokeTest = new XSmokeTestFunction(this, 'x-smoke-test-lambda', {
+        architecture: Architecture.ARM_64,
+        environment: {
+          RELEASE: props.smokeTest.release,
+          X_CREDENTIALS_SECRET_ARN: this.credentialsSecret.secretArn,
+        },
+        logGroup: new LogGroup(this, 'x-smoke-test-log-group', {
+          retention: RetentionDays.ONE_YEAR,
+        }),
+        role: new XSmokeTestRole(this, 'x-smoke-test-role', {
+          credentialsSecretArn: this.credentialsSecret.secretArn,
+        }),
+        timeout: Duration.seconds(30),
+        tracing: Tracing.ACTIVE,
+      });
+      // Runs whenever the function changes, which RELEASE makes every deploy
+      new Trigger(this, 'x-smoke-test', {
+        executeAfter: [notifier],
+        executeOnHandlerChange: true,
+        handler: smokeTest,
+        timeout: Duration.seconds(30),
+      });
+    }
 
     if (props.alertsTopic) {
       const alarm = new Alarm(this, 'x-notifier-dead-letters', {
