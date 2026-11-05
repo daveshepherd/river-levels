@@ -79,6 +79,9 @@
           "spawn": "bundle:notifications-stack/x-notifier.lambda"
         },
         {
+          "spawn": "bundle:notifications-stack/x-smoke-test.lambda"
+        },
+        {
           "spawn": "bundle:storage-stack/crawler.lambda"
         },
         {
@@ -156,6 +159,45 @@
             "--target=node24",
             "--platform=node",
             "--outfile=assets/notifications-stack/x-notifier.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/x-smoke-test.lambda": {
+      "name": "bundle:notifications-stack/x-smoke-test.lambda",
+      "description": "Create a JavaScript bundle from src/notifications-stack/x-smoke-test.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/x-smoke-test.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/x-smoke-test.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/x-smoke-test.lambda:watch": {
+      "name": "bundle:notifications-stack/x-smoke-test.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/notifications-stack/x-smoke-test.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/x-smoke-test.lambda.ts",
+            "--target=node24",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/x-smoke-test.lambda/index.js",
             "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",

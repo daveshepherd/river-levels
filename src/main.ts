@@ -8,6 +8,7 @@ import {
   apiDomainName,
   resolveStage,
   xNotifierMode,
+  xSmokeTestEnabled,
 } from './stage';
 import { StorageStack } from './storage-stack';
 
@@ -61,6 +62,9 @@ new NotificationsStack(app, 'RiverLevelsNotifications', {
   alertsTopic: storageStack.alertsTopic,
   env,
   mode: xNotifierMode(stage),
+  smokeTest: xSmokeTestEnabled(stage)
+    ? { release: process.env.GITHUB_SHA ?? 'local' }
+    : undefined,
   statusTopic: apiStack.statusTopic,
 });
 

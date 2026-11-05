@@ -48,6 +48,7 @@ flowchart LR
     xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
     xstate[("DynamoDB<br/>x-notifier-state")]
     xsecret["Secrets Manager<br/>x-credentials"]
+    xsmoke["x-smoke-test Lambda + trigger<br/>(development only)"]
   end
 
   xaccount["X account"]
@@ -86,6 +87,8 @@ flowchart LR
   xnotifier -- "last posted state" --> xstate
   xnotifier -- "credentials" --> xsecret
   xnotifier -- "post on a state change (post mode)" --> xaccount
+  xsmoke -- "credentials" --> xsecret
+  xsmoke -. "post and delete on each deploy" .-> xaccount
   xdlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
   website -- "GET /status, /chart" --> cdn
@@ -250,6 +253,13 @@ aws secretsmanager put-secret-value --secret-id <XCredentialsSecretArn output> \
 
 In `post` mode, a missing value fails the post, which retries and then raises the dead-letter alarm.
 
+**Smoke test** (development only, `xSmokeTestEnabled()` in [`src/stage.ts`](../src/stage.ts)): each development deploy runs [`x-smoke-test`](../src/notifications-stack/x-smoke-test.lambda.ts) through the `x-smoke-test` CDK trigger. It posts "Smoke test of the river levels X notifier, release <commit>, at <time>…" to the test account, and deletes it straight away. This checks the secret, the X client and the account without waiting for the river to change. If posting or deleting fails, the trigger fails, so the `RiverLevelsNotifications` update rolls back, `deploy_development` fails and production isn't deployed.
+
+- The trigger runs whenever the smoke test function changes. Its `RELEASE` env var is the deploy's `GITHUB_SHA`, so it runs on every release. The commit and time keep the text unique, because X rejects duplicate posts.
+- Each run uses two X API writes (a post and a delete).
+- If a later resource in the same update fails, the rollback runs the previous version's smoke test again, which posts and deletes once more.
+- A local deploy with `STAGE=development` also runs it, with release `local`.
+
 #### Switching production over from flood-readings
 
 flood-readings' crawler posts the same announcements today, so production's notifier stays in `log` mode until it takes over:
@@ -350,6 +360,9 @@ Logical names as they appear in the CloudFormation template.
 | `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 24, arm64, 30 s timeout, X-Ray active. Env: `RELEASE` (the deploy's commit), `X_CREDENTIALS_SECRET_ARN`. |
+| `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
+| `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
 **Stack outputs:**
 - `RiverLevelsTable` (the table ARN) from `RiverLevels`
@@ -375,6 +388,7 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state` |
 | `x-notifier-role` | `secretsmanager:GetSecretValue` | `x-credentials` |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
+| `x-smoke-test-role` | `secretsmanager:GetSecretValue` | `x-credentials` |
 | `api-publisher-role` | `sqs:ReceiveMessage`, `DeleteMessage`, `ChangeMessageVisibility`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | `api-publisher-queue` |
 
 ## Deployment
@@ -385,13 +399,13 @@ flowchart LR
   pr --> codeql["codeql workflow<br/>javascript-typescript · actions"]
   build & codeql --> merge["Mergify merge queue<br/>squash merge to main"]
   merge --> release["release job<br/>build, bump version, tag"]
-  release --> dev["deploy_development<br/>environment: development"]
+  release --> dev["deploy_development<br/>environment: development<br/>x-smoke-test trigger posts to X"]
   dev --> prod["deploy_production<br/>environment: production"]
 ```
 
 - The deploy jobs check out the released commit and download the release job's `dist` artifact, which provides `releasetag.txt` for the `endor:Version` tag. They don't rebuild or re-run tests: the release job already did that for the same commit, and `cdk deploy` bundles the Lambdas through the `build` hook in `cdk.json`.
 - **Each account is CDK-bootstrapped in both `eu-west-2` and `us-east-1`**, because `RiverLevelsApiDomain` deploys to us-east-1. The bootstrap (`CDKToolkit` stacks, qualifier `hnb659fds`, version 32) is managed by Terraform in endor-infrastructure's `modules/cdk_bootstrap`. **Don't run `cdk bootstrap` against these accounts**, as it would drift from Terraform. To upgrade, regenerate the template there. The GitHub deploy role can assume the bootstrap roles in any region.
-- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys all three stacks, including `RiverLevelsApiDomain` in us-east-1, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
+- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys all four stacks, including `RiverLevelsApiDomain` in us-east-1, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
 - Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. PRs from `trustedAuthors` (the sole maintainer) need no approval; everyone else's need one, and fork PRs also need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in [`docs/github-configuration.md`](github-configuration.md), which projen generates.
@@ -406,6 +420,7 @@ flowchart LR
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
 - **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
+- **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing or revoked `x-credentials` value, or the X API's limits.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
 ### Alarms

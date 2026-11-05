@@ -32,13 +32,25 @@ async function getCredentials(): Promise<XCredentials> {
   return credentials as XCredentials;
 }
 
-/** Posts to the X account in the credentials secret. */
-export async function postToX(text: string): Promise<string> {
+async function getClient(): Promise<TwitterApi> {
   if (!client) {
     client = new TwitterApi(await getCredentials());
   }
-  const result = await client.readWrite.v2.tweet(text);
+  return client;
+}
+
+/** Posts to the X account in the credentials secret. */
+export async function postToX(text: string): Promise<string> {
+  const result = await (await getClient()).readWrite.v2.tweet(text);
   return result.data.id;
+}
+
+/** Deletes a post from the X account in the credentials secret. */
+export async function deleteFromX(id: string): Promise<void> {
+  const result = await (await getClient()).readWrite.v2.deleteTweet(id);
+  if (!result.data.deleted) {
+    throw new Error(`X did not delete post ${id}`);
+  }
 }
 
 /** Forgets the cached client. Only for tests. */

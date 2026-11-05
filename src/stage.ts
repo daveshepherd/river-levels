@@ -73,3 +73,19 @@ const X_NOTIFIER_MODES: Record<Stage, NotifierMode> = {
 export function xNotifierMode(stage: Stage): NotifierMode {
   return X_NOTIFIER_MODES[stage];
 }
+
+/**
+ * Whether each stage's deploy posts a smoke test to X, and deletes it, failing
+ * the deploy if that doesn't work. Only development, which posts to a test
+ * account, so the deploy gates production. See "Notifications" in
+ * docs/infrastructure.md.
+ */
+const X_SMOKE_TEST_ENABLED: Record<Stage, boolean> = {
+  local: false,
+  development: true,
+  production: false,
+};
+
+export function xSmokeTestEnabled(stage: Stage): boolean {
+  return X_SMOKE_TEST_ENABLED[stage];
+}

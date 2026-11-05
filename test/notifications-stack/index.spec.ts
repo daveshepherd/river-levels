@@ -114,6 +114,43 @@ describe('NotificationsStack', () => {
     });
   });
 
+  test('that the smoke test runs on deploy with its own role', () => {
+    const { stack, template } = synth({ smokeTest: { release: 'abc123' } });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          RELEASE: 'abc123',
+          X_CREDENTIALS_SECRET_ARN: stack.resolve(stack.credentialsSecret.secretArn),
+        },
+      },
+    });
+    template.resourceCountIs('Custom::Trigger', 1);
+    template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      Description: 'Read the X credentials',
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'secretsmanager:GetSecretValue',
+            Effect: 'Allow',
+            Resource: stack.resolve(stack.credentialsSecret.secretArn),
+          },
+        ],
+      },
+    });
+  });
+
+  test('that there is no smoke test by default', () => {
+    const { template } = synth();
+
+    template.resourceCountIs('Custom::Trigger', 0);
+    template.resourcePropertiesCountIs(
+      'AWS::Lambda::Function',
+      { Environment: { Variables: { RELEASE: Match.anyValue() } } },
+      0,
+    );
+  });
+
   test('that there is no alarm without an alerts topic', () => {
     synth({ alertsTopic: undefined }).template.resourceCountIs(
       'AWS::CloudWatch::Alarm',

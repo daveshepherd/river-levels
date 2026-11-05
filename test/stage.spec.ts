@@ -3,6 +3,7 @@ import {
   apiDomainName,
   resolveStage,
   xNotifierMode,
+  xSmokeTestEnabled,
 } from '../src/stage';
 
 describe('resolveStage', () => {
@@ -55,5 +56,15 @@ describe('xNotifierMode', () => {
     ['production', 'log'],
   ] as const)('that %s is in %s mode', (stage, mode) => {
     expect(xNotifierMode(stage)).toBe(mode);
+  });
+});
+
+describe('xSmokeTestEnabled', () => {
+  test.each([
+    ['local', false],
+    ['development', true],
+    ['production', false],
+  ] as const)('that %s smoke tests X: %s', (stage, enabled) => {
+    expect(xSmokeTestEnabled(stage)).toBe(enabled);
   });
 });
