@@ -9,6 +9,7 @@ import { Construct } from 'constructs';
 export interface ApiPublisherRoleProps {
   apiBucketArn: string;
   dynamoDbTableArn: string;
+  statusTopicArn: string;
 }
 
 export class ApiPublisherRole extends Role {
@@ -27,7 +28,7 @@ export class ApiPublisherRole extends Role {
     this.addManagedPolicy(
       new ManagedPolicy(this, 'api-publisher-policy', {
         description:
-          'Read readings from the river levels table and publish station files to the API bucket',
+          'Read readings from the river levels table, publish station files to the API bucket and station statuses to the status topic',
         path: '/service-policy/',
         statements: [
           new PolicyStatement({
@@ -37,6 +38,10 @@ export class ApiPublisherRole extends Role {
           new PolicyStatement({
             actions: ['s3:PutObject'],
             resources: [`${props.apiBucketArn}/stations/*`],
+          }),
+          new PolicyStatement({
+            actions: ['sns:Publish'],
+            resources: [props.statusTopicArn],
           }),
         ],
       }),

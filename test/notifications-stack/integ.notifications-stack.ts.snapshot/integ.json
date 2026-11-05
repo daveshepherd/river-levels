@@ -1,0 +1,17 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "NotificationsTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestNotificationsStack"
+      ],
+      "regions": [
+        "${Token[AWS.Region.5]}"
+      ],
+      "assertionStack": "NotificationsTest/DefaultTest/DeployAssert",
+      "assertionStackName": "NotificationsTestDefaultTestDeployAssertCB520A9C"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}

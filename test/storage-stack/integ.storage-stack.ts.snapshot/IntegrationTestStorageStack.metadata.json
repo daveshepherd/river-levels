@@ -1,4 +1,10 @@
 {
+  "/IntegrationTestStorageStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestStorageStack.template.json"
+    }
+  ],
   "/IntegrationTestStorageStack/river-levels-table": [
     {
       "type": "aws:cdk:analytics:construct",

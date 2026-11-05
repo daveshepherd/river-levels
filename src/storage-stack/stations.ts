@@ -7,6 +7,8 @@ export interface FordConfig {
   floodedAboveMetres: number;
   /** Above this depth the ford is impassable. Must be above floodedAboveMetres. */
   impassableAboveMetres: number;
+  /** A page about the ford, linked from posts about its state, such as https://kenilworthford.com. */
+  website?: string;
 }
 
 /** A river level gauge the crawler collects readings for. */
@@ -41,7 +43,11 @@ export const STATIONS: StationConfig[] = [
     measureId: '2627-level-stage-i-15_min-mASD',
     // Kenilworth ford (kenilworthford.com), from the original flood-readings
     // service.
-    ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
+    ford: {
+      floodedAboveMetres: 1.23,
+      impassableAboveMetres: 1.4,
+      website: 'https://kenilworthford.com',
+    },
   },
 ];
 
@@ -81,6 +87,14 @@ export function validateStations(stations: unknown): StationConfig[] {
       ) {
         throw new Error(
           `ford.floodedAboveMetres must be below ford.impassableAboveMetres for station ${station.id}`,
+        );
+      }
+      if (
+        station.ford.website !== undefined &&
+        !station.ford.website.startsWith('https://')
+      ) {
+        throw new Error(
+          `ford.website must be an https:// URL for station ${station.id}`,
         );
       }
     }

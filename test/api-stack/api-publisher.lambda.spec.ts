@@ -1,5 +1,6 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 import type { Context, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
@@ -7,6 +8,7 @@ import * as target from '../../src/api-stack/api-publisher.lambda';
 
 const dynamoDbMock = mockClient(DynamoDBClient);
 const s3Mock = mockClient(S3Client);
+const snsMock = mockClient(SNSClient);
 
 const KENILWORTH = {
   id: 'kenilworth',
@@ -55,6 +57,8 @@ function putBody(key: string) {
 beforeEach(() => {
   dynamoDbMock.reset();
   s3Mock.reset();
+  snsMock.reset();
+  process.env.STATUS_TOPIC_ARN = 'status-topic';
   process.env.API_BUCKET = 'api-bucket';
   process.env.DYNAMODB_READINGS_TABLE = 'readings-table';
   process.env.STATIONS = JSON.stringify([KENILWORTH]);
@@ -92,6 +96,24 @@ describe('api-publisher', () => {
       CacheControl: 'max-age=300',
       ContentType: 'application/json',
       Key: 'stations/kenilworth/status.json',
+    });
+  });
+
+  it('publishes the station status to the status topic', async () => {
+    mockReadings([item('kenilworth', 1577891700000, 1.3)], []);
+
+    await target.handler(sqsEvent({ id: 'm1', body: readingMessage('kenilworth') }));
+
+    expect(snsMock).toHaveReceivedCommandTimes(PublishCommand, 1);
+    const publish = snsMock.commandCalls(PublishCommand)[0].args[0].input;
+    expect(publish.TopicArn).toBe('status-topic');
+    expect(JSON.parse(publish.Message!)).toStrictEqual({
+      station: 'kenilworth',
+      depth: 1.3,
+      direction: 'none',
+      rate: 'none',
+      state: 'flooded',
+      lastUpdate: '2020-01-01T15:15:00.000Z',
     });
   });
 

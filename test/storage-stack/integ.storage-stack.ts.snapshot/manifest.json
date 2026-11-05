@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fbe36cca09547da33085e5cb6790050cfba0c636573a8e089efad4fdb57be3cf.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/3fbcc85f37e680e957a5273b3cadbd83f553fe6678c840478e032fc44585c082.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -53,7 +53,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/05bcb7dec7e62451e4c69c19c8f24bab4e2cd38ceb127a032972f60565244534.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/5a7722bf7292eb924bac86c0fcba35f6fa09c3424d4c425ce0980f90aaf5208e.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -625,6 +625,17 @@
           "@aws-cdk/aws-cloudfront:defaultViewerProtocolPolicyRedirectToHttps": {
             "recommendedValue": true,
             "explanation": "Default Distribution cache behaviors to redirect HTTP viewer requests to HTTPS"
+          },
+          "@aws-cdk/aws-apigateway:logGroupDestinationArnWithoutWildcard": {
+            "recommendedValue": true,
+            "explanation": "Render the API Gateway access log destination ARN without the trailing `:*`"
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:evaluateExpressionDedicatedFunction": {
+            "recommendedValue": true,
+            "explanation": "When enabled, each EvaluateExpression task gets its own Lambda function",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
           }
         }
       }

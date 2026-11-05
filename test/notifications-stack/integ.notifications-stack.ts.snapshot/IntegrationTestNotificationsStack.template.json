@@ -1,0 +1,556 @@
+{
+ "Metadata": {
+  "cdk_nag": {
+   "rules_to_suppress": [
+    {
+     "reason": "it is acceptable to use build in iam policies for basic lambda runtime",
+     "id": "AwsSolutions-IAM4",
+     "applies_to": [
+      "Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     ]
+    },
+    {
+     "reason": "the lambda tracing option creates a wildcard policy",
+     "id": "AwsSolutions-IAM5",
+     "applies_to": [
+      "Resource::*"
+     ]
+    }
+   ]
+  }
+ },
+ "Resources": {
+  "xnotifierstateA1B1B132": {
+   "Type": "AWS::DynamoDB::GlobalTable",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "station",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "station",
+      "KeyType": "HASH"
+     }
+    ],
+    "Replicas": [
+     {
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": {
+       "Ref": "AWS::Region"
+      },
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xcredentials56E4AA86": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "X (Twitter) OAuth 1.0a credentials for the river levels notifier: appKey, appSecret, accessToken, accessSecret",
+    "GenerateSecretString": {
+     "GenerateStringKey": "unused",
+     "SecretStringTemplate": "{\"appKey\":\"\",\"appSecret\":\"\",\"accessToken\":\"\",\"accessSecret\":\"\"}"
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "X credentials are issued by X and set by hand; Secrets Manager cannot rotate them",
+       "id": "AwsSolutions-SMG4"
+      }
+     ]
+    }
+   }
+  },
+  "xnotifierdeadletterqueue5047C832": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "this queue is the dead-letter queue for the X notifier queue, so it does not need a DLQ of its own",
+       "id": "AwsSolutions-SQS3"
+      }
+     ]
+    }
+   }
+  },
+  "xnotifierdeadletterqueuePolicy217DFEE2": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "xnotifierdeadletterqueue5047C832",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "xnotifierdeadletterqueue5047C832"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierqueue4AFB83AF": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "xnotifierdeadletterqueue5047C832",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 5
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "VisibilityTimeout": 180
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierqueuePolicy361D54A1": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "xnotifierqueue4AFB83AF",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Fn::GetStackOutput": {
+           "StackName": "IntegrationTestNotificationsFixtures",
+           "Region": {
+            "Ref": "AWS::Region"
+           },
+           "OutputName": "PublishOutputRefstationstatusA5DBC6CCC965AB53"
+          }
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "xnotifierqueue4AFB83AF",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "xnotifierqueue4AFB83AF"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierqueueIntegrationTestNotificationsFixturesstationstatusE28DFCB0CB8F7B98": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "xnotifierqueue4AFB83AF",
+      "Arn"
+     ]
+    },
+    "Protocol": "sqs",
+    "RawMessageDelivery": true,
+    "TopicArn": {
+     "Fn::GetStackOutput": {
+      "StackName": "IntegrationTestNotificationsFixtures",
+      "Region": {
+       "Ref": "AWS::Region"
+      },
+      "OutputName": "PublishOutputRefstationstatusA5DBC6CCC965AB53"
+     }
+    }
+   },
+   "DependsOn": [
+    "xnotifierqueuePolicy361D54A1"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierloggroup0C99F60C": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "RetentionInDays": 365,
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierroleAEDE4425": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "The service role for running the river levels X notifier lambda",
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Ref": "xnotifierrolexnotifierpolicy95ADB25C"
+     }
+    ],
+    "Path": "/service-role/",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierrolexnotifierpolicy95ADB25C": {
+   "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "Description": "Read and record the last state posted per station, and read the X credentials",
+    "Path": "/service-policy/",
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "xnotifierstateA1B1B132",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "xcredentials56E4AA86"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierroleDefaultPolicyBFA3C2BC": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ReceiveMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "xnotifierqueue4AFB83AF",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "xnotifierroleDefaultPolicyBFA3C2BC",
+    "Roles": [
+     {
+      "Ref": "xnotifierroleAEDE4425"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierlambdaFE8EA2B4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "a1c39ec193d364a4b7d09f2f53b4dcf85f017783d3500b46aead2a6491524f5f.zip"
+    },
+    "Description": "src/notifications-stack/x-notifier.lambda.ts",
+    "Environment": {
+     "Variables": {
+      "MODE": "log",
+      "STATE_TABLE": {
+       "Ref": "xnotifierstateA1B1B132"
+      },
+      "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\",\"ford\":{\"floodedAboveMetres\":1.23,\"impassableAboveMetres\":1.4,\"website\":\"https://kenilworthford.com\"}}]",
+      "X_CREDENTIALS_SECRET_ARN": {
+       "Ref": "xcredentials56E4AA86"
+      },
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+     }
+    },
+    "Handler": "index.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "xnotifierloggroup0C99F60C"
+     }
+    },
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "xnotifierroleAEDE4425",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs24.x",
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ],
+    "Timeout": 30,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "xnotifierroleDefaultPolicyBFA3C2BC",
+    "xnotifierroleAEDE4425",
+    "xnotifierrolexnotifierpolicy95ADB25C"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "xnotifierlambdaSqsEventSourceIntegrationTestNotificationsStackxnotifierqueue7A770848A2FDDA0A": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "BatchSize": 10,
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "xnotifierqueue4AFB83AF",
+      "Arn"
+     ]
+    },
+    "FunctionName": {
+     "Ref": "xnotifierlambdaFE8EA2B4"
+    },
+    "FunctionResponseTypes": [
+     "ReportBatchItemFailures"
+    ],
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  }
+ },
+ "Outputs": {
+  "XCredentialsSecretArn": {
+   "Description": "Set this secret to the X credentials before switching the notifier to post",
+   "Value": {
+    "Ref": "xcredentials56E4AA86"
+   }
+  },
+  "PublishOutputRefxnotifierstateA1B1B132C3649023": {
+   "Value": {
+    "Ref": "xnotifierstateA1B1B132"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

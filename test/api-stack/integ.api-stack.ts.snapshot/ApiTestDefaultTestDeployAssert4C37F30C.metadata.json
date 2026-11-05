@@ -17,7 +17,7 @@
       "data": "CheckBootstrapVersion"
     }
   ],
-  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand32fcd6e158aff7555d615a5c92bc6ac9/Default": [
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommande2d6aea43c083df10110bf8361435edc/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -35,7 +35,7 @@
       "data": "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F"
     }
   ],
-  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand744e644dc54167bc13a4ef102785834f/Default": [
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand4b53f4f56ab9b86179fe562c62b59a88/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -83,6 +83,26 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-sqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-sqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70/AssertionResults": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AssertionResultsAwsApiCallawssdkclientsqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70"
     }
   ],
   "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand3da61a04b02aaad89e81d474a561a00e/Default": [
@@ -165,16 +185,16 @@
       "data": "AssertionResultsHttpApiCallc381be6a0e0da54de1b133cf790e367a"
     }
   ],
-  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand32fcd6e158aff7555d615a5c92bc6ac9/Default/Default": [
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommande2d6aea43c083df10110bf8361435edc/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientdynamodbPutItemCommand32fcd6e158aff7555d615a5c92bc6ac9"
+      "data": "AwsApiCallawssdkclientdynamodbPutItemCommande2d6aea43c083df10110bf8361435edc"
     }
   ],
-  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand744e644dc54167bc13a4ef102785834f/Default/Default": [
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand4b53f4f56ab9b86179fe562c62b59a88/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientsnsPublishCommand744e644dc54167bc13a4ef102785834f"
+      "data": "AwsApiCallawssdkclientsnsPublishCommand4b53f4f56ab9b86179fe562c62b59a88"
     }
   ],
   "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11/Default/Default": [
@@ -193,6 +213,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitFor1EBE87C1"
+    }
+  ],
+  "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-sqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclientsqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70"
     }
   ],
   "/ApiTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-s3GetObjectCommand3da61a04b02aaad89e81d474a561a00e/Default/Default": [

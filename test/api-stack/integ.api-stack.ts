@@ -3,6 +3,8 @@ import { ExpectedResult, IntegTest, Match } from '@aws-cdk/integ-tests-alpha';
 import { App, Aspects, Duration, Stack, Tags } from 'aws-cdk-lib';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { ApiStack } from '../../src/api-stack';
 import { ApplyDestroyPolicyAspect } from '../../src/destroy-policy';
@@ -34,6 +36,14 @@ const stackUnderTest = new ApiStack(app, 'IntegrationTestApiStack', {
     },
   ],
 });
+// Receives what the publisher sends to the station-status topic
+const statusQueue = new Queue(stackUnderTest, 'station-status-test-queue', {
+  enforceSSL: true,
+});
+stackUnderTest.statusTopic.addSubscription(
+  new SqsSubscription(statusQueue, { rawMessageDelivery: true }),
+);
+
 for (const stack of [fixtures, stackUnderTest]) {
   Tags.of(stack).add('endor:ManagedBy', 'cdk');
   Tags.of(stack).add('endor:Stage', 'development');
@@ -96,6 +106,29 @@ integ.assertions
         interval: Duration.seconds(15),
         backoffRate: 2,
       }),
+  )
+  // The same status, published to the station-status topic
+  .next(
+    integ.assertions
+      .awsApiCall('@aws-sdk/client-sqs', 'ReceiveMessageCommand', {
+        QueueUrl: statusQueue.queueUrl,
+        WaitTimeSeconds: 20,
+      })
+      .expect(
+        ExpectedResult.objectLike({
+          Messages: Match.arrayWith([
+            Match.objectLike({
+              Body: Match.serializedJson(
+                Match.objectLike({
+                  station: 'kenilworth',
+                  depth: 1.3,
+                  state: 'flooded',
+                }),
+              ),
+            }),
+          ]),
+        }),
+      ),
   )
   .next(
     integ.assertions
@@ -230,6 +263,16 @@ NagSuppressions.addResourceSuppressionsByPath(
     {
       id: 'AwsSolutions-CFR4',
       reason: 'the default cloudfront.net certificate cannot set a minimum TLS version; the custom domain certificate will require TLS 1.2',
+    },
+  ],
+);
+NagSuppressions.addResourceSuppressionsByPath(
+  stackUnderTest,
+  '/IntegrationTestApiStack/station-status-test-queue/Resource',
+  [
+    {
+      id: 'AwsSolutions-SQS3',
+      reason: 'a test-only queue that receives the station-status topic for the assertions',
     },
   ],
 );

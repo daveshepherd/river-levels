@@ -49,7 +49,11 @@ describe('StorageStack', () => {
             {
               id: 'kenilworth',
               measureId: '2627-level-stage-i-15_min-mASD',
-              ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
+              ford: {
+                floodedAboveMetres: 1.23,
+                impassableAboveMetres: 1.4,
+                website: 'https://kenilworthford.com',
+              },
             },
           ]),
         },

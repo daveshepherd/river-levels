@@ -13,7 +13,11 @@ describe('stations', () => {
     expect(STATIONS).toContainEqual({
       id: 'kenilworth',
       measureId: '2627-level-stage-i-15_min-mASD',
-      ford: { floodedAboveMetres: 1.23, impassableAboveMetres: 1.4 },
+      ford: {
+        floodedAboveMetres: 1.23,
+        impassableAboveMetres: 1.4,
+        website: 'https://kenilworthford.com',
+      },
     });
   });
 
@@ -39,6 +43,11 @@ describe('stations', () => {
       'equal ford thresholds',
       [{ id: 'a', measureId: 'm', ford: { floodedAboveMetres: 1, impassableAboveMetres: 1 } }],
       'ford.floodedAboveMetres must be below ford.impassableAboveMetres for station a',
+    ],
+    [
+      'a ford website that is not https',
+      [{ id: 'a', measureId: 'm', ford: { floodedAboveMetres: 1, impassableAboveMetres: 2, website: 'http://a' } }],
+      'ford.website must be an https:// URL for station a',
     ],
     [
       'a zero threshold',

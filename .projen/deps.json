@@ -134,6 +134,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-secrets-manager",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sns",
       "type": "runtime"
     },
@@ -149,6 +153,10 @@
     {
       "name": "constructs",
       "version": "^10.5.1",
+      "type": "runtime"
+    },
+    {
+      "name": "twitter-api-v2",
       "type": "runtime"
     }
   ],

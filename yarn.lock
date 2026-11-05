@@ -123,6 +123,20 @@
     "@smithy/types" "^4.19.0"
     tslib "^2.6.2"
 
+"@aws-sdk/client-secrets-manager@^3.1162.0":
+  version "3.1162.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-secrets-manager/-/client-secrets-manager-3.1162.0.tgz#21afe418e381e713c87a636bca6068f6d64cef62"
+  integrity sha512-08LlSWeA0I/WZMlUOYXSGUhLK3AQGilrvyoBGezntKxZ9rj89MZaxQth64vnumbKwJJiEkF5i5mIIYHhviqnsA==
+  dependencies:
+    "@aws-sdk/core" "^3.980.0"
+    "@aws-sdk/credential-provider-node" "^3.972.93"
+    "@aws-sdk/types" "^3.975.0"
+    "@smithy/core" "^3.38.0"
+    "@smithy/fetch-http-handler" "^5.8.0"
+    "@smithy/node-http-handler" "^4.14.0"
+    "@smithy/types" "^4.19.0"
+    tslib "^2.6.2"
+
 "@aws-sdk/client-sns@^3.1162.0":
   version "3.1162.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-sns/-/client-sns-3.1162.0.tgz#e68b6f37c13af37d773a80aa44a54267bc6594c4"
@@ -5431,6 +5445,11 @@ tslib@^2.1.0, tslib@^2.6.2:
   version "2.9.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.9.1.tgz#8986213ba2f17f38ba39a7c43d0e565a9134ff5f"
   integrity sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==
+
+twitter-api-v2@^1.31.0:
+  version "1.31.0"
+  resolved "https://registry.yarnpkg.com/twitter-api-v2/-/twitter-api-v2-1.31.0.tgz#cf3d76595ad147bc4bd700eb3a9a981d3b775fdb"
+  integrity sha512-slrAXaibHjTQTXxm50+bGdT6YfHYrpwIslmXXr4kOtEGtTN3OTbODj0/O5ZVckILiTioZtbIHdqjsYFjj0vcRg==
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
