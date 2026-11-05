@@ -239,7 +239,7 @@ Before posting, the notifier claims the change with a conditional write to the s
 - `log`: runs everything and records state, but logs the post instead of sending it.
 - `post`: posts to the X account whose credentials are in the stage's `x-credentials` secret.
 
-Every stage is in `log` until its secret is filled in. Development uses a test X account; production uses the kenilworthford.com account.
+Development is in `post`, using a test X account. Production is in `log` until it takes over from flood-readings (below), then posts as the kenilworthford.com account. `local` is always `log`.
 
 **Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials:
 
