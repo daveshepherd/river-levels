@@ -16,11 +16,27 @@ import { resetXClient } from '../../src/notifications-stack/x-client';
 import * as target from '../../src/notifications-stack/x-notifier.lambda';
 
 const tweet = jest.fn();
+const RATE_LIMIT = {
+  limit: 100,
+  remaining: 99,
+  reset: 1_800_000_900,
+  userDay: { limit: 17, remaining: 16, reset: 1_800_086_400 },
+};
+// The clients call v2.post('tweets', { text }, { fullResponse: true }); tweet
+// receives the text and resolves to the response body
+async function fullResponsePost(
+  url: string,
+  body: { text: string },
+  options: { fullResponse: boolean },
+) {
+  expect([url, options]).toStrictEqual(['tweets', { fullResponse: true }]);
+  return { data: await tweet(body.text), headers: {}, rateLimit: RATE_LIMIT };
+}
 const twitterApi = jest.fn();
 jest.mock('twitter-api-v2', () => ({
   TwitterApi: jest.fn().mockImplementation((credentials) => {
     twitterApi(credentials);
-    return { readWrite: { v2: { tweet } } };
+    return { readWrite: { v2: { post: fullResponsePost } } };
   }),
 }));
 
