@@ -84,8 +84,8 @@ async function notifyStation(status: StationStatusMessage, website?: string) {
     return;
   }
   try {
-    const id = await postToX(text);
-    logger.info('Posted to X', { transition: decision.transition, id });
+    const { id, rateLimit } = await postToX(text);
+    logger.info('Posted to X', { transition: decision.transition, id, rateLimit });
   } catch (error) {
     // Put the previous record back, so the retry posts again
     await replacePostedState(status.station, next, posted!);
