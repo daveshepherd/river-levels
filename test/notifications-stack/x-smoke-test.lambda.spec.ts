@@ -4,14 +4,31 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import type { Context } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+import { logger } from '../../src/notifications-stack/powertools';
 import { resetXClient } from '../../src/notifications-stack/x-client';
 import * as target from '../../src/notifications-stack/x-smoke-test.lambda';
 
 const tweet = jest.fn();
+const RATE_LIMIT = {
+  limit: 100,
+  remaining: 99,
+  reset: 1_800_000_900,
+  userDay: { limit: 17, remaining: 16, reset: 1_800_086_400 },
+};
+// The clients call v2.post('tweets', { text }, { fullResponse: true }); tweet
+// receives the text and resolves to the response body
+async function fullResponsePost(
+  url: string,
+  body: { text: string },
+  options: { fullResponse: boolean },
+) {
+  expect([url, options]).toStrictEqual(['tweets', { fullResponse: true }]);
+  return { data: await tweet(body.text), headers: {}, rateLimit: RATE_LIMIT };
+}
 const deleteTweet = jest.fn();
 jest.mock('twitter-api-v2', () => ({
   TwitterApi: jest.fn().mockImplementation(() => ({
-    readWrite: { v2: { tweet, deleteTweet } },
+    readWrite: { v2: { post: fullResponsePost, deleteTweet } },
   })),
 }));
 
@@ -39,6 +56,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
+  jest.restoreAllMocks();
 });
 
 describe('x-smoke-test', () => {
@@ -51,6 +69,33 @@ describe('x-smoke-test', () => {
       'Smoke test of the river levels X notifier, release abc123, at 2027-01-15T08:00:00.000Z. This post is deleted straight away.',
     );
     expect(deleteTweet).toHaveBeenCalledWith('123');
+  });
+
+  it('logs the posting limits X reports', async () => {
+    const info = jest.spyOn(logger, 'info');
+
+    await target.handler({});
+
+    expect(info).toHaveBeenCalledWith('Posted the smoke test to X', {
+      id: '123',
+      release: 'abc123',
+      rateLimit: RATE_LIMIT,
+    });
+  });
+
+  it('logs the limits when X rejects the post', async () => {
+    const warn = jest.spyOn(logger, 'warn');
+    const limited = Object.assign(new Error('Too Many Requests'), {
+      code: 429,
+      rateLimit: { ...RATE_LIMIT, userDay: { limit: 17, remaining: 0, reset: 1 } },
+    });
+    tweet.mockRejectedValue(limited);
+
+    await expect(target.handler({})).rejects.toThrow('Too Many Requests');
+    expect(warn).toHaveBeenCalledWith('The X API call failed', {
+      code: 429,
+      rateLimit: limited.rateLimit,
+    });
   });
 
   it('says the release is local when none is set', async () => {

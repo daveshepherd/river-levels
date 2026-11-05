@@ -257,6 +257,7 @@ In `post` mode, a missing value fails the post, which retries and then raises th
 
 - The trigger runs whenever the smoke test function changes. Its `RELEASE` env var is the deploy's `GITHUB_SHA`, so it runs on every release. The commit and time keep the text unique, because X rejects duplicate posts.
 - Each run uses two X API writes (a post and a delete).
+- **Posting limits:** X's developer console doesn't show them, so the smoke test logs the limits X returns with the post as `rateLimit`. That covers the 15-minute window (`limit`, `remaining`, `reset`), and the app's (`day`) and account's (`userDay`) 24-hour caps when X sends them. "Posted to X" logs them too, and a failed X call logs them with its status code, so a 429 shows which limit was hit.
 - If a later resource in the same update fails, the rollback runs the previous version's smoke test again, which posts and deletes once more.
 - A local deploy with `STAGE=development` also runs it, with release `local`.
 
@@ -419,7 +420,7 @@ flowchart LR
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
-- **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
+- **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
 - **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing or revoked `x-credentials` value, or the X API's limits.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
