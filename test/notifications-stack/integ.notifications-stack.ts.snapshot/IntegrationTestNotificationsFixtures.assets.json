@@ -1,0 +1,20 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "eb3555d23038fb3878b10cd3850812f137daba32733ca581b158162db0b74a60": {
+      "displayName": "IntegrationTestNotificationsFixtures Template",
+      "source": {
+        "path": "IntegrationTestNotificationsFixtures.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-ebe7091a": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "eb3555d23038fb3878b10cd3850812f137daba32733ca581b158162db0b74a60.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

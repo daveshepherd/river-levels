@@ -59,6 +59,16 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/station-status": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "enforceSSL": true,
+        "masterKey": "*"
+      }
+    }
+  ],
   "/IntegrationTestApiStack/api-publisher-role": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -174,6 +184,15 @@
       "data": {
         "addEnvironment": [
           "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
           "*",
           {
             "removeInEdge": true
@@ -192,6 +211,14 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "ApiDomainName"
+    }
+  ],
+  "/IntegrationTestApiStack/station-status-test-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true
+      }
     }
   ],
   "/IntegrationTestApiStack/BootstrapVersion": [
@@ -291,6 +318,22 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/station-status/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusA5DBC6CC"
+    }
+  ],
+  "/IntegrationTestApiStack/station-status/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
   "/IntegrationTestApiStack/api-publisher-role/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -304,6 +347,14 @@
         "description": "*",
         "path": "*",
         "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
       }
     },
     {
@@ -442,10 +493,47 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/station-status-test-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatustestqueue27156BD7"
+    }
+  ],
+  "/IntegrationTestApiStack/station-status-test-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/station-status-test-queue/IntegrationTestApiStackstationstatus3AFA2561": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
   "/IntegrationTestApiStack/Publish/Output{\"Ref\":\"apibucketE65E1D51\"}": [
     {
       "type": "aws:cdk:logicalId",
       "data": "PublishOutputRefapibucketE65E1D51AEE84AA4"
+    }
+  ],
+  "/IntegrationTestApiStack/Publish/Output{\"Ref\":\"stationstatustestqueue27156BD7\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefstationstatustestqueue27156BD78E8D362F"
     }
   ],
   "/IntegrationTestApiStack/Publish/Output{\"Fn::GetAtt\":[\"apidistribution146B80A5\",\"DomainName\"]}": [
@@ -490,6 +578,12 @@
       "data": "apipublisherqueueIntegrationTestApiFixturesnotificationsB6C8D73365847AF4"
     }
   ],
+  "/IntegrationTestApiStack/station-status/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusPolicy9E34EFF4"
+    }
+  ],
   "/IntegrationTestApiStack/api-publisher-role/api-publisher-policy/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -530,6 +624,18 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "apidistribution146B80A5"
+    }
+  ],
+  "/IntegrationTestApiStack/station-status-test-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatustestqueuePolicyC5C7B9DF"
+    }
+  ],
+  "/IntegrationTestApiStack/station-status-test-queue/IntegrationTestApiStackstationstatus3AFA2561/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatustestqueueIntegrationTestApiStackstationstatus3AFA256115173574"
     }
   ],
   "/IntegrationTestApiStack/api/distribution/Origin1/S3OriginAccessControl": [

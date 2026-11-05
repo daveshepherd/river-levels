@@ -1,0 +1,56 @@
+{
+  "/IntegrationTestNotificationsFixtures": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestNotificationsFixtures.template.json"
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/station-status": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/station-status/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusA5DBC6CC"
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/station-status/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/Publish/Output{\"Ref\":\"stationstatusA5DBC6CC\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefstationstatusA5DBC6CCC965AB53"
+    }
+  ],
+  "/IntegrationTestNotificationsFixtures/station-status/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusPolicy9E34EFF4"
+    }
+  ]
+}

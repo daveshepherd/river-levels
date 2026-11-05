@@ -477,6 +477,75 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
+  "stationstatusA5DBC6CC": {
+   "Type": "AWS::SNS::Topic",
+   "Properties": {
+    "DisplayName": "river-levels-station-status",
+    "KmsMasterKeyId": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":kms:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":alias/aws/sns"
+      ]
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "stationstatusPolicy9E34EFF4": {
+   "Type": "AWS::SNS::TopicPolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sns:Publish",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": "*",
+       "Resource": {
+        "Ref": "stationstatusA5DBC6CC"
+       },
+       "Sid": "AllowPublishThroughSSLOnly"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Topics": [
+     {
+      "Ref": "stationstatusA5DBC6CC"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
   "apipublisherroleB277F12C": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -528,7 +597,7 @@
   "apipublisherroleapipublisherpolicy4D57C96F": {
    "Type": "AWS::IAM::ManagedPolicy",
    "Properties": {
-    "Description": "Read readings from the river levels table and publish station files to the API bucket",
+    "Description": "Read readings from the river levels table, publish station files to the API bucket and station statuses to the status topic",
     "Path": "/service-policy/",
     "PolicyDocument": {
      "Statement": [
@@ -561,6 +630,13 @@
           "/stations/*"
          ]
         ]
+       }
+      },
+      {
+       "Action": "sns:Publish",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "stationstatusA5DBC6CC"
        }
       }
      ],
@@ -640,7 +716,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "9801063b640bc219bf3c7bc164471fd95ec922f225075192caa1e211f2dd297a.zip"
+     "S3Key": "97afdf335b8c6abf9c791ab88d999bc855db1ed32624c2225e6b60ff79d32d4c.zip"
     },
     "Description": "src/api-stack/api-publisher.lambda.ts",
     "Environment": {
@@ -658,6 +734,9 @@
        }
       },
       "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\",\"ford\":{\"floodedAboveMetres\":1.23,\"impassableAboveMetres\":1.4}}]",
+      "STATUS_TOPIC_ARN": {
+       "Ref": "stationstatusA5DBC6CC"
+      },
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
      }
     },
@@ -904,6 +983,109 @@
      ]
     }
    }
+  },
+  "stationstatustestqueue27156BD7": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "endor:ManagedBy",
+      "Value": "cdk"
+     },
+     {
+      "Key": "endor:Stage",
+      "Value": "development"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "cdk_nag": {
+     "rules_to_suppress": [
+      {
+       "reason": "a test-only queue that receives the station-status topic for the assertions",
+       "id": "AwsSolutions-SQS3"
+      }
+     ]
+    }
+   }
+  },
+  "stationstatustestqueuePolicyC5C7B9DF": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "stationstatustestqueue27156BD7",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Ref": "stationstatusA5DBC6CC"
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "stationstatustestqueue27156BD7",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "stationstatustestqueue27156BD7"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "stationstatustestqueueIntegrationTestApiStackstationstatus3AFA256115173574": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "stationstatustestqueue27156BD7",
+      "Arn"
+     ]
+    },
+    "Protocol": "sqs",
+    "RawMessageDelivery": true,
+    "TopicArn": {
+     "Ref": "stationstatusA5DBC6CC"
+    }
+   },
+   "DependsOn": [
+    "stationstatustestqueuePolicyC5C7B9DF"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
   }
  },
  "Outputs": {
@@ -923,6 +1105,11 @@
   "PublishOutputRefapibucketE65E1D51AEE84AA4": {
    "Value": {
     "Ref": "apibucketE65E1D51"
+   }
+  },
+  "PublishOutputRefstationstatustestqueue27156BD78E8D362F": {
+   "Value": {
+    "Ref": "stationstatustestqueue27156BD7"
    }
   },
   "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092": {

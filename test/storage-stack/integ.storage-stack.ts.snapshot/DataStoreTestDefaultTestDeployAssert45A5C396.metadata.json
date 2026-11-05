@@ -1,4 +1,10 @@
 {
+  "/DataStoreTest/DefaultTest/DeployAssert": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "DataStoreTestDefaultTestDeployAssert45A5C396.template.json"
+    }
+  ],
   "/DataStoreTest/DefaultTest/DeployAssert/BootstrapVersion": [
     {
       "type": "aws:cdk:logicalId",
@@ -79,7 +85,7 @@
       "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
     }
   ],
-  "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand52aa12892c4231dd7d0c5bdb9dda9fa8/Default": [
+  "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand8d7cf434efd3998d7fdf30fcc6fa92d2/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -129,10 +135,10 @@
       "data": "AwsApiCallDynamoDBQuery1bb148b2112fb979fc484ac2e80ee93aWaitFor3CFFF996"
     }
   ],
-  "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand52aa12892c4231dd7d0c5bdb9dda9fa8/Default/Default": [
+  "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbPutItemCommand8d7cf434efd3998d7fdf30fcc6fa92d2/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientdynamodbPutItemCommand52aa12892c4231dd7d0c5bdb9dda9fa8"
+      "data": "AwsApiCallawssdkclientdynamodbPutItemCommand8d7cf434efd3998d7fdf30fcc6fa92d2"
     }
   ],
   "/DataStoreTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-sqsReceiveMessageCommandea71aaf16ee8489068ca649190d820dc/Default/Default": [

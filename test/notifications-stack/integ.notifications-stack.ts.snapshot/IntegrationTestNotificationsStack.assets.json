@@ -1,0 +1,34 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "a1c39ec193d364a4b7d09f2f53b4dcf85f017783d3500b46aead2a6491524f5f": {
+      "displayName": "x-notifier-lambda/Code",
+      "source": {
+        "path": "asset.a1c39ec193d364a4b7d09f2f53b4dcf85f017783d3500b46aead2a6491524f5f.lambda",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-current_region-ff2a16ef": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "a1c39ec193d364a4b7d09f2f53b4dcf85f017783d3500b46aead2a6491524f5f.zip",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "7fb29cf05072512676766b40294f58f752ae31f7af2cefc785a06adb66fe232e": {
+      "displayName": "IntegrationTestNotificationsStack Template",
+      "source": {
+        "path": "IntegrationTestNotificationsStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-1fccedeb": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "7fb29cf05072512676766b40294f58f752ae31f7af2cefc785a06adb66fe232e.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
