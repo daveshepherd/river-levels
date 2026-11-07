@@ -45,6 +45,11 @@
     "node_modules/",
     "*.generated.ts",
     "coverage",
+    "src/api-stack/api-publisher-function.ts",
+    "src/notifications-stack/x-notifier-function.ts",
+    "src/notifications-stack/x-smoke-test-function.ts",
+    "src/storage-stack/crawler-function.ts",
+    "src/storage-stack/sns-publisher-function.ts",
     "!.projenrc.ts",
     "!projenrc/**/*.ts"
   ],
