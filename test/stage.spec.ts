@@ -53,7 +53,7 @@ describe('xNotifierMode', () => {
   test.each([
     ['local', 'log'],
     ['development', 'post'],
-    ['production', 'log'],
+    ['production', 'post'],
   ] as const)('that %s is in %s mode', (stage, mode) => {
     expect(xNotifierMode(stage)).toBe(mode);
   });
