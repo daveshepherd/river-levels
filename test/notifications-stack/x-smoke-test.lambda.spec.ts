@@ -50,7 +50,6 @@ beforeEach(() => {
   });
   tweet.mockResolvedValue({ data: { id: '123', text: '' } });
   deleteTweet.mockResolvedValue({ data: { deleted: true } });
-  process.env.RELEASE = 'abc123';
   process.env.X_CREDENTIALS_SECRET_ARN = 'secret-arn';
 });
 
@@ -66,7 +65,7 @@ describe('x-smoke-test', () => {
     ).resolves.toStrictEqual({ id: '123' });
 
     expect(tweet).toHaveBeenCalledWith(
-      'Smoke test of the river levels X notifier, release abc123, at 2027-01-15T08:00:00.000Z. This post is deleted straight away.',
+      'Smoke test of the river levels X notifier at 2027-01-15T08:00:00.000Z. This post is deleted straight away.',
     );
     expect(deleteTweet).toHaveBeenCalledWith('123');
   });
@@ -78,7 +77,6 @@ describe('x-smoke-test', () => {
 
     expect(info).toHaveBeenCalledWith('Posted the smoke test to X', {
       id: '123',
-      release: 'abc123',
       rateLimit: RATE_LIMIT,
     });
   });
@@ -98,13 +96,6 @@ describe('x-smoke-test', () => {
     });
   });
 
-  it('says the release is local when none is set', async () => {
-    delete process.env.RELEASE;
-
-    await target.handler({});
-
-    expect(tweet.mock.calls[0][0]).toContain('release local,');
-  });
 
   it('fails when posting fails', async () => {
     tweet.mockRejectedValue(new Error('X is down'));

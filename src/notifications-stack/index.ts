@@ -44,14 +44,11 @@ export interface NotificationsStackProps extends StackProps {
   /** The stations, for each ford's website link. Defaults to STATIONS in stations.ts. */
   stations?: StationConfig[];
   /**
-   * Post a smoke test to X, and delete it, on each deploy, failing the deploy
-   * if that doesn't work. Only for a stage whose credentials secret is set,
-   * and that posts to a test account.
+   * Post a smoke test to X, and delete it, on deploys that change the smoke
+   * test function, failing the deploy if that doesn't work. Only for a stage
+   * whose credentials secret is set, and that posts to a test account.
    */
-  smokeTest?: {
-    /** Identifies the release in the post. It must change on each deploy, as the smoke test only runs when its function changes. */
-    release: string;
-  };
+  smokeTest?: boolean;
   setDestroyPolicyToAllResources?: boolean;
 }
 
@@ -137,7 +134,6 @@ export class NotificationsStack extends Stack {
       const smokeTest = new XSmokeTestFunction(this, 'x-smoke-test-lambda', {
         architecture: Architecture.ARM_64,
         environment: {
-          RELEASE: props.smokeTest.release,
           X_CREDENTIALS_SECRET_ARN: this.credentialsSecret.secretArn,
         },
         logGroup: new LogGroup(this, 'x-smoke-test-log-group', {
@@ -149,7 +145,9 @@ export class NotificationsStack extends Stack {
         timeout: Duration.seconds(30),
         tracing: Tracing.ACTIVE,
       });
-      // Runs whenever the function changes, which RELEASE makes every deploy
+      // Runs only when the function's code or configuration changes. Its
+      // bundle includes the X client and twitter-api-v2, so a change that
+      // could affect posting runs it
       new Trigger(this, 'x-smoke-test', {
         executeAfter: [notifier],
         executeOnHandlerChange: true,

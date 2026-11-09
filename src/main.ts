@@ -62,9 +62,7 @@ new NotificationsStack(app, 'RiverLevelsNotifications', {
   alertsTopic: storageStack.alertsTopic,
   env,
   mode: xNotifierMode(stage),
-  smokeTest: xSmokeTestEnabled(stage)
-    ? { release: process.env.GITHUB_SHA ?? 'local' }
-    : undefined,
+  smokeTest: xSmokeTestEnabled(stage),
   statusTopic: apiStack.statusTopic,
 });
 

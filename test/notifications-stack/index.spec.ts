@@ -115,12 +115,12 @@ describe('NotificationsStack', () => {
   });
 
   test('that the smoke test runs on deploy with its own role', () => {
-    const { stack, template } = synth({ smokeTest: { release: 'abc123' } });
+    const { stack, template } = synth({ smokeTest: true });
 
     template.hasResourceProperties('AWS::Lambda::Function', {
+      Description: 'src/notifications-stack/x-smoke-test.lambda.ts',
       Environment: {
         Variables: {
-          RELEASE: 'abc123',
           X_CREDENTIALS_SECRET_ARN: stack.resolve(stack.credentialsSecret.secretArn),
         },
       },
@@ -146,7 +146,7 @@ describe('NotificationsStack', () => {
     template.resourceCountIs('Custom::Trigger', 0);
     template.resourcePropertiesCountIs(
       'AWS::Lambda::Function',
-      { Environment: { Variables: { RELEASE: Match.anyValue() } } },
+      { Description: 'src/notifications-stack/x-smoke-test.lambda.ts' },
       0,
     );
   });
