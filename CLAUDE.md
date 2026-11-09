@@ -72,7 +72,7 @@ src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted
 src/notifications-stack/
   index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
   x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
-  x-smoke-test.lambda.ts     Development only: a CDK trigger runs it on deploy to post to X and delete the post, failing the deploy if that fails
+  x-smoke-test.lambda.ts     Development only: a CDK trigger runs it when a deploy changes it (its code, the X client or their dependencies) to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
 test/<stack>/                Jest specs mirror src/. integ.*.ts are integ-runner tests
 test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against

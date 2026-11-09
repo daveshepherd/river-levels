@@ -88,7 +88,7 @@ flowchart LR
   xnotifier -- "credentials" --> xsecret
   xnotifier -- "post on a state change (post mode)" --> xaccount
   xsmoke -- "credentials" --> xsecret
-  xsmoke -. "post and delete on each deploy" .-> xaccount
+  xsmoke -. "post and delete when the smoke test changes" .-> xaccount
   xdlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
   website -- "GET /status, /chart" --> cdn
@@ -253,13 +253,15 @@ aws secretsmanager put-secret-value --secret-id <XCredentialsSecretArn output> \
 
 In `post` mode, a missing value fails the post, which retries and then raises the dead-letter alarm.
 
-**Smoke test** (development only, `xSmokeTestEnabled()` in [`src/stage.ts`](../src/stage.ts)): each development deploy runs [`x-smoke-test`](../src/notifications-stack/x-smoke-test.lambda.ts) through the `x-smoke-test` CDK trigger. It posts "Smoke test of the river levels X notifier, release <commit>, at <time>…" to the test account, and deletes it straight away. This checks the secret, the X client and the account without waiting for the river to change. If posting or deleting fails, the trigger fails, so the `RiverLevelsNotifications` update rolls back, `deploy_development` fails and production isn't deployed.
+**Smoke test** (development only, `xSmokeTestEnabled()` in [`src/stage.ts`](../src/stage.ts)): a development deploy that could affect posting runs [`x-smoke-test`](../src/notifications-stack/x-smoke-test.lambda.ts) through the `x-smoke-test` CDK trigger. It posts "Smoke test of the river levels X notifier at <time>…" to the test account, and deletes it straight away. This checks the secret, the X client and the account without waiting for the river to change. If posting or deleting fails, the trigger fails, so the `RiverLevelsNotifications` update rolls back, `deploy_development` fails and production isn't deployed.
 
-- The trigger runs whenever the smoke test function changes. Its `RELEASE` env var is the deploy's `GITHUB_SHA`, so it runs on every release. The commit and time keep the text unique, because X rejects duplicate posts.
+- **When it runs:** only when the smoke test function's version changes, that is when its bundled code or its configuration changes. The bundle includes `x-client.ts`, `twitter-api-v2` and Powertools, so changing the X client or upgrading those dependencies runs it. Changes to other code, such as the notifier's decision rules or wording, don't, and nor do releases that don't touch it. The trigger's first deploy runs it too.
+- The time keeps the text unique, because X rejects duplicate posts.
+- **Running it by hand,** for example after changing the `x-credentials` secret, which no deploy detects: `aws lambda invoke --region eu-west-2 --function-name <x-smoke-test-lambda name> /dev/stdout`. A `FunctionError` in the output means it failed, and the error is in the response and the logs.
 - Each run uses two X API writes (a post and a delete).
 - **Posting limits:** X's developer console doesn't show them, so the smoke test logs the limits X returns with the post as `rateLimit`. That covers the 15-minute window (`limit`, `remaining`, `reset`), and the app's (`day`) and account's (`userDay`) 24-hour caps when X sends them. "Posted to X" logs them too, and a failed X call logs them with its status code, so a 429 shows which limit was hit.
 - If a later resource in the same update fails, the rollback runs the previous version's smoke test again, which posts and deletes once more.
-- A local deploy with `STAGE=development` also runs it, with release `local`.
+- A local deploy with `STAGE=development` runs it under the same rule.
 
 #### Switching production over from flood-readings
 
@@ -361,7 +363,7 @@ Logical names as they appear in the CloudFormation template.
 | `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
-| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 24, arm64, 30 s timeout, X-Ray active. Env: `RELEASE` (the deploy's commit), `X_CREDENTIALS_SECRET_ARN`. |
+| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 24, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_SECRET_ARN`. |
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
@@ -400,7 +402,7 @@ flowchart LR
   pr --> codeql["codeql workflow<br/>javascript-typescript · actions"]
   build & codeql --> merge["Mergify merge queue<br/>squash merge to main"]
   merge --> release["release job<br/>build, bump version, tag"]
-  release --> dev["deploy_development<br/>environment: development<br/>x-smoke-test trigger posts to X"]
+  release --> dev["deploy_development<br/>environment: development<br/>x-smoke-test trigger posts to X<br/>when the smoke test changes"]
   dev --> prod["deploy_production<br/>environment: production"]
 ```
 
