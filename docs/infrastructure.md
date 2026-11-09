@@ -244,12 +244,45 @@ Before posting, the notifier claims the change with a conditional write to the s
 
 Development is in `post`, using a test X account. Production is in `log` until it takes over from flood-readings (below), then posts as the kenilworthford.com account. `local` is always `log`.
 
-**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials:
+**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app, not the one flood-readings uses.
+
+| Secret field | X developer portal (app's Keys and tokens tab) |
+|--------------|-----------------------------------------------|
+| `appKey` | Consumer Key (API Key) |
+| `appSecret` | Secret Key (API Key Secret) |
+| `accessToken` | Access Token |
+| `accessSecret` | Access Token Secret |
+
+The bearer token, client ID and client secret aren't used: the bearer token can't post as an account, and the client ID and secret are for OAuth 2.0.
+
+Keep the values out of shell history by writing the JSON to a file, then deleting it:
 
 ```sh
-aws secretsmanager put-secret-value --secret-id <XCredentialsSecretArn output> \
-  --secret-string '{"appKey":"…","appSecret":"…","accessToken":"…","accessSecret":"…"}'
+aws secretsmanager put-secret-value --region eu-west-2 --secret-id <XCredentialsSecretArn output> \
+  --secret-string file://x-credentials.json
+rm x-credentials.json
 ```
+
+**X app requirements.** Posting fails with `403 Client Forbidden: … you must use keys and tokens from a developer App that is attached to a Project` unless all of these hold. The message is misleading, because it also appears for an app that is in a Project, but on the Free plan:
+- The app is in a **pay-per-use** project with credit. Free projects can authenticate but can't post. An app already connected to the Free ("Standard Basic") package has to be disconnected first, or use a new app.
+- The app's **User authentication settings** give **Read and write**.
+- The access token was generated **after** that, while signed in as the account that should post, and the portal shows it as Read and Write.
+
+**Checking credentials without posting:** `GET /2/users/me` returns the account the credentials belong to and, in the `x-access-level` header, their access. Run it from the repo, which has `twitter-api-v2` installed; it prints only the username and access level:
+
+```sh
+aws secretsmanager get-secret-value --region eu-west-2 --secret-id <XCredentialsSecretArn output> \
+  --query SecretString --output text \
+| node -e '
+const { TwitterApi } = require("twitter-api-v2");
+let s = "";
+process.stdin.on("data", (d) => (s += d)).on("end", async () => {
+  const r = await new TwitterApi(JSON.parse(s)).v2.get("users/me", undefined, { fullResponse: true });
+  console.log(r.data.data.username, r.headers["x-access-level"]);
+});'
+```
+
+It should print the account's username and `read-write`. It doesn't prove the project can post: a Free project passes this check too.
 
 In `post` mode, a missing value fails the post, which retries and then raises the dead-letter alarm.
 
@@ -267,8 +300,8 @@ In `post` mode, a missing value fails the post, which retries and then raises th
 
 flood-readings' crawler posts the same announcements today, so production's notifier stays in `log` mode until it takes over:
 
-1. **Watch the logs.** With production in `log` mode, check the `x-notifier` logs (service `x-notifier`) at the next state change: "Would post (log mode)" with the expected text, and nothing during the cooldown.
-2. **Set production's `x-credentials` secret** to the account flood-readings posts as. Its values are in flood-readings' `.env.prod.yml`: `TWITTER_API_KEY` is `appKey`, `TWITTER_API_SECRET` is `appSecret`, `TWITTER_ACCESS_TOKEN` is `accessToken`, and `TWITTER_ACCESS_SECRET` is `accessSecret`.
+1. **Production's `x-credentials` secret is set**, for a new production app in a pay-per-use project. flood-readings keeps its own app, so it isn't affected until step 3. Before switching, check the secret with `users/me` (above), and that the project still has credit. Notifier posts include a link to the ford's website, which X charges more for than a plain post.
+2. **Watch the logs.** With production in `log` mode, check the `x-notifier` logs (service `x-notifier`) at the next state change: "Would post (log mode)" with the expected text, and nothing during the cooldown. Development posts the same change to the test account.
 3. **At the same time:** merge a river-levels change setting production to `post`, and stop flood-readings posting, by setting its `TWITTER_API_KEY` to `disabled` and redeploying it, or by retiring its crawler.
 
 ### API domains
