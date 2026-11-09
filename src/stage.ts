@@ -60,14 +60,14 @@ export function apiCustomDomainEnabled(stage: Stage): boolean {
 export type NotifierMode = 'log' | 'post';
 
 /**
- * Each stage's X notifier mode. Development posts to a test X account.
- * Production only logs until it switches to 'post' at the same time
- * flood-readings stops posting. See "Notifications" in docs/infrastructure.md.
+ * Each stage's X notifier mode. Development posts to a test X account and
+ * production to the kenilworthford.com account, which it took over from
+ * flood-readings. See "Notifications" in docs/infrastructure.md.
  */
 const X_NOTIFIER_MODES: Record<Stage, NotifierMode> = {
   local: 'log',
   development: 'post',
-  production: 'log',
+  production: 'post',
 };
 
 export function xNotifierMode(stage: Stage): NotifierMode {

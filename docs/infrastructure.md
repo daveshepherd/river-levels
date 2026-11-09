@@ -242,7 +242,7 @@ Before posting, the notifier claims the change with a conditional write to the s
 - `log`: runs everything and records state, but logs the post instead of sending it.
 - `post`: posts to the X account whose credentials are in the stage's `x-credentials` secret.
 
-Development is in `post`, using a test X account. Production is in `log` until it takes over from flood-readings (below), then posts as the kenilworthford.com account. `local` is always `log`.
+Development is in `post`, using a test X account. Production is in `post`, as the kenilworthford.com account, which it took over from flood-readings (below). `local` is always `log`.
 
 **Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app, not the one flood-readings uses.
 
@@ -296,13 +296,15 @@ In `post` mode, a missing value fails the post, which retries and then raises th
 - If a later resource in the same update fails, the rollback runs the previous version's smoke test again, which posts and deletes once more.
 - A local deploy with `STAGE=development` runs it under the same rule.
 
-#### Switching production over from flood-readings
+#### Taking over from flood-readings
 
-flood-readings' crawler posts the same announcements today, so production's notifier stays in `log` mode until it takes over:
+flood-readings' crawler used to post these announcements. Production took over in November 2026:
 
-1. **Production's `x-credentials` secret is set**, for a new production app in a pay-per-use project. flood-readings keeps its own app, so it isn't affected until step 3. Before switching, check the secret with `users/me` (above), and that the project still has credit. Notifier posts include a link to the ford's website, which X charges more for than a plain post.
-2. **Watch the logs.** With production in `log` mode, check the `x-notifier` logs (service `x-notifier`) at the next state change: "Would post (log mode)" with the expected text, and nothing during the cooldown. Development posts the same change to the test account.
-3. **At the same time:** merge a river-levels change setting production to `post`, and stop flood-readings posting, by setting its `TWITTER_API_KEY` to `disabled` and redeploying it, or by retiring its crawler.
+1. Production's `x-credentials` secret was set for a new production app in a pay-per-use project, separate from flood-readings' app, and checked with `users/me` (above). Keep the project in credit: notifier posts include a link to the ford's website, which X charges more for than a plain post.
+2. Production ran in `log` mode first. Ford state changes can be months apart, so it switched to `post` without waiting for one. The development smoke test had shown that posting works, and the `x-notifier-dead-letters` alarm catches a failed post.
+3. Production was switched to `post`, and flood-readings' posting was stopped as soon as that deploy finished, so a state change could only be posted twice in that short window, never missed.
+
+While in `log` mode, production recorded each state change in `x-notifier-state` as if posted, so switching to `post` doesn't announce the current state. It posts at the next change.
 
 ### API domains
 
