@@ -185,7 +185,7 @@ The failure queue holds stream positions (shard and sequence numbers), not the r
 
 ### 3. Publish station files: on every batch of new readings
 
-The `RiverLevelsApi` stack keeps a status file and a chart file for each station in S3. These replace the original flood-readings service's `/status` and `/chart` API, in the same JSON shapes, for the kenilworthford.com website.
+The `RiverLevelsApi` stack keeps a status file and a chart file for each station in S3. These replaced the original flood-readings service's `/status` and `/chart` API, in the same JSON shapes, for the kenilworthford.com website. flood-readings was retired in November 2026 (see [Taking over from flood-readings](#taking-over-from-flood-readings)).
 
 - `api-publisher-queue` is subscribed to `river-levels-notifications` with raw message delivery, so each message is the SNS message body.
 - [`api-publisher.lambda.ts`](../src/api-stack/api-publisher.lambda.ts) reads the queue in batches of up to 100, waiting up to 60 seconds to fill one. It groups messages by station and rebuilds each station's files **once per batch**, so a crawler backfill doesn't rebuild them dozens of times.
@@ -244,7 +244,7 @@ Before posting, the notifier claims the change with a conditional write to the s
 
 Development is in `post`, using a test X account. Production is in `post`, as the kenilworthford.com account, which it took over from flood-readings (below). `local` is always `log`.
 
-**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app, not the one flood-readings uses.
+**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app. flood-readings' apps were deleted when it was retired.
 
 | Secret field | X developer portal (app's Keys and tokens tab) |
 |--------------|-----------------------------------------------|
@@ -302,7 +302,10 @@ flood-readings' crawler used to post these announcements. Production took over i
 
 1. Production's `x-credentials` secret was set for a new production app in a pay-per-use project, separate from flood-readings' app, and checked with `users/me` (above). Keep the project in credit: notifier posts include a link to the ford's website, which X charges more for than a plain post.
 2. Production ran in `log` mode first. Ford state changes can be months apart, so it switched to `post` without waiting for one. The development smoke test had shown that posting works, and the `x-notifier-dead-letters` alarm catches a failed post.
-3. Production was switched to `post`, and flood-readings' posting was stopped as soon as that deploy finished, so a state change could only be posted twice in that short window, never missed.
+3. Production was switched to `post` (#598), and flood-readings' crawler schedule was disabled as soon as that deploy finished.
+4. flood-readings was decommissioned on 10 November 2026, in its account (238573916854, eu-west-1). Its Serverless stack, readings table and replicas, API bucket, IAM roles and alarm were removed, and their Terraform was deleted from endor-infrastructure (#29). Its X apps were deleted. A final backup of its readings table is kept in that account.
+
+**History:** all 236,485 of flood-readings' readings, from 5 February 2020, were copied into production's readings table. The copy was checked on 9 November 2026: every reading is present with the same depth. Production also has 18 readings from 25 September 2025 that flood-readings missed.
 
 While in `log` mode, production recorded each state change in `x-notifier-state` as if posted, so switching to `post` doesn't announce the current state. It posts at the next change.
 
@@ -318,13 +321,13 @@ Each stage's account owns a public hosted zone for its API domain, in the `River
 
 The parent zones are in the endor account and managed by Terraform. They delegate each domain to its zone with `NS` records for the stack's `NameServers` output. The zone is retained if the stack is deleted, because a new zone would get new name servers and break the delegation.
 
-Whether a stage serves at its domain is switched per stage by `apiCustomDomainEnabled()` in [`src/stage.ts`](../src/stage.ts). It's off for every stage until that stage's cutover. When it's on:
+Whether a stage serves at its domain is switched per stage by `apiCustomDomainEnabled()` in [`src/stage.ts`](../src/stage.ts). It's on for `development` and `production`, and off for `local`. When it's on:
 
 - `RiverLevelsApiDomain` creates `api-certificate`, an ACM certificate for the domain, DNS-validated with a record in `api-zone`.
 - `RiverLevelsApi` adds the domain to `api/distribution` with that certificate and a TLS 1.2 minimum (`TLSv1.2_2021`, SNI). It also creates `api/alias-a` and `api/alias-aaaa`, alias records at the zone apex pointing at the distribution.
 - The certificate and zone are in us-east-1 and the distribution is in eu-west-2, so both stacks set `crossRegionReferences`. CDK passes the values through SSM parameters, using a `Custom::CrossRegionExportWriter` in `RiverLevelsApiDomain` and a `Custom::CrossRegionExportReader` in `RiverLevelsApi`.
 
-Status of the move from flood-readings' API:
+The move from flood-readings' API is complete:
 1. Done: CloudFront distribution, at its `*.cloudfront.net` domain.
 2. Done: hosted zones, delegated from endor-infrastructure.
 3. Done: certificate, domain and alias records, switched on per stage.

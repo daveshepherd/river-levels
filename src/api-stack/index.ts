@@ -64,7 +64,7 @@ export interface ApiStackProps extends StackProps {
 /**
  * Publishes each station's status and chart as JSON files in S3, regenerated
  * whenever new readings arrive, and serves them through CloudFront. These
- * replace the original flood-readings service's /status and /chart API.
+ * replaced the original flood-readings service's /status and /chart API.
  */
 export class ApiStack extends Stack {
   public readonly apiBucket: Bucket;
