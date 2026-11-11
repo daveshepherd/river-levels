@@ -1,0 +1,14 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "DataTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestDataStack"
+      ],
+      "assertionStack": "DataTestAssertions",
+      "assertionStackName": "DataTestAssertions"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}
