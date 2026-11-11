@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { App, Tags } from 'aws-cdk-lib';
 import { ApiDomainStack } from './api-domain-stack';
 import { ApiStack } from './api-stack';
+import { DataStack } from './data-stack';
 import { NotificationsStack } from './notifications-stack';
 import {
   apiCustomDomainEnabled,
@@ -23,6 +24,13 @@ if (stage !== 'local' && !alertEmail) {
 }
 
 const env = { region: 'eu-west-2' };
+
+// The strongly consistent global tables for running in three regions. Not
+// used yet: see docs/adr/0001-multi-region-active-active.md
+new DataStack(app, 'RiverLevelsData', {
+  env,
+  replicaRegions: ['eu-west-1', 'eu-central-1'],
+});
 
 const storageStack = new StorageStack(app, 'RiverLevels', {
   alertEmail,
