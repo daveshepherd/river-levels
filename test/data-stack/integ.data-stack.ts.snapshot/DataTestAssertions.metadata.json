@@ -1,0 +1,70 @@
+{
+  "/DataTestAssertions": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "DataTestAssertions.template.json"
+    }
+  ],
+  "/DataTestAssertions/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/DataTestAssertions/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/DataTestAssertions/AwsApiCallDynamoDBputItem0057a4b5ceed223b9b7335c24abed3d9/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/DataTestAssertions/SingletonFunction1488541a7b23466481b69b4408076b81/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81Role37ABCE73"
+    }
+  ],
+  "/DataTestAssertions/SingletonFunction1488541a7b23466481b69b4408076b81/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F"
+    }
+  ],
+  "/DataTestAssertions/AwsApiCallDynamoDBgetItem7680287cdeff0e83d00e5194376902a0/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/DataTestAssertions/AwsApiCallDynamoDBgetItem7680287cdeff0e83d00e5194376902a0/AssertionResults": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AssertionResultsAwsApiCallDynamoDBgetItem7680287cdeff0e83d00e5194376902a0"
+    }
+  ],
+  "/DataTestAssertions/AwsApiCallDynamoDBputItem0057a4b5ceed223b9b7335c24abed3d9/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallDynamoDBputItem0057a4b5ceed223b9b7335c24abed3d9"
+    }
+  ],
+  "/DataTestAssertions/AwsApiCallDynamoDBgetItem7680287cdeff0e83d00e5194376902a0/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallDynamoDBgetItem7680287cdeff0e83d00e5194376902a0"
+    }
+  ]
+}

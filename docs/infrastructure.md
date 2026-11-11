@@ -3,12 +3,13 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** four, all deployed by `cdk deploy --all`:
+- **Stacks:** five, all deployed by `cdk deploy --all`:
   - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
   - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)): posts ford state changes to X. It imports the `station-status` topic from `RiverLevelsApi` and the alerts topic from `RiverLevels`.
-- **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland)
+  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. **Not used yet**: see [ADR 0001](adr/0001-multi-region-active-active.md) for the plan.
+- **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland). Moving to active-active in three regions ([ADR 0001](adr/0001-multi-region-active-active.md)).
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
 ## Architecture
@@ -49,6 +50,10 @@ flowchart LR
     xstate[("DynamoDB<br/>x-notifier-state")]
     xsecret["Secrets Manager<br/>x-credentials"]
     xsmoke["x-smoke-test Lambda + trigger<br/>(development only)"]
+  end
+
+  subgraph data["AWS · RiverLevelsData stack · eu-west-2 (not used yet)"]
+    mrsc[("DynamoDB MRSC global tables<br/>readings · notifier-state<br/>eu-west-2 · eu-west-1 · eu-central-1")]
   end
 
   xaccount["X account"]
@@ -405,8 +410,16 @@ Logical names as they appear in the CloudFormation template.
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
+`RiverLevelsData` stack (not used yet; see [ADR 0001](adr/0001-multi-region-active-active.md)):
+
+| Resource | Type | Key settings |
+|----------|------|--------------|
+| `readings` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, replicas in `eu-west-2`, `eu-west-1` and `eu-central-1` (fixed at creation). Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Retained when the stack is deleted. |
+| `notifier-state` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, same three regions. Partition key `station` (S). Point-in-time recovery. Deletion protection on. Retained when the stack is deleted. |
+
 **Stack outputs:**
 - `RiverLevelsTable` (the table ARN) from `RiverLevels`
+- `ReadingsTableName` and `NotifierStateTableName` from `RiverLevelsData`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
 - `XCredentialsSecretArn` from `RiverLevelsNotifications`
@@ -452,7 +465,7 @@ flowchart LR
 - Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. PRs from `trustedAuthors` (the sole maintainer) need no approval; everyone else's need one, and fork PRs also need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in [`docs/github-configuration.md`](github-configuration.md), which projen generates.
 - The deploy jobs come from the `deployments` option in `.projenrc.ts`, which projen-modules turns into jobs on the release workflow.
 - The workflow is generated from [`.projenrc.ts`](../.projenrc.ts). Change it there, not in `.github/workflows/`.
-- The integ snapshot check compares the synthesized templates with the committed snapshots in `test/storage-stack/` and `test/api-stack/`. Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
+- The integ snapshot check compares the synthesized templates with the committed snapshots in each `test/<stack>/` directory. Any change to the template needs `yarn integ:update`, which deploys a temporary stack to AWS and runs end-to-end assertions.
 
 ## Operations
 

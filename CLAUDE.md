@@ -52,7 +52,7 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi" and NotificationsStack "RiverLevelsNotifications" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
@@ -68,6 +68,7 @@ src/api-stack/
   api-publisher.lambda.ts    SQS batches of new-reading notifications → stations/{id}/status.json and chart.json in S3
   status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
   distribution.ts            CloudFront in front of the bucket; legacy-paths function maps /status and /chart
+src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; not used yet
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
   index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
