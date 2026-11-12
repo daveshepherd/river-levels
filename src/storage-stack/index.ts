@@ -7,6 +7,7 @@ import {
 } from 'aws-cdk-lib';
 import {
   AttributeType,
+  ITableV2,
   StreamViewType,
   TableV2,
 } from 'aws-cdk-lib/aws-dynamodb';
@@ -15,6 +16,8 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Alias } from 'aws-cdk-lib/aws-kms';
 import {
   Architecture,
+  FilterCriteria,
+  FilterRule,
   StartingPosition,
   Tracing,
 } from 'aws-cdk-lib/aws-lambda';
@@ -25,6 +28,11 @@ import {
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ITopic, Topic, TracingConfig } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import {
+  AwsCustomResource,
+  AwsCustomResourcePolicy,
+  PhysicalResourceId,
+} from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import { StorageAlarms } from './alarms';
@@ -41,6 +49,26 @@ export interface StorageStackProps extends StackProps {
    */
   alertEmail?: string;
   replicaRegions?: Array<string>;
+  /**
+   * Use the multi-region (MRSC) readings table, by name, instead of creating
+   * a table. The crawler then only creates readings that don't exist yet,
+   * tagged with this stack's region in `origin`, and the SNS publisher only
+   * publishes readings with this region's `origin`, so each reading is
+   * published once across regions. `replicaRegions` is ignored.
+   */
+  readingsTableName?: string;
+  /**
+   * Whether the crawler's schedule and the SNS publisher's stream mapping are
+   * switched on. Off deploys a region without it crawling or publishing.
+   * @default true
+   */
+  live?: boolean;
+  /**
+   * Minutes past each 10 that the crawler runs, so crawlers in different
+   * regions don't all run at once. Without it, the crawler runs every 10
+   * minutes from when the rule was created.
+   */
+  scheduleOffsetMinutes?: number;
   setDestroyPolicyToAllResources?: boolean;
   /**
    * The stations the crawler collects. Defaults to STATIONS in stations.ts.
@@ -52,31 +80,36 @@ export class StorageStack extends Stack {
   public readonly alertsTopic: ITopic;
   public readonly crawlerFunctionName: string;
   public readonly riverLevelsNotificationsTopic: ITopic;
-  public readonly riverLevelsTable: TableV2;
+  public readonly riverLevelsTable: ITableV2;
   public readonly riverLevelsTableName: string;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
-    const riverLevelsTable = new TableV2(this, 'river-levels-table', {
-      deletionProtection: !props?.setDestroyPolicyToAllResources,
-      dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
-      partitionKey: { name: 'station', type: AttributeType.STRING },
-      pointInTimeRecoverySpecification: {
-        pointInTimeRecoveryEnabled: true,
-        recoveryPeriodInDays: 35,
-      },
-      sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
-      replicas: props.replicaRegions
-        ? props.replicaRegions.map(function (replicaRegion) {
-          return { region: replicaRegion };
-        })
-        : [],
-    });
+    const live = props.live ?? true;
+    const multiRegion = props.readingsTableName !== undefined;
+    const riverLevelsTable = props.readingsTableName
+      ? this.importReadingsTable(props.readingsTableName)
+      : new TableV2(this, 'river-levels-table', {
+        deletionProtection: !props?.setDestroyPolicyToAllResources,
+        dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
+        partitionKey: { name: 'station', type: AttributeType.STRING },
+        pointInTimeRecoverySpecification: {
+          pointInTimeRecoveryEnabled: true,
+          recoveryPeriodInDays: 35,
+        },
+        sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
+        replicas: props.replicaRegions
+          ? props.replicaRegions.map(function (replicaRegion) {
+            return { region: replicaRegion };
+          })
+          : [],
+      });
     this.riverLevelsTable = riverLevelsTable;
     this.riverLevelsTableName = riverLevelsTable.tableName;
 
     const executionRole = new CrawlerRole(this, 'crawler-role', {
+      conditionalWrites: multiRegion,
       dynamoDbTableArn: riverLevelsTable.tableArn,
     });
 
@@ -87,6 +120,7 @@ export class StorageStack extends Stack {
       architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
+        ...(multiRegion ? { READINGS_ORIGIN: this.region } : {}),
         STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
       },
       logGroup: crawlerLogGroup,
@@ -102,8 +136,11 @@ export class StorageStack extends Stack {
       retentionPeriod: Duration.days(14),
     });
     new Rule(this, 'crawler-cron', {
-      enabled: true,
-      schedule: Schedule.rate(Duration.minutes(10)),
+      enabled: live,
+      schedule:
+        props.scheduleOffsetMinutes === undefined
+          ? Schedule.rate(Duration.minutes(10))
+          : Schedule.cron({ minute: `${props.scheduleOffsetMinutes}/10` }),
       targets: [
         new LambdaFunction(crawler, {
           deadLetterQueue: crawlerDeadLetterQueue,
@@ -160,6 +197,19 @@ export class StorageStack extends Stack {
       events: [
         new DynamoEventSource(riverLevelsTable, {
           bisectBatchOnError: true,
+          // Only set when off, so a live stack's mapping is unchanged
+          enabled: live ? undefined : false,
+          // Every replica's stream has every reading; only publish the ones
+          // this region wrote
+          filters: multiRegion
+            ? [
+              FilterCriteria.filter({
+                dynamodb: {
+                  NewImage: { origin: { S: FilterRule.isEqual(this.region) } },
+                },
+              }),
+            ]
+            : undefined,
           onFailure: new SqsDlq(snsPublisherFailureQueue),
           reportBatchItemFailures: true,
           retryAttempts: 5,
@@ -187,6 +237,36 @@ export class StorageStack extends Stack {
     }
     new CfnOutput(this, 'RiverLevelsTable', {
       value: riverLevelsTable.tableArn,
+    });
+  }
+
+  /**
+   * The multi-region readings table's replica in this stack's region. CDK only
+   * knows a replica's stream ARN as a wildcard, which an event source mapping
+   * can't use, so it's looked up with DescribeTable.
+   */
+  private importReadingsTable(tableName: string): ITableV2 {
+    const tableArn = this.formatArn({
+      resource: 'table',
+      resourceName: tableName,
+      service: 'dynamodb',
+    });
+    const describe = {
+      action: 'describeTable',
+      parameters: { TableName: tableName },
+      physicalResourceId: PhysicalResourceId.of(`${tableName}-stream`),
+      service: 'DynamoDB',
+      outputPaths: ['Table.LatestStreamArn'],
+    };
+    const streamLookup = new AwsCustomResource(this, 'readings-stream-lookup', {
+      installLatestAwsSdk: false,
+      onCreate: describe,
+      onUpdate: describe,
+      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: [tableArn] }),
+    });
+    return TableV2.fromTableAttributes(this, 'readings-table', {
+      tableArn,
+      tableStreamArn: streamLookup.getResponseField('Table.LatestStreamArn'),
     });
   }
 }

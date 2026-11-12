@@ -1,0 +1,1112 @@
+{
+  "/IntegrationTestRegionalStorageStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestRegionalStorageStack.template.json"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "memorySize": "*",
+        "timeout": "*",
+        "role": "*",
+        "logGroup": "*",
+        "functionName": "*",
+        "vpc": "*",
+        "vpcSubnets": "*",
+        "code": "*",
+        "handler": "*",
+        "runtime": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:is-custom-resource-handler-singleton",
+      "data": true
+    },
+    {
+      "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+      "data": 0
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-log-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-dead-letter-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-cron": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enabled": true,
+        "schedule": "*",
+        "targets": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEventPattern": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addTarget": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/river-levels-notifications": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "masterKey": "*",
+        "enforceSSL": true,
+        "tracingConfig": "Active"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-failure-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "events": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/RiverLevelsTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RiverLevelsTable"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-dlq": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deadLetterQueue": {
+          "queue": "*",
+          "maxReceiveCount": "*"
+        },
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/readings-stream-lookup/Provider": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "uuid": "*",
+        "lambdaPurpose": "*",
+        "memorySize": "*",
+        "timeout": "*",
+        "role": "*",
+        "logGroup": "*",
+        "functionName": "*",
+        "vpc": "*",
+        "vpcSubnets": "*",
+        "code": "*",
+        "handler": "*",
+        "runtime": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addMetadata": [
+          "*",
+          true
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addMetadata": [
+          "*",
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/readings-stream-lookup/Resource": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/readings-stream-lookup/CustomResourcePolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "logGroupName": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerrole985C99ED"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role/crawler-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-log-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerloggroup6A20A1A3"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerlambda65FC80E0"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-dead-letter-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerdeadletterqueue07A80621"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-dead-letter-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-cron/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlercronD1309D29"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-cron/AllowEventRuleIntegrationTestRegionalStorageStackcrawlerlambdaF704B5B9": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlercronAllowEventRuleIntegrationTestRegionalStorageStackcrawlerlambdaF704B5B9EE632348"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/river-levels-notifications/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "riverlevelsnotificationsACDAE605"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/river-levels-notifications/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublishergroup0F35AF53"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherrole00E553A8"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/dynamodb-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/sns-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-failure-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherfailurequeue972E49A6"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-failure-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherlambda35C1A2D1"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-lambda/DynamoDBEventSource:IntegrationTestRegionalStorageStackreadingstableFCDF4067": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "target": "*",
+        "eventSourceArn": "*",
+        "metricsConfig": "*",
+        "supportS3OnFailureDestination": true,
+        "batchSize": "*",
+        "bisectBatchOnError": true,
+        "startingPosition": "LATEST",
+        "reportBatchItemFailures": true,
+        "maxBatchingWindow": "*",
+        "maxRecordAge": "*",
+        "retryAttempts": "*",
+        "parallelizationFactor": "*",
+        "onFailure": "*",
+        "tumblingWindow": "*",
+        "enabled": "*",
+        "filters": "*",
+        "filterEncryption": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/alerts": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-errors": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-not-running": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "breaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-dead-letters": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/sns-publisher-iterator-age": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/sns-publisher-failures": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "alarmDescription": "*",
+        "metric": {
+          "warnings": "*",
+          "warningsV2": "*"
+        },
+        "threshold": "*",
+        "evaluationPeriods": "*",
+        "comparisonOperator": "*",
+        "treatMissingData": "notBreaching"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addAlarmAction": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-dlq/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testdlqE3F3EA6D"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-dlq/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueueA58C838B"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue/IntegrationTestRegionalStorageStackriverlevelsnotifications2E37667D": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/Publish/Output{\"Ref\":\"crawlerlambda65FC80E0\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefcrawlerlambda65FC80E066798C7A"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/Publish/Output{\"Ref\":\"testqueueA58C838B\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputReftestqueueA58C838BE85F9255"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/readings-stream-lookup/Resource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "readingsstreamlookup66E27F64"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/readings-stream-lookup/CustomResourcePolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "readingsstreamlookupCustomResourcePolicyB8D6D137"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role/crawler-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerrolecrawlerpolicy8AFFD705"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerroleDefaultPolicyD657C666"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/crawler-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "crawlerdeadletterqueuePolicyD5E47EF8"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/river-levels-notifications/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "riverlevelsnotificationsPolicyA8C529BB"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/dynamodb-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherroledynamodbpolicy804FBAEB"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/sns-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherrolesnspolicy6B97BC97"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherroleDefaultPolicyE5B88FFE"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-failure-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherfailurequeuePolicyC34F62E5"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/sns-publisher-lambda/DynamoDBEventSource:IntegrationTestRegionalStorageStackreadingstableFCDF4067/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "snspublisherlambdaDynamoDBEventSourceIntegrationTestRegionalStorageStackreadingstableFCDF4067A3DEF432"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/alerts/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmsalerts44C0CABB"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/alerts/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-errors/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlererrors997B4B6E"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-not-running/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlernotrunning2DAFA5B4"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/crawler-dead-letters/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmscrawlerdeadletters80D6E810"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/sns-publisher-iterator-age/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmssnspublisheriteratorage3238D578"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/sns-publisher-failures/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmssnspublisherfailuresA3942966"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-dlq/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testdlqPolicy5921D4DA"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueuePolicyB9530952"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/test-queue/IntegrationTestRegionalStorageStackriverlevelsnotifications2E37667D/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueueIntegrationTestRegionalStorageStackriverlevelsnotifications2E37667DC14ADC57"
+    }
+  ],
+  "/IntegrationTestRegionalStorageStack/alarms/alerts/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "alarmsalertsPolicy96B07FEA"
+    }
+  ]
+}

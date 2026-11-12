@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "8e193c69d762e71076fd6fb6101e4eb3beeb418a62a93d68848352ccde9d66fa": {
+      "displayName": "IntegrationTestRegionalStorageData Template",
+      "source": {
+        "path": "IntegrationTestRegionalStorageData.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-2-76034f03": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-2",
+          "objectKey": "8e193c69d762e71076fd6fb6101e4eb3beeb418a62a93d68848352ccde9d66fa.json",
+          "region": "eu-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

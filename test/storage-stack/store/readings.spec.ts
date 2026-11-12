@@ -1,6 +1,9 @@
 import {
+  ConditionalCheckFailedException,
   DynamoDBClient,
+  PutItemCommand,
   QueryCommand,
+  ReplicatedWriteConflictException,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -12,6 +15,7 @@ import * as target from '../../../src/storage-stack/store/readings';
 
 beforeEach(() => {
   dynamoDBClientMock.reset();
+  delete process.env.READINGS_ORIGIN;
 });
 
 describe('readings store', () => {
@@ -159,5 +163,70 @@ describe('readings store', () => {
 
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 25);
     expect(maxInFlight).toBe(target.MAX_CONCURRENT_WRITES);
+  });
+
+  describe('with READINGS_ORIGIN set', () => {
+    const reading = { date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 };
+    const conflict = () => new ReplicatedWriteConflictException({ message: 'conflict', $metadata: {} });
+
+    beforeEach(() => {
+      process.env.READINGS_ORIGIN = 'eu-west-1';
+      process.env.DYNAMODB_READINGS_TABLE = 'readings';
+    });
+
+    it('creates a reading only if it is new, tagged with the region', async () => {
+      dynamoDBClientMock.on(PutItemCommand).resolves({});
+
+      await target.updateReadings('kenilworth', [reading]);
+
+      expect(dynamoDBClientMock).toHaveReceivedCommandWith(PutItemCommand, {
+        ConditionExpression: 'attribute_not_exists(#timestamp)',
+        ExpressionAttributeNames: { '#timestamp': 'timestamp' },
+        Item: {
+          station: { S: 'kenilworth' },
+          timestamp: { N: '1577879100000' },
+          reading_depth: { N: '0.83' },
+          origin: { S: 'eu-west-1' },
+        },
+        TableName: 'readings',
+      });
+      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 0);
+    });
+
+    it('skips a reading another region already wrote', async () => {
+      dynamoDBClientMock.on(PutItemCommand).rejects(
+        new ConditionalCheckFailedException({ message: 'exists', $metadata: {} }),
+      );
+
+      await expect(target.updateReadings('kenilworth', [reading])).resolves.toBeUndefined();
+      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutItemCommand, 1);
+    });
+
+    it('retries a write that conflicts with another region', async () => {
+      dynamoDBClientMock
+        .on(PutItemCommand)
+        .rejectsOnce(conflict())
+        .rejectsOnce(new ConditionalCheckFailedException({ message: 'exists', $metadata: {} }));
+
+      await target.updateReadings('kenilworth', [reading]);
+
+      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutItemCommand, 2);
+    });
+
+    it(`gives up after ${target.MAX_CONFLICT_RETRIES} conflict retries`, async () => {
+      dynamoDBClientMock.on(PutItemCommand).rejects(conflict());
+
+      await expect(target.updateReadings('kenilworth', [reading])).rejects.toThrow('conflict');
+      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(
+        PutItemCommand,
+        target.MAX_CONFLICT_RETRIES + 1,
+      );
+    });
+
+    it('rethrows other errors', async () => {
+      dynamoDBClientMock.on(PutItemCommand).rejects(new Error('throttled'));
+
+      await expect(target.updateReadings('kenilworth', [reading])).rejects.toThrow('throttled');
+    });
   });
 });

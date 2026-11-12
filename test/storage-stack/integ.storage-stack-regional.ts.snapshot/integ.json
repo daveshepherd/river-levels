@@ -1,0 +1,24 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "RegionalStorageTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestRegionalStorageStack"
+      ],
+      "allowDestroy": [
+        "AWS::IAM::Policy"
+      ],
+      "cdkCommandOptions": {
+        "destroy": {
+          "args": {
+            "force": true
+          }
+        }
+      },
+      "assertionStack": "RegionalStorageTestAssertions",
+      "assertionStackName": "RegionalStorageTestAssertions"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}
