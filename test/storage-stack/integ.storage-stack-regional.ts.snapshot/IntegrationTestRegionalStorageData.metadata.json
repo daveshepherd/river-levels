@@ -1,0 +1,146 @@
+{
+  "/IntegrationTestRegionalStorageData": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestRegionalStorageData.template.json"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/readings": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deletionProtection": false,
+        "dynamoStream": "NEW_AND_OLD_IMAGES",
+        "multiRegionConsistency": "STRONG",
+        "partitionKey": {
+          "name": "*",
+          "type": "S"
+        },
+        "pointInTimeRecoverySpecification": {
+          "pointInTimeRecoveryEnabled": true,
+          "recoveryPeriodInDays": "*"
+        },
+        "removalPolicy": "destroy",
+        "replicas": [
+          {
+            "region": "*"
+          },
+          {
+            "region": "*"
+          }
+        ],
+        "sortKey": {
+          "name": "*",
+          "type": "N"
+        }
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/notifier-state": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deletionProtection": false,
+        "multiRegionConsistency": "STRONG",
+        "partitionKey": {
+          "name": "*",
+          "type": "S"
+        },
+        "pointInTimeRecoverySpecification": {
+          "pointInTimeRecoveryEnabled": true
+        },
+        "removalPolicy": "destroy",
+        "replicas": [
+          {
+            "region": "*"
+          },
+          {
+            "region": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/ReadingsTableName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ReadingsTableName"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/NotifierStateTableName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "NotifierStateTableName"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/readings/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "readingsA064D750"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/notifier-state/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "notifierstateEF9F54ED"
+    }
+  ],
+  "/IntegrationTestRegionalStorageData/Publish/Output{\"Ref\":\"readingsA064D750\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefreadingsA064D750D95EE332"
+    }
+  ]
+}
