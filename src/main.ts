@@ -25,11 +25,29 @@ if (stage !== 'local' && !alertEmail) {
 
 const env = { region: 'eu-west-2' };
 
-// The strongly consistent global tables for running in three regions. Not
-// used yet: see docs/adr/0001-multi-region-active-active.md
-new DataStack(app, 'RiverLevelsData', {
+// The strongly consistent global tables for running in three regions. See
+// docs/adr/0001-multi-region-active-active.md
+const otherRegions: [string, string] = ['eu-west-1', 'eu-central-1'];
+const dataStack = new DataStack(app, 'RiverLevelsData', {
+  // The regional stacks use the table names
+  crossRegionReferences: true,
   env,
-  replicaRegions: ['eu-west-1', 'eu-central-1'],
+  replicaRegions: otherRegions,
+});
+
+// The crawler and SNS publisher in the other two regions, against the
+// multi-region readings table. Not live until the cutover, so they don't
+// crawl or publish alongside the eu-west-2 stack's.
+otherRegions.forEach((region, i) => {
+  new StorageStack(app, `RiverLevels-${region}`, {
+    alertEmail,
+    crossRegionReferences: true,
+    env: { region },
+    live: false,
+    readingsTableName: dataStack.readingsTable.tableName,
+    // eu-west-2 will run at 0 minutes past each 10
+    scheduleOffsetMinutes: 3 * (i + 1),
+  });
 });
 
 const storageStack = new StorageStack(app, 'RiverLevels', {

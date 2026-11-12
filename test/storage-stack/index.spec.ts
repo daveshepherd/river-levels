@@ -215,4 +215,95 @@ describe('StorageStack', () => {
         }),
     ).toThrow('At least one station must be configured');
   });
+
+  describe('on the multi-region readings table', () => {
+    function regional(props: Partial<ConstructorParameters<typeof StorageStack>[2]> = {}) {
+      const app = new App();
+      const stack = new StorageStack(app, 'RegionalStorageStack', {
+        env: { account: '123456789012', region: 'eu-west-1' },
+        readingsTableName: 'readings',
+        ...props,
+      });
+      return { stack, template: Template.fromStack(stack) };
+    }
+
+    test('that it uses the table instead of creating one', () => {
+      const { template } = regional();
+
+      template.resourceCountIs('AWS::DynamoDB::GlobalTable', 0);
+      template.hasResourceProperties('AWS::Lambda::Function', {
+        Environment: {
+          Variables: Match.objectLike({
+            DYNAMODB_READINGS_TABLE: 'readings',
+            READINGS_ORIGIN: 'eu-west-1',
+          }),
+        },
+      });
+    });
+
+    test('that the crawler can create readings with a conditional put', () => {
+      regional().template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+        Description: 'Grant access to the river levels table',
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: ['dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem'],
+              Effect: 'Allow',
+              Resource: {
+                'Fn::Join': ['', Match.arrayWith([':dynamodb:eu-west-1:123456789012:table/readings'])],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test("that the SNS publisher reads the replica's stream, looked up by name", () => {
+      const { template } = regional();
+
+      template.hasResourceProperties('Custom::AWS', {
+        Create: Match.stringLikeRegexp('describeTable'),
+      });
+      template.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
+        EventSourceArn: { 'Fn::GetAtt': [Match.stringLikeRegexp('readingsstreamlookup'), 'Table.LatestStreamArn'] },
+      });
+    });
+
+    test('that the SNS publisher only publishes readings this region wrote', () => {
+      regional().template.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
+        FilterCriteria: {
+          Filters: [
+            { Pattern: JSON.stringify({ dynamodb: { NewImage: { origin: { S: ['eu-west-1'] } } } }) },
+          ],
+        },
+      });
+    });
+  });
+
+  test('that a stack that is not live neither crawls nor publishes', () => {
+    const app = new App();
+    const template = Template.fromStack(
+      new StorageStack(app, 'StorageStack', { env: { region: 'eu-west-2' }, live: false }),
+    );
+
+    template.hasResourceProperties('AWS::Events::Rule', { State: 'DISABLED' });
+    template.hasResourceProperties('AWS::Lambda::EventSourceMapping', { Enabled: false });
+  });
+
+  test('that a live stack leaves the stream mapping enabled by default', () => {
+    const app = new App();
+    const template = Template.fromStack(new StorageStack(app, 'StorageStack', { env: { region: 'eu-west-2' } }));
+
+    template.hasResourceProperties('AWS::Events::Rule', { State: 'ENABLED' });
+    template.hasResourceProperties('AWS::Lambda::EventSourceMapping', { Enabled: Match.absent() });
+  });
+
+  test('that the crawler can run at an offset past each 10 minutes', () => {
+    const app = new App();
+    const template = Template.fromStack(
+      new StorageStack(app, 'StorageStack', { env: { region: 'eu-west-2' }, scheduleOffsetMinutes: 3 }),
+    );
+
+    template.hasResourceProperties('AWS::Events::Rule', { ScheduleExpression: 'cron(3/10 * * * ? *)' });
+  });
 });

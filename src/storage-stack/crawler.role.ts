@@ -8,6 +8,8 @@ import { Construct } from 'constructs';
 
 export interface CrawlerRoleProps {
   dynamoDbTableArn: string;
+  /** Also allow PutItem, for creating readings with a conditional put on the multi-region table. */
+  conditionalWrites?: boolean;
 }
 
 export class CrawlerRole extends Role {
@@ -28,7 +30,9 @@ export class CrawlerRole extends Role {
       path: '/service-policy/',
       statements: [
         new PolicyStatement({
-          actions: ['dynamodb:Query', 'dynamodb:UpdateItem'],
+          actions: props.conditionalWrites
+            ? ['dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem']
+            : ['dynamodb:Query', 'dynamodb:UpdateItem'],
           resources: [props.dynamoDbTableArn],
         }),
       ],

@@ -52,7 +52,7 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), StorageStacks "RiverLevels-eu-west-1" and "RiverLevels-eu-central-1" (multi-region readings table, not live yet), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
@@ -68,7 +68,7 @@ src/api-stack/
   api-publisher.lambda.ts    SQS batches of new-reading notifications → stations/{id}/status.json and chart.json in S3
   status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
   distribution.ts            CloudFront in front of the bucket; legacy-paths function maps /status and /chart
-src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; not used yet
+src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by the regional storage stacks
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
   index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
@@ -81,7 +81,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 
 ## Data and contracts
 
-- **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`.
+- **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`. In the multi-region `readings` table, items also have `origin` (S): the region whose crawler wrote it, or `migration` for copied history. Stream filters rely on it, so every write there must set it.
 - **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
 - **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days. CloudFront also serves Kenilworth's at `/status` and `/chart`, the paths the website calls; keep those working.
 - **Station status messages** on the `station-status` topic: `{station, depth, direction, rate, state?, lastUpdate}`, published once per batch per station, whether or not anything changed.

@@ -3,12 +3,13 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** five, all deployed by `cdk deploy --all`:
+- **Stacks:** seven, all deployed by `cdk deploy --all`:
   - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
   - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)): posts ford state changes to X. It imports the `station-status` topic from `RiverLevelsApi` and the alerts topic from `RiverLevels`.
-  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. **Not used yet**: see [ADR 0001](adr/0001-multi-region-active-active.md) for the plan.
+  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. See [ADR 0001](adr/0001-multi-region-active-active.md) for the plan. History has been copied into its `readings` table.
+  - `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in the other two regions, against `RiverLevelsData`'s `readings` table, which they get through cross-region references. **Not live yet:** their crawler schedules and stream mappings are switched off until the cutover. See [Multi-region storage](#multi-region-storage).
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland). Moving to active-active in three regions ([ADR 0001](adr/0001-multi-region-active-active.md)).
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -160,6 +161,16 @@ Stations are crawled one at a time in a single invocation. If one fails, the err
 The thresholds are named constants at the top of `crawler.lambda.ts`: `DEFAULT_READINGS_LIMIT` (96), `MAX_LOOKBACK_DAYS` (7), `SPIKE_FILTER_WINDOW_MS` (1 hour) and `DEFAULT_MAX_DEPTH_RISE_METRES` (2, overridable per station). The spike filter only applies when the new readings follow on from the stored one without a gap, so a real rise after an outage isn't thrown away. The crawler logs a warning when it drops readings.
 
 `UpdateItem` creates or overwrites a reading. A new key produces an `INSERT` stream event. Writing an existing key again produces a `MODIFY` event, which the publisher ignores. So re-fetching readings that are already stored doesn't send duplicate notifications.
+
+#### Multi-region storage
+
+A `StorageStack` given `readingsTableName` (the regional stacks today, every region after the cutover) works differently:
+
+- **It doesn't create a table.** It uses the `RiverLevelsData` `readings` replica in its own region. CDK only knows a replica's stream ARN as a wildcard, so `readings-stream-lookup` (an `AwsCustomResource`) looks up the real one with `DescribeTable`.
+- **The crawler only creates new readings.** With `READINGS_ORIGIN` set to its region, it writes each reading with `PutItem` and `attribute_not_exists(timestamp)`, adding `origin` with its region. On an MRSC table that condition sees every region's writes, so when crawlers in several regions fetch the same reading, exactly one creates it. A write that hits `ReplicatedWriteConflictException`, because another region is writing the same reading, is retried up to 3 times, after which the retry normally fails the condition. Existing readings are never overwritten, so a value the Environment Agency revises later isn't picked up.
+- **The SNS publisher only publishes its own region's readings.** Every replica's stream carries every write, so its stream mapping filters on `NewImage.origin` equal to its region. Readings copied from the old table have `origin: migration`, which no region matches.
+- **Staggered schedules:** `scheduleOffsetMinutes` runs the crawler at a fixed offset past each 10 minutes (`cron(3/10 * * * ? *)` in `eu-west-1` and `cron(6/10 * * * ? *)` in `eu-central-1`).
+- **`live: false`** deploys the stack with the crawler rule disabled and the stream mapping switched off.
 
 ### 2. Publish: on every stream batch
 
@@ -361,11 +372,12 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). |
-| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list). |
-| `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, 3 retry attempts, then `crawler-dead-letter-queue`. |
+| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list), and `READINGS_ORIGIN` (the region) with `readingsTableName`. |
+| `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, or `cron(<offset>/10 * * * ? *)` with `scheduleOffsetMinutes`. 3 retry attempts, then `crawler-dead-letter-queue`. Disabled when the stack isn't `live`. |
+| `readings-stream-lookup` | `Custom::AWS` | Only with `readingsTableName`. `DynamoDB.describeTable` on the regional replica, for `Table.LatestStreamArn`. |
 | `crawler-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives scheduled invocations EventBridge couldn't deliver to the crawler. |
 | `sns-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 128 MB, 30 s timeout, X-Ray active. Env: `SNS_TOPIC_ARN`. |
-| `sns-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | DynamoDB stream, starting position `LATEST`, batch size 100. `ReportBatchItemFailures` and bisect on error. 5 retries, then on-failure destination. |
+| `sns-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | DynamoDB stream, starting position `LATEST`, batch size 100. `ReportBatchItemFailures` and bisect on error. 5 retries, then on-failure destination. With `readingsTableName`, a filter on `NewImage.origin` equal to the region. Disabled when the stack isn't `live`. |
 | `sns-publisher-failure-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives stream batches that still fail after retries. |
 | `alarms/alerts` | `AWS::SNS::Topic` | `river-levels-alerts`. SSL enforced; not encrypted, because CloudWatch can't publish to a topic using the AWS-managed SNS key. Email subscription to `alertEmail` when set. |
 | `alarms/*` | `AWS::CloudWatch::Alarm` | Five alarms, listed under [Alarms](#alarms). Each notifies the alerts topic on ALARM and on return to OK. |
@@ -432,7 +444,7 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 
 | Role | Permission | Resource |
 |------|------------|----------|
-| `crawler-role` | `dynamodb:Query`, `dynamodb:UpdateItem` | the table |
+| `crawler-role` | `dynamodb:Query`, `dynamodb:UpdateItem`, and `dynamodb:PutItem` with `readingsTableName` | the table, or the regional replica of `readings` |
 | `sns-publisher-role` | `dynamodb:DescribeStream`, `GetRecords`, `GetShardIterator`, `ListStreams` | the table stream |
 | `sns-publisher-role` | `sns:Publish` | the topic |
 | `sns-publisher-role` | `sqs:SendMessage`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | the failure queue |
