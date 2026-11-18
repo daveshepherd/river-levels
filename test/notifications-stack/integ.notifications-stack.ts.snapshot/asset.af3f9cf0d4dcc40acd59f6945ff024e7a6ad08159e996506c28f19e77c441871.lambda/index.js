@@ -18848,12 +18848,31 @@ async function getCredentials() {
   }
   return credentials;
 }
-async function postToX(text) {
+async function getClient() {
   if (!client) {
     client = new import_twitter_api_v2.TwitterApi(await getCredentials());
   }
-  const result = await client.readWrite.v2.tweet(text);
-  return result.data.id;
+  return client;
+}
+async function withLimitsLogged(call) {
+  try {
+    return await call();
+  } catch (error) {
+    const { code, rateLimit } = error;
+    logger.warn("The X API call failed", { code, rateLimit });
+    throw error;
+  }
+}
+async function postToX(text) {
+  const xClient = await getClient();
+  const result = await withLimitsLogged(
+    () => xClient.readWrite.v2.post(
+      "tweets",
+      { text },
+      { fullResponse: true }
+    )
+  );
+  return { id: result.data.data.id, rateLimit: result.rateLimit };
 }
 
 // src/storage-stack/stations.ts
@@ -18968,8 +18987,8 @@ async function notifyStation(status, website) {
     return;
   }
   try {
-    const id = await postToX(text);
-    logger.info("Posted to X", { transition: decision.transition, id });
+    const { id, rateLimit } = await postToX(text);
+    logger.info("Posted to X", { transition: decision.transition, id, rateLimit });
   } catch (error) {
     await replacePostedState(status.station, next, posted);
     throw error;

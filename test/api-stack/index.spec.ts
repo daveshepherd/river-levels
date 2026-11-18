@@ -84,7 +84,7 @@ describe('ApiStack', () => {
     });
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Runtime: 'nodejs24.x',
+      Runtime: 'nodejs26.x',
       Timeout: 60,
       TracingConfig: { Mode: 'Active' },
       Environment: {

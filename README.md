@@ -26,7 +26,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 ## Getting Started
 
 Prerequisites:
-* Node.js 24
+* Node.js 26
 * Yarn 1 (classic)
 * AWS credentials for the target account, needed to deploy and for the integration test tasks that deploy (`integ:update`, `integ:force`, `integ:watch`)
 

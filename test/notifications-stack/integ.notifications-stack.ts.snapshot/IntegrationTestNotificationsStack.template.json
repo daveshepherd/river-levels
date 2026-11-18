@@ -422,7 +422,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "a1c39ec193d364a4b7d09f2f53b4dcf85f017783d3500b46aead2a6491524f5f.zip"
+     "S3Key": "af3f9cf0d4dcc40acd59f6945ff024e7a6ad08159e996506c28f19e77c441871.zip"
     },
     "Description": "src/notifications-stack/x-notifier.lambda.ts",
     "Environment": {
@@ -451,7 +451,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs24.x",
+    "Runtime": "nodejs26.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",
