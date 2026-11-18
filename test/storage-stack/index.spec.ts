@@ -306,4 +306,16 @@ describe('StorageStack', () => {
 
     template.hasResourceProperties('AWS::Events::Rule', { ScheduleExpression: 'cron(3/10 * * * ? *)' });
   });
+
+  test('that the notifications topic can have a fixed name', () => {
+    const app = new App();
+    const template = Template.fromStack(
+      new StorageStack(app, 'StorageStack', {
+        env: { region: 'eu-west-2' },
+        notificationsTopicName: 'river-levels-notifications',
+      }),
+    );
+
+    template.hasResourceProperties('AWS::SNS::Topic', { TopicName: 'river-levels-notifications' });
+  });
 });

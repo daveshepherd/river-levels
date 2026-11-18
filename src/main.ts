@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'fs';
-import { App, Tags } from 'aws-cdk-lib';
+import { App, Aws, Duration, Tags } from 'aws-cdk-lib';
 import { ApiDomainStack } from './api-domain-stack';
 import { ApiStack } from './api-stack';
 import { DataStack } from './data-stack';
@@ -35,18 +35,43 @@ const dataStack = new DataStack(app, 'RiverLevelsData', {
   replicaRegions: otherRegions,
 });
 
-// The crawler and SNS publisher in the other two regions, against the
-// multi-region readings table. Not live until the cutover, so they don't
-// crawl or publish alongside the eu-west-2 stack's.
+// The regional new-reading topics have a fixed name, so each region's API
+// publisher can subscribe to the others' by ARN
+const notificationsTopicName = 'river-levels-notifications';
+const notificationsTopicArn = (region: string) =>
+  `arn:${Aws.PARTITION}:sns:${region}:${Aws.ACCOUNT_ID}:${notificationsTopicName}`;
+
+// The other two regions, against the multi-region readings table. Not live
+// until the cutover, so they don't crawl or publish alongside eu-west-2.
 otherRegions.forEach((region, i) => {
-  new StorageStack(app, `RiverLevels-${region}`, {
+  const regionalStorage = new StorageStack(app, `RiverLevels-${region}`, {
     alertEmail,
     crossRegionReferences: true,
     env: { region },
     live: false,
+    notificationsTopicName,
     readingsTableName: dataStack.readingsTable.tableName,
     // eu-west-2 will run at 0 minutes past each 10
     scheduleOffsetMinutes: 3 * (i + 1),
+  });
+
+  // Keeps this region's copy of the station files current, for CloudFront to
+  // fail over to. Each region's topic only carries the readings its crawler
+  // wrote, so it subscribes to the other regions' topics too.
+  new ApiStack(app, `RiverLevelsApi-${region}`, {
+    alertsTopic: regionalStorage.alertsTopic,
+    allowCloudFrontInAccount: true,
+    createDistribution: false,
+    // The readings table's name comes from RiverLevelsData, in eu-west-2
+    crossRegionReferences: true,
+    // Time for a reading written in another region to reach this replica
+    deliveryDelay: Duration.seconds(30),
+    env: { region },
+    notificationsTopic: regionalStorage.riverLevelsNotificationsTopic,
+    otherNotificationsTopicArns: otherRegions
+      .filter((other) => other !== region)
+      .map(notificationsTopicArn),
+    readingsTable: regionalStorage.riverLevelsTable,
   });
 });
 

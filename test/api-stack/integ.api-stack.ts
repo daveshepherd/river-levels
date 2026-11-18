@@ -36,6 +36,8 @@ const stackUnderTest = new ApiStack(app, 'IntegrationTestApiStack', {
     },
   ],
 });
+// This stack serves the API, so it has a distribution
+const distribution = stackUnderTest.distribution!;
 // Receives what the publisher sends to the station-status topic
 const statusQueue = new Queue(stackUnderTest, 'station-status-test-queue', {
   enforceSSL: true,
@@ -146,7 +148,7 @@ integ.assertions
   .next(
     integ.assertions
       .httpApiCall(
-        `https://${stackUnderTest.distribution.distributionDomainName}/status`,
+        `https://${distribution.distributionDomainName}/status`,
         { headers: { Origin: 'https://kenilworthford.com' } },
       )
       .expect(
@@ -170,7 +172,7 @@ integ.assertions
   .next(
     integ.assertions
       .httpApiCall(
-        `https://${stackUnderTest.distribution.distributionDomainName}/status`,
+        `https://${distribution.distributionDomainName}/status`,
         {
           headers: {
             'Origin': 'https://kenilworthford.com',
@@ -191,7 +193,7 @@ integ.assertions
   .next(
     integ.assertions
       .httpApiCall(
-        `https://${stackUnderTest.distribution.distributionDomainName}/chart`,
+        `https://${distribution.distributionDomainName}/chart`,
       )
       .expect(
         ExpectedResult.objectLike({

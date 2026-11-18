@@ -14,6 +14,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { ITableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Alias } from 'aws-cdk-lib/aws-kms';
 import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -22,6 +23,7 @@ import {
   BlockPublicAccess,
   Bucket,
   BucketEncryption,
+  IBucket,
 } from 'aws-cdk-lib/aws-s3';
 import { ITopic, Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -42,6 +44,36 @@ export interface ApiStackProps extends StackProps {
   readingsTable: ITableV2;
   /** The topic that announces each new reading. */
   notificationsTopic: ITopic;
+  /**
+   * New-reading topics in other regions, by ARN, to subscribe to as well. In
+   * the multi-region setup each region's topic only carries the readings its
+   * crawler wrote, so a region's files need all of them.
+   */
+  otherNotificationsTopicArns?: string[];
+  /**
+   * How long new-reading notifications wait in the queue before the
+   * publisher sees them, so a reading written in another region has reached
+   * this region's replica of the table.
+   * @default - no delay
+   */
+  deliveryDelay?: Duration;
+  /**
+   * Whether this stack creates the CloudFront distribution. Only one region
+   * serves the API; the others publish to their buckets for failover.
+   * @default true
+   */
+  createDistribution?: boolean;
+  /**
+   * Let CloudFront distributions in this account read the bucket, so another
+   * region's distribution can use it as a failover origin.
+   * @default false
+   */
+  allowCloudFrontInAccount?: boolean;
+  /**
+   * Another region's station-files bucket for the distribution to fail over
+   * to. Only with createDistribution.
+   */
+  failoverBucket?: IBucket;
   /** Where the publisher's alarms are sent. No alarms are created when omitted. */
   alertsTopic?: ITopic;
   /** The stations to publish. Defaults to STATIONS in stations.ts. */
@@ -68,7 +100,8 @@ export interface ApiStackProps extends StackProps {
  */
 export class ApiStack extends Stack {
   public readonly apiBucket: Bucket;
-  public readonly distribution: Distribution;
+  /** The distribution serving the files, unless createDistribution is false. */
+  public readonly distribution?: Distribution;
   /** Each station's status, published once per batch of new readings. */
   public readonly statusTopic: Topic;
 
@@ -92,6 +125,25 @@ export class ApiStack extends Stack {
       removalPolicy: destroy ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
       versioned: true,
     });
+    if (props.allowCloudFrontInAccount) {
+      // The serving region's distribution is in another stack, and it needs
+      // this bucket's domain, so naming the distribution here would make the
+      // two stacks depend on each other. Any distribution in the account may
+      // read instead.
+      this.apiBucket.addToResourcePolicy(
+        new PolicyStatement({
+          actions: ['s3:GetObject'],
+          conditions: {
+            StringEquals: { 'AWS:SourceAccount': this.account },
+            ArnLike: {
+              'AWS:SourceArn': `arn:${this.partition}:cloudfront::${this.account}:distribution/*`,
+            },
+          },
+          principals: [new ServicePrincipal('cloudfront.amazonaws.com')],
+          resources: [this.apiBucket.arnForObjects('*')],
+        }),
+      );
+    }
 
     // New-reading notifications are queued so a burst of readings, such as a
     // crawler backfill, is handled in one batch instead of one at a time.
@@ -101,6 +153,7 @@ export class ApiStack extends Stack {
     });
     const queue = new Queue(this, 'api-publisher-queue', {
       deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 5 },
+      deliveryDelay: props.deliveryDelay,
       enforceSSL: true,
       // At least 6 times the function timeout, as AWS recommends for SQS event sources
       visibilityTimeout: Duration.minutes(6),
@@ -108,6 +161,11 @@ export class ApiStack extends Stack {
     props.notificationsTopic.addSubscription(
       new SqsSubscription(queue, { rawMessageDelivery: true }),
     );
+    (props.otherNotificationsTopicArns ?? []).forEach((topicArn, i) => {
+      Topic.fromTopicArn(this, `other-notifications-${i}`, topicArn).addSubscription(
+        new SqsSubscription(queue, { rawMessageDelivery: true }),
+      );
+    });
 
     this.statusTopic = new Topic(this, 'station-status', {
       displayName: 'river-levels-station-status',
@@ -163,18 +221,21 @@ export class ApiStack extends Stack {
       alarm.addOkAction(action);
     }
 
-    this.distribution = new ApiDistribution(this, 'api', {
-      bucket: this.apiBucket,
-      customDomain: props.customDomain,
-      legacyStationId,
-    }).distribution;
+    if (props.createDistribution ?? true) {
+      this.distribution = new ApiDistribution(this, 'api', {
+        bucket: this.apiBucket,
+        customDomain: props.customDomain,
+        failoverBucket: props.failoverBucket,
+        legacyStationId,
+      }).distribution;
+      new CfnOutput(this, 'ApiDomainName', {
+        value: this.distribution.distributionDomainName,
+      });
+    }
 
     if (destroy) {
       Aspects.of(this).add(new ApplyDestroyPolicyAspect());
     }
     new CfnOutput(this, 'ApiBucket', { value: this.apiBucket.bucketName });
-    new CfnOutput(this, 'ApiDomainName', {
-      value: this.distribution.distributionDomainName,
-    });
   }
 }

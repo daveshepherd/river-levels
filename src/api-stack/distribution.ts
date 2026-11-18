@@ -15,7 +15,7 @@ import {
   SecurityPolicyProtocol,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
-import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { OriginGroup, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import {
   AaaaRecord,
   ARecord,
@@ -63,7 +63,17 @@ export interface ApiDistributionProps {
   legacyStationId: string;
   /** Serve at a custom domain as well as the CloudFront domain. */
   customDomain?: ApiCustomDomain;
+  /**
+   * Another region's copy of the station files, served when `bucket` fails.
+   * Its own stack must let this distribution read it (see ApiStack's
+   * allowCloudFrontInAccount), because CDK can't change an imported bucket's
+   * policy.
+   */
+  failoverBucket?: IBucket;
 }
+
+/** Responses from the primary origin that send a request to the failover origin. */
+export const FAILOVER_STATUS_CODES = [403, 500, 502, 503, 504];
 
 /**
  * Serves the station files from the private API bucket over HTTPS, with the
@@ -121,7 +131,15 @@ export class ApiDistribution extends Construct {
             function: legacyPaths,
           },
         ],
-        origin: S3BucketOrigin.withOriginAccessControl(props.bucket),
+        origin: props.failoverBucket
+          ? new OriginGroup({
+            primaryOrigin: S3BucketOrigin.withOriginAccessControl(props.bucket),
+            fallbackOrigin: S3BucketOrigin.withOriginAccessControl(
+              props.failoverBucket,
+            ),
+            fallbackStatusCodes: FAILOVER_STATUS_CODES,
+          })
+          : S3BucketOrigin.withOriginAccessControl(props.bucket),
         responseHeadersPolicy: cors,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },

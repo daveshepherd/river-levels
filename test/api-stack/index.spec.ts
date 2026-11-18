@@ -1,7 +1,8 @@
-import { App, Stack } from 'aws-cdk-lib';
+import { App, Duration, Stack } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { ApiStack, ApiStackProps } from '../../src/api-stack';
 
@@ -229,6 +230,100 @@ describe('ApiStack', () => {
           OriginOverride: true,
         },
       }),
+    });
+  });
+
+  describe('in a region that does not serve the API', () => {
+    const regional = () =>
+      synth({
+        allowCloudFrontInAccount: true,
+        createDistribution: false,
+        deliveryDelay: Duration.seconds(30),
+        otherNotificationsTopicArns: [
+          'arn:aws:sns:eu-central-1:123456789012:river-levels-notifications',
+        ],
+      });
+
+    test('that there is no distribution or domain name output', () => {
+      const { stack, template } = regional();
+
+      template.resourceCountIs('AWS::CloudFront::Distribution', 0);
+      expect(stack.distribution).toBeUndefined();
+      expect(template.findOutputs('ApiDomainName')).toEqual({});
+      template.hasOutput('ApiBucket', {});
+    });
+
+    test("that it also subscribes to other regions' topics, with that region set", () => {
+      regional().template.hasResourceProperties('AWS::SNS::Subscription', {
+        Protocol: 'sqs',
+        RawMessageDelivery: true,
+        Region: 'eu-central-1',
+        TopicArn: 'arn:aws:sns:eu-central-1:123456789012:river-levels-notifications',
+      });
+    });
+
+    test('that new-reading notifications are delayed for the replica to catch up', () => {
+      regional().template.hasResourceProperties('AWS::SQS::Queue', {
+        DelaySeconds: 30,
+        RedrivePolicy: Match.anyValue(),
+      });
+    });
+
+    test('that any CloudFront distribution in the account can read the bucket', () => {
+      regional().template.hasResourceProperties('AWS::S3::BucketPolicy', {
+        PolicyDocument: {
+          Statement: Match.arrayWith([
+            Match.objectLike({
+              Action: 's3:GetObject',
+              Condition: {
+                StringEquals: { 'AWS:SourceAccount': { Ref: 'AWS::AccountId' } },
+                ArnLike: {
+                  'AWS:SourceArn': {
+                    'Fn::Join': ['', Match.arrayWith([':cloudfront::', ':distribution/*'])],
+                  },
+                },
+              },
+              Effect: 'Allow',
+              Principal: { Service: 'cloudfront.amazonaws.com' },
+            }),
+          ]),
+        },
+      });
+    });
+  });
+
+  test('that the distribution fails over to another region\'s bucket', () => {
+    const app = new App();
+    const failoverBucket = Bucket.fromBucketAttributes(new Stack(app, 'Other', { env: { region: 'eu-west-1' } }), 'failover', {
+      bucketName: 'failover-bucket',
+      region: 'eu-west-1',
+    });
+    const { template } = synth({ failoverBucket });
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        OriginGroups: {
+          Items: [
+            Match.objectLike({
+              FailoverCriteria: {
+                StatusCodes: { Items: [403, 500, 502, 503, 504], Quantity: 5 },
+              },
+              Members: Match.objectLike({ Quantity: 2 }),
+            }),
+          ],
+          Quantity: 1,
+        },
+        Origins: Match.arrayWith([
+          Match.objectLike({ DomainName: 'failover-bucket.s3.eu-west-1.amazonaws.com' }),
+        ]),
+      }),
+    });
+  });
+
+  test('that queued notifications are not delayed by default', () => {
+    synth().template.hasResourceProperties('AWS::SQS::Queue', {
+      DelaySeconds: Match.absent(),
+      RedrivePolicy: Match.anyValue(),
     });
   });
 });
