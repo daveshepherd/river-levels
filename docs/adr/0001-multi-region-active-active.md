@@ -23,7 +23,7 @@ Run the whole app in **`eu-west-2`, `eu-west-1` and `eu-central-1`** (Frankfurt)
 - **New-reading notifications:** each region's SNS publisher reads its own replica's stream with an event filter on `NewImage.origin` equal to its region. Only the region that wrote a reading publishes it.
 - **Station files:** each region keeps its own bucket current. Its API publisher subscribes to all three regions' new-reading topics, with a short delivery delay so its replica has the reading, and rebuilds the files from its own replica.
 - **API:** CloudFront serves from an origin group, with London as primary and Ireland as secondary. It switches automatically when the primary returns a 5xx or 403. An origin group takes only two origins, so Frankfurt's bucket is a warm spare.
-- **X notifier:** runs in every region. Its state table becomes an MRSC table too, so its existing conditional claim lets exactly one region post each change. The X credentials secret is replicated from London with Secrets Manager replication.
+- **X notifier:** runs in every region. Its state table becomes an MRSC table too, so its existing conditional claim lets exactly one region post each change. The X credentials are an SSM SecureString parameter, which SSM doesn't replicate, so it's created by hand in each region (free, unlike a replicated secret).
 - **Alarms** are per region, each with its own alerts topic.
 
 ### Why MRSC instead of the existing table

@@ -35,13 +35,13 @@ describe('NotificationsStack', () => {
           MODE: 'post',
           STATE_TABLE: stack.resolve(stack.stateTable.tableName),
           STATIONS: JSON.stringify([{ id: 'a', measureId: 'm' }]),
-          X_CREDENTIALS_SECRET_ARN: stack.resolve(stack.credentialsSecret.secretArn),
+          X_CREDENTIALS_PARAMETER: '/river-levels/x-credentials',
         },
       },
     });
   });
 
-  test('that the state table and credentials secret are retained', () => {
+  test('that the state table is retained', () => {
     const { template } = synth();
 
     template.hasResource('AWS::DynamoDB::GlobalTable', {
@@ -50,20 +50,13 @@ describe('NotificationsStack', () => {
         KeySchema: [{ AttributeName: 'station', KeyType: 'HASH' }],
       }),
     });
-    template.hasResource('AWS::SecretsManager::Secret', {
-      DeletionPolicy: 'Retain',
-      Properties: Match.objectLike({
-        GenerateSecretString: {
-          GenerateStringKey: 'unused',
-          SecretStringTemplate: JSON.stringify({
-            appKey: '',
-            appSecret: '',
-            accessToken: '',
-            accessSecret: '',
-          }),
-        },
-      }),
-    });
+  });
+
+  test('that the X credentials come from an SSM parameter, not a secret', () => {
+    const { template } = synth();
+
+    template.resourceCountIs('AWS::SecretsManager::Secret', 0);
+    template.resourceCountIs('AWS::SSM::Parameter', 0);
   });
 
   test('that station statuses are queued with raw delivery and a dead-letter queue', () => {
@@ -83,7 +76,7 @@ describe('NotificationsStack', () => {
     });
   });
 
-  test('that the notifier can only use its table and secret', () => {
+  test('that the notifier can only use its table and credentials parameter', () => {
     const { stack, template } = synth();
 
     template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
@@ -95,9 +88,11 @@ describe('NotificationsStack', () => {
             Resource: stack.resolve(stack.stateTable.tableArn),
           },
           {
-            Action: 'secretsmanager:GetSecretValue',
+            Action: 'ssm:GetParameter',
             Effect: 'Allow',
-            Resource: stack.resolve(stack.credentialsSecret.secretArn),
+            Resource: {
+              'Fn::Join': ['', Match.arrayWith([':parameter/river-levels/x-credentials'])],
+            },
           },
         ],
       },
@@ -121,7 +116,7 @@ describe('NotificationsStack', () => {
       Description: 'src/notifications-stack/x-smoke-test.lambda.ts',
       Environment: {
         Variables: {
-          X_CREDENTIALS_SECRET_ARN: stack.resolve(stack.credentialsSecret.secretArn),
+          X_CREDENTIALS_PARAMETER: '/river-levels/x-credentials',
         },
       },
     });
@@ -131,9 +126,11 @@ describe('NotificationsStack', () => {
       PolicyDocument: {
         Statement: [
           {
-            Action: 'secretsmanager:GetSecretValue',
+            Action: 'ssm:GetParameter',
             Effect: 'Allow',
-            Resource: stack.resolve(stack.credentialsSecret.secretArn),
+            Resource: {
+              'Fn::Join': ['', Match.arrayWith([':parameter/river-levels/x-credentials'])],
+            },
           },
         ],
       },
@@ -166,9 +163,16 @@ describe('NotificationsStack', () => {
     }
   });
 
-  test('that the secret ARN is a stack output', () => {
-    synth().template.hasOutput('XCredentialsSecretArn', {
-      Value: { Ref: Match.stringLikeRegexp('xcredentials') },
+  test('that the parameter name is a stack output', () => {
+    synth().template.hasOutput('XCredentialsParameterName', {
+      Value: '/river-levels/x-credentials',
     });
+  });
+
+  test('that the parameter name can be changed', () => {
+    const { stack, template } = synth({ credentialsParameterName: '/other/x' });
+
+    expect(stack.credentialsParameterName).toBe('/other/x');
+    template.hasOutput('XCredentialsParameterName', { Value: '/other/x' });
   });
 });

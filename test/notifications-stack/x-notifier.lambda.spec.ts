@@ -4,10 +4,7 @@ import {
   GetItemCommand,
   PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import type { Context, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
@@ -41,7 +38,7 @@ jest.mock('twitter-api-v2', () => ({
 }));
 
 const dynamoDbMock = mockClient(DynamoDBClient);
-const secretsMock = mockClient(SecretsManagerClient);
+const ssmMock = mockClient(SSMClient);
 
 const NOW = 1_800_000_000_000;
 const CREDENTIALS = {
@@ -85,19 +82,19 @@ function puts() {
 beforeEach(() => {
   jest.useFakeTimers({ now: NOW });
   dynamoDbMock.reset();
-  secretsMock.reset();
+  ssmMock.reset();
   tweet.mockReset();
   twitterApi.mockReset();
   resetXClient();
   dynamoDbMock.on(GetItemCommand).resolves({});
   dynamoDbMock.on(PutItemCommand).resolves({});
-  secretsMock
-    .on(GetSecretValueCommand)
-    .resolves({ SecretString: JSON.stringify(CREDENTIALS) });
+  ssmMock
+    .on(GetParameterCommand)
+    .resolves({ Parameter: { Value: JSON.stringify(CREDENTIALS) } });
   tweet.mockResolvedValue({ data: { id: '123', text: '' } });
   process.env.MODE = 'post';
   process.env.STATE_TABLE = 'state-table';
-  process.env.X_CREDENTIALS_SECRET_ARN = 'secret-arn';
+  process.env.X_CREDENTIALS_PARAMETER = '/river-levels/x-credentials';
   process.env.STATIONS = JSON.stringify([
     {
       id: 'kenilworth',
@@ -189,7 +186,7 @@ describe('x-notifier', () => {
 
     expect(puts()).toHaveLength(1);
     expect(tweet).not.toHaveBeenCalled();
-    expect(secretsMock).toHaveReceivedCommandTimes(GetSecretValueCommand, 0);
+    expect(ssmMock).toHaveReceivedCommandTimes(GetParameterCommand, 0);
   });
 
   it('does not post when another invocation claimed the change first', async () => {
@@ -224,10 +221,10 @@ describe('x-notifier', () => {
     });
   });
 
-  it('fails the station when the credentials secret is not filled in', async () => {
+  it('fails the station when the credentials parameter is not filled in', async () => {
     stored('clear', 0);
-    secretsMock.on(GetSecretValueCommand).resolves({
-      SecretString: JSON.stringify({ ...CREDENTIALS, appKey: '', accessSecret: '' }),
+    ssmMock.on(GetParameterCommand).resolves({
+      Parameter: { Value: JSON.stringify({ ...CREDENTIALS, appKey: '', accessSecret: '' }) },
     });
 
     const response = await target.handler(sqsEvent(statusMessage('flooded')));
@@ -238,9 +235,9 @@ describe('x-notifier', () => {
     expect(tweet).not.toHaveBeenCalled();
   });
 
-  it('fails the station when the secret has no value', async () => {
+  it('fails the station when the parameter has no value', async () => {
     stored('clear', 0);
-    secretsMock.on(GetSecretValueCommand).resolves({});
+    ssmMock.on(GetParameterCommand).resolves({});
 
     const response = await target.handler(sqsEvent(statusMessage('flooded')));
 
@@ -289,7 +286,11 @@ describe('x-notifier', () => {
     await target.handler(sqsEvent(statusMessage('clear')));
 
     expect(tweet).toHaveBeenCalledTimes(2);
-    expect(secretsMock).toHaveReceivedCommandTimes(GetSecretValueCommand, 1);
+    expect(ssmMock).toHaveReceivedCommandTimes(GetParameterCommand, 1);
+    expect(ssmMock).toHaveReceivedCommandWith(GetParameterCommand, {
+      Name: '/river-levels/x-credentials',
+      WithDecryption: true,
+    });
   });
 });
 

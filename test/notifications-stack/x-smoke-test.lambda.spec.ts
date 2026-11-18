@@ -1,7 +1,4 @@
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import type { Context } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../src/notifications-stack/powertools';
@@ -32,25 +29,27 @@ jest.mock('twitter-api-v2', () => ({
   })),
 }));
 
-const secretsMock = mockClient(SecretsManagerClient);
+const ssmMock = mockClient(SSMClient);
 
 beforeEach(() => {
   jest.useFakeTimers({ now: Date.parse('2027-01-15T08:00:00.000Z') });
-  secretsMock.reset();
+  ssmMock.reset();
   tweet.mockReset();
   deleteTweet.mockReset();
   resetXClient();
-  secretsMock.on(GetSecretValueCommand).resolves({
-    SecretString: JSON.stringify({
-      appKey: 'k',
-      appSecret: 's',
-      accessToken: 't',
-      accessSecret: 'a',
-    }),
+  ssmMock.on(GetParameterCommand).resolves({
+    Parameter: {
+      Value: JSON.stringify({
+        appKey: 'k',
+        appSecret: 's',
+        accessToken: 't',
+        accessSecret: 'a',
+      }),
+    },
   });
   tweet.mockResolvedValue({ data: { id: '123', text: '' } });
   deleteTweet.mockResolvedValue({ data: { deleted: true } });
-  process.env.X_CREDENTIALS_SECRET_ARN = 'secret-arn';
+  process.env.X_CREDENTIALS_PARAMETER = '/river-levels/x-credentials';
 });
 
 afterEach(() => {
