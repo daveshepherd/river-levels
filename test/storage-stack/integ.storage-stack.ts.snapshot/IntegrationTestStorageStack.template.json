@@ -202,7 +202,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "539c97e2bb4c03c31cc98b62222e359b90e86e6c7f7a8456b2f10104590a7348.zip"
+     "S3Key": "a4f6e3bec4771b95086ad9cb6c0d70606abadbbb1ea4cfa916cdb8c3fa48b759.zip"
     },
     "Description": "src/storage-stack/crawler.lambda.ts",
     "Environment": {
@@ -227,7 +227,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs24.x",
+    "Runtime": "nodejs26.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",
@@ -741,7 +741,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs24.x",
+    "Runtime": "nodejs26.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",

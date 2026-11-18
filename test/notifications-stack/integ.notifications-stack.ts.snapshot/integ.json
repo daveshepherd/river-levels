@@ -6,7 +6,7 @@
         "IntegrationTestNotificationsStack"
       ],
       "regions": [
-        "${Token[AWS.Region.5]}"
+        "${Token[AWS.Region.4]}"
       ],
       "assertionStack": "NotificationsTest/DefaultTest/DeployAssert",
       "assertionStackName": "NotificationsTestDefaultTestDeployAssertCB520A9C"

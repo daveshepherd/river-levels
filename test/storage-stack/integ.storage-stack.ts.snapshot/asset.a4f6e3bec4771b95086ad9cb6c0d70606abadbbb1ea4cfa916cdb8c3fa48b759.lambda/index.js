@@ -12066,7 +12066,7 @@ var require_follow_redirects = __commonJS({
       return URL3 && value instanceof URL3;
     }
     function escapeRegex(regex) {
-      return regex.replace(/[[\]\\/()*+?.^$|]/g, "\\$&");
+      return regex.replace(/[\^$\\.*+?()[\]{}|]/g, "\\$&");
     }
     module2.exports = wrap({ http: http4, https: https3 });
     module2.exports.wrap = wrap;
@@ -21883,7 +21883,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.21.0";
+var VERSION = "1.21.1";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -25384,8 +25384,11 @@ function throwIfCancellationRequested(config) {
     throw new CanceledError_default(null, config);
   }
 }
-function elapsedSince(start) {
-  return Math.max(0, Date.now() - start);
+function resolveClock() {
+  return typeof performance !== "undefined" && utils_default.isFunction(performance.now) ? () => performance.now() : Date.now;
+}
+function elapsedSince(now, start) {
+  return Math.max(0, Math.round(now() - start));
 }
 function dispatchRequest(_config) {
   const config = utils_default.toSafeFlatObject(_config);
@@ -25396,11 +25399,12 @@ function dispatchRequest(_config) {
     config.headers.setContentType("application/x-www-form-urlencoded", false);
   }
   const adapter2 = adapters_default.getAdapter(config.adapter || defaults_default.adapter, config);
-  const start = Date.now();
+  const now = resolveClock();
+  const start = now();
   return adapter2(config).then(
     function onAdapterResolution(response) {
       throwIfCancellationRequested(config);
-      response.duration = elapsedSince(start);
+      response.duration = elapsedSince(now, start);
       config.response = response;
       try {
         response.data = transformData.call(config, config.transformResponse, response);
@@ -25414,7 +25418,7 @@ function dispatchRequest(_config) {
       if (!isCancel(reason)) {
         throwIfCancellationRequested(config);
         if (reason && reason.response) {
-          reason.response.duration = elapsedSince(start);
+          reason.response.duration = elapsedSince(now, start);
           config.response = reason.response;
           try {
             reason.response.data = transformData.call(
@@ -29416,12 +29420,63 @@ async function updateReading(station, reading) {
     throw error;
   }
 }
+var MAX_CONFLICT_RETRIES = 3;
+async function putNewReading(station, reading, origin2) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await dynamoDbClient.send(
+        new import_client_dynamodb.PutItemCommand({
+          ConditionExpression: "attribute_not_exists(#timestamp)",
+          ExpressionAttributeNames: { "#timestamp": "timestamp" },
+          Item: {
+            station: { S: station },
+            timestamp: { N: reading.date.getTime().toString() },
+            reading_depth: { N: reading.depth.toString() },
+            origin: { S: origin2 }
+          },
+          TableName: process.env.DYNAMODB_READINGS_TABLE
+        })
+      );
+      return true;
+    } catch (error) {
+      if (error instanceof import_client_dynamodb.ConditionalCheckFailedException) {
+        return false;
+      }
+      if (error instanceof import_client_dynamodb.ReplicatedWriteConflictException && attempt < MAX_CONFLICT_RETRIES) {
+        continue;
+      }
+      logger.error("Error writing a reading to DynamoDB", {
+        station,
+        date: reading.date.toISOString(),
+        error
+      });
+      throw error;
+    }
+  }
+}
 async function updateReadings(station, readings) {
+  const origin2 = process.env.READINGS_ORIGIN;
+  let created = 0;
   for (let i = 0; i < readings.length; i += MAX_CONCURRENT_WRITES) {
     const batch = readings.slice(i, i + MAX_CONCURRENT_WRITES);
-    await Promise.all(batch.map((reading) => updateReading(station, reading)));
+    if (origin2) {
+      const results = await Promise.all(
+        batch.map((reading) => putNewReading(station, reading, origin2))
+      );
+      created += results.filter(Boolean).length;
+    } else {
+      await Promise.all(batch.map((reading) => updateReading(station, reading)));
+    }
   }
-  logger.info("Readings updated", { station, count: readings.length });
+  if (origin2) {
+    logger.info("Readings written", {
+      station,
+      created,
+      alreadyPresent: readings.length - created
+    });
+  } else {
+    logger.info("Readings updated", { station, count: readings.length });
+  }
 }
 
 // src/storage-stack/crawler.lambda.ts
