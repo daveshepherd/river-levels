@@ -372,11 +372,11 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). |
-| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list), and `READINGS_ORIGIN` (the region) with `readingsTableName`. |
+| `crawler-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list), and `READINGS_ORIGIN` (the region) with `readingsTableName`. |
 | `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, or `cron(<offset>/10 * * * ? *)` with `scheduleOffsetMinutes`. 3 retry attempts, then `crawler-dead-letter-queue`. Disabled when the stack isn't `live`. |
 | `readings-stream-lookup` | `Custom::AWS` | Only with `readingsTableName`. `DynamoDB.describeTable` on the regional replica, for `Table.LatestStreamArn`. |
 | `crawler-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives scheduled invocations EventBridge couldn't deliver to the crawler. |
-| `sns-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 128 MB, 30 s timeout, X-Ray active. Env: `SNS_TOPIC_ARN`. |
+| `sns-publisher-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 128 MB, 30 s timeout, X-Ray active. Env: `SNS_TOPIC_ARN`. |
 | `sns-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | DynamoDB stream, starting position `LATEST`, batch size 100. `ReportBatchItemFailures` and bisect on error. 5 retries, then on-failure destination. With `readingsTableName`, a filter on `NewImage.origin` equal to the region. Disabled when the stack isn't `live`. |
 | `sns-publisher-failure-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives stream batches that still fail after retries. |
 | `alarms/alerts` | `AWS::SNS::Topic` | `river-levels-alerts`. SSL enforced; not encrypted, because CloudWatch can't publish to a topic using the AWS-managed SNS key. Email subscription to `alertEmail` when set. |
@@ -395,7 +395,7 @@ Logical names as they appear in the CloudFormation template.
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
 | `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
-| `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
+| `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
 | `api-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | `api-publisher-queue`, batch size 100, 60 s batching window, `ReportBatchItemFailures`. |
 | `api-publisher-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `api-publisher-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
@@ -415,10 +415,10 @@ Logical names as they appear in the CloudFormation template.
 | `x-credentials` | `AWS::SecretsManager::Secret` | X OAuth 1.0a credentials, set by hand. Created with empty values and never overwritten. Retained when the stack is deleted. |
 | `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
 | `x-notifier-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
-| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 24, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
-| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 24, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_SECRET_ARN`. |
+| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 26, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_SECRET_ARN`. |
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 

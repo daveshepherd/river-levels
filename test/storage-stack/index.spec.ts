@@ -39,7 +39,7 @@ describe('StorageStack', () => {
 
     template.hasResource('AWS::Lambda::Function', {});
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Runtime: 'nodejs24.x',
+      Runtime: 'nodejs26.x',
       Environment: {
         Variables: {
           DYNAMODB_READINGS_TABLE: storageStack.resolve(

@@ -27,7 +27,7 @@ describe('NotificationsStack', () => {
     });
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Runtime: 'nodejs24.x',
+      Runtime: 'nodejs26.x',
       Timeout: 30,
       TracingConfig: { Mode: 'Active' },
       Environment: {
