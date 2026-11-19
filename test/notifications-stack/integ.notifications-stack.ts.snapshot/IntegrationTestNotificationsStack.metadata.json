@@ -20,19 +20,6 @@
       }
     }
   ],
-  "/IntegrationTestNotificationsStack/x-credentials": [
-    {
-      "type": "aws:cdk:analytics:construct",
-      "data": {
-        "description": "*",
-        "generateSecretString": {
-          "generateStringKey": "*",
-          "secretStringTemplate": "*"
-        },
-        "removalPolicy": "destroy"
-      }
-    }
-  ],
   "/IntegrationTestNotificationsStack/x-notifier-dead-letter-queue": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -187,10 +174,10 @@
       }
     }
   ],
-  "/IntegrationTestNotificationsStack/XCredentialsSecretArn": [
+  "/IntegrationTestNotificationsStack/XCredentialsParameterName": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "XCredentialsSecretArn"
+      "data": "XCredentialsParameterName"
     }
   ],
   "/IntegrationTestNotificationsStack/BootstrapVersion": [
@@ -209,12 +196,6 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "xnotifierstateA1B1B132"
-    }
-  ],
-  "/IntegrationTestNotificationsStack/x-credentials/Resource": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "xcredentials56E4AA86"
     }
   ],
   "/IntegrationTestNotificationsStack/x-notifier-dead-letter-queue/Resource": [

@@ -1,5 +1,4 @@
 Rule ID,Resource ID,Compliance,Exception Reason,Rule Level,Rule Info
-"AwsSolutions-SMG4","IntegrationTestNotificationsStack/x-credentials/Resource","Suppressed","X credentials are issued by X and set by hand; Secrets Manager cannot rotate them","Error","The secret does not have automatic rotation scheduled."
 "AwsSolutions-SQS2","IntegrationTestNotificationsStack/x-notifier-dead-letter-queue/Resource","Compliant","N/A","Error","The SQS Queue does not have server-side encryption enabled."
 "AwsSolutions-SQS3","IntegrationTestNotificationsStack/x-notifier-dead-letter-queue/Resource","Compliant","N/A","Error","The SQS queue is not used as a dead-letter queue (DLQ) and does not have a DLQ enabled."
 "AwsSolutions-SQS4","IntegrationTestNotificationsStack/x-notifier-dead-letter-queue/Resource","Compliant","N/A","Error","The SQS queue does not require requests to use SSL."
