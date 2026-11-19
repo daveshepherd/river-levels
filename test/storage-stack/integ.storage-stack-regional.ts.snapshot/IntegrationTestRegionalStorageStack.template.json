@@ -410,7 +410,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs24.x",
+    "Runtime": "nodejs26.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",
@@ -916,7 +916,7 @@
       "Arn"
      ]
     },
-    "Runtime": "nodejs24.x",
+    "Runtime": "nodejs26.x",
     "Tags": [
      {
       "Key": "endor:ManagedBy",

@@ -1,4 +1,7 @@
-import { NodePackageManager } from 'projen/lib/javascript';
+import {
+  NodePackageManager,
+  UpgradeDependenciesSchedule,
+} from 'projen/lib/javascript';
 import { CdkTypeScriptApp } from 'projen-modules';
 
 const project = new CdkTypeScriptApp({
@@ -15,6 +18,12 @@ const project = new CdkTypeScriptApp({
     'axios',
     'twitter-api-v2',
   ],
+  // Weekly rather than daily: each upgrade release changes the Lambdas in
+  // every stack and region, and Control Tower's AWS Config recorder charges
+  // for each resource change it records
+  depsUpgradeOptions: {
+    workflowOptions: { schedule: UpgradeDependenciesSchedule.WEEKLY },
+  },
   description:
     'A scraper and APIs for getting river readings from the Environment Agency',
   devDeps: [

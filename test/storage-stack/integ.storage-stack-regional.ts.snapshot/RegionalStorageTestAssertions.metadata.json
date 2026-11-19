@@ -85,13 +85,13 @@
       "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
     }
   ],
-  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItemb975ed4f5d10596fd5e31de4e2ee05c2/Default": [
+  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem588f369f5c2c6cc6af683f2cd2080f65/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
     }
   ],
-  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem1d2f2db27bffcac4fb1964056c0f8384/Default": [
+  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem9cf0a1e4f9b4719387fa36fd026978e4/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -141,16 +141,16 @@
       "data": "AwsApiCallDynamoDBQuerybb85a32cb801de99e969cebe246e0841WaitFor8E5B7B20"
     }
   ],
-  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItemb975ed4f5d10596fd5e31de4e2ee05c2/Default/Default": [
+  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem588f369f5c2c6cc6af683f2cd2080f65/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallDynamoDBPutItemb975ed4f5d10596fd5e31de4e2ee05c2"
+      "data": "AwsApiCallDynamoDBPutItem588f369f5c2c6cc6af683f2cd2080f65"
     }
   ],
-  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem1d2f2db27bffcac4fb1964056c0f8384/Default/Default": [
+  "/RegionalStorageTestAssertions/AwsApiCallDynamoDBPutItem9cf0a1e4f9b4719387fa36fd026978e4/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallDynamoDBPutItem1d2f2db27bffcac4fb1964056c0f8384"
+      "data": "AwsApiCallDynamoDBPutItem9cf0a1e4f9b4719387fa36fd026978e4"
     }
   ],
   "/RegionalStorageTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/Default/Default": [
