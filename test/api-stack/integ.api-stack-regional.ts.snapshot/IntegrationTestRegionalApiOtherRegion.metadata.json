@@ -1,0 +1,51 @@
+{
+  "/IntegrationTestRegionalApiOtherRegion": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestRegionalApiOtherRegion.template.json"
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/notifications": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "topicName": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/notifications/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "notificationsBCF85F58"
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/notifications/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiOtherRegion/notifications/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "notificationsPolicy7560F28F"
+    }
+  ]
+}

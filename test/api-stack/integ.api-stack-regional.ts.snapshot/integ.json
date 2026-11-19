@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "RegionalApiTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestRegionalApiStack"
+      ],
+      "cdkCommandOptions": {
+        "destroy": {
+          "args": {
+            "force": true
+          }
+        }
+      },
+      "assertionStack": "RegionalApiTestAssertions",
+      "assertionStackName": "RegionalApiTestAssertions"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}
