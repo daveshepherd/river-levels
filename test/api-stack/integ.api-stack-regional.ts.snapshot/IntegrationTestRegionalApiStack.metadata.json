@@ -1,0 +1,525 @@
+{
+  "/IntegrationTestRegionalApiStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestRegionalApiStack.template.json"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "autoDeleteObjects": true,
+        "blockPublicAccess": "*",
+        "encryption": "S3_MANAGED",
+        "enforceSSL": true,
+        "lifecycleRules": [
+          {}
+        ],
+        "removalPolicy": "destroy",
+        "versioned": true
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addLifecycleRule": [
+          {},
+          "*",
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+    {
+      "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+      "data": true
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-dead-letter-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deadLetterQueue": {
+          "queue": "*",
+          "maxReceiveCount": "*"
+        },
+        "deliveryDelay": "*",
+        "enforceSSL": true,
+        "visibilityTimeout": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/station-status": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "enforceSSL": true,
+        "masterKey": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-log-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/ApiBucket": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiBucket"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apibucketE65E1D51"
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketAutoDeleteObjects"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "bucket": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket/AutoDeleteObjectsCustomResource": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-dead-letter-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherdeadletterqueue36740371"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-dead-letter-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherqueueF62C78AE"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/IntegrationTestRegionalApiFixturesnotificationsBB9ECBC0": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/IntegrationTestRegionalApiStackothernotifications0F8FAB62D": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/station-status/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusA5DBC6CC"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/station-status/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherroleB277F12C"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role/api-publisher-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-log-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherloggroup6427F72F"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherlambdaD9D09DC9"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-lambda/SqsEventSource:IntegrationTestRegionalApiStackapipublisherqueueE78F8C67": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "target": "*",
+        "batchSize": "*",
+        "maxBatchingWindow": "*",
+        "maxConcurrency": "*",
+        "reportBatchItemFailures": true,
+        "enabled": "*",
+        "eventSourceArn": "*",
+        "filters": "*",
+        "filterEncryption": "*",
+        "metricsConfig": "*",
+        "provisionedPollerConfig": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/Publish/Output{\"Ref\":\"apibucketE65E1D51\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefapibucketE65E1D51AEE84AA4"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apibucketPolicy1AF6792E"
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketPolicyStatements"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-bucket/AutoDeleteObjectsCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apibucketAutoDeleteObjectsCustomResource2AE850FE"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherdeadletterqueuePolicy093362A1"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherqueuePolicyCECFF367"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/IntegrationTestRegionalApiFixturesnotificationsBB9ECBC0/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherqueueIntegrationTestRegionalApiFixturesnotificationsBB9ECBC04D6D6B98"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-queue/IntegrationTestRegionalApiStackothernotifications0F8FAB62D/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherqueueIntegrationTestRegionalApiStackothernotifications0F8FAB62DB6E64BFE"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/station-status/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "stationstatusPolicy9E34EFF4"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role/api-publisher-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherroleapipublisherpolicy4D57C96F"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherroleDefaultPolicyC736EA69"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalApiStack/api-publisher-lambda/SqsEventSource:IntegrationTestRegionalApiStackapipublisherqueueE78F8C67/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "apipublisherlambdaSqsEventSourceIntegrationTestRegionalApiStackapipublisherqueueE78F8C670A9029F1"
+    }
+  ]
+}

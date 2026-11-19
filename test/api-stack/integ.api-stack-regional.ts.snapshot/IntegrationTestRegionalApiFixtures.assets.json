@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "fc8164d28b19658b601a37afbf510d3680fdd090a0aef617f44eeca2b2285fe1": {
+      "displayName": "IntegrationTestRegionalApiFixtures Template",
+      "source": {
+        "path": "IntegrationTestRegionalApiFixtures.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-1-e61fd0ec": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "fc8164d28b19658b601a37afbf510d3680fdd090a0aef617f44eeca2b2285fe1.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

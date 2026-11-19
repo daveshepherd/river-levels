@@ -3,13 +3,14 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** seven, all deployed by `cdk deploy --all`:
+- **Stacks:** nine, all deployed by `cdk deploy --all`:
   - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
   - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)): posts ford state changes to X. It imports the `station-status` topic from `RiverLevelsApi` and the alerts topic from `RiverLevels`.
   - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. See [ADR 0001](adr/0001-multi-region-active-active.md) for the plan. History has been copied into its `readings` table.
   - `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in the other two regions, against `RiverLevelsData`'s `readings` table, which they get through cross-region references. **Not live yet:** their crawler schedules and stream mappings are switched off until the cutover. See [Multi-region storage](#multi-region-storage).
+  - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, from its own replica of `readings`, for CloudFront to fail over to. **Not live yet:** they only receive what their region's storage stack publishes, which is nothing until the cutover. See [Multi-region station files](#multi-region-station-files).
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland). Moving to active-active in three regions ([ADR 0001](adr/0001-multi-region-active-active.md)).
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -171,6 +172,7 @@ A `StorageStack` given `readingsTableName` (the regional stacks today, every reg
 - **The SNS publisher only publishes its own region's readings.** Every replica's stream carries every write, so its stream mapping filters on `NewImage.origin` equal to its region. Readings copied from the old table have `origin: migration`, which no region matches.
 - **Staggered schedules:** `scheduleOffsetMinutes` runs the crawler at a fixed offset past each 10 minutes (`cron(3/10 * * * ? *)` in `eu-west-1` and `cron(6/10 * * * ? *)` in `eu-central-1`).
 - **`live: false`** deploys the stack with the crawler rule disabled and the stream mapping switched off.
+- **`notificationsTopicName`** gives the new-reading topic a fixed name (`river-levels-notifications` in the regional stacks), so other regions' API stacks can subscribe by ARN without cross-region references.
 
 ### 2. Publish: on every stream batch
 
@@ -228,6 +230,17 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
 - **Caching:** the managed `CachingOptimized` policy honours the files' `Cache-Control: max-age=300`, so CloudFront and browsers cache for 5 minutes. Responses are compressed.
 - **Delivery:** HTTPS only (HTTP redirects), HTTP/2 and HTTP/3, price class 100 (North America and Europe).
 - **Domain:** always its `*.cloudfront.net` domain, output as `ApiDomainName`. A stage whose custom domain is on also serves at its API domain, with a TLS 1.2 minimum; see [API domains](#api-domains).
+
+#### Multi-region station files
+
+An `ApiStack` in a region that doesn't serve the API (the regional stacks) differs from `RiverLevelsApi`:
+
+- **No distribution** (`createDistribution: false`), and so no `ApiDomainName` output.
+- **It subscribes to every region's new readings.** Each region's `river-levels-notifications` topic only carries the readings its own crawler wrote, so `api-publisher-queue` also subscribes to the other regions' topics by ARN (`otherNotificationsTopicArns`), with the subscription's region set. Today the regional stacks subscribe to each other's topics. `RiverLevels` in eu-west-2 joins at the cutover.
+- **Delivery is delayed 30 seconds** (`deliveryDelay`), so a reading written in another region has reached this region's replica before the publisher queries it.
+- **CloudFront can read the bucket** (`allowCloudFrontInAccount`). The serving distribution is in another stack, and naming it in this bucket's policy would make the two stacks depend on each other, so the policy allows any CloudFront distribution in the account (`AWS:SourceAccount` and a `distribution/*` source ARN).
+
+`ApiDistribution` also takes a `failoverBucket`: an origin group with `api-bucket` as primary and that bucket as fallback, switching on `403`, `500`, `502`, `503` or `504` (`FAILOVER_STATUS_CODES`). Nothing passes it yet; `RiverLevelsApi` gets eu-west-1's bucket at the cutover. An origin group takes two origins, so eu-central-1's bucket is a spare.
 
 ### 5. Notifications: posting ford state changes to X
 
@@ -384,19 +397,19 @@ Logical names as they appear in the CloudFormation template.
 | `sns-publisher-failure-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives stream batches that still fail after retries. |
 | `alarms/alerts` | `AWS::SNS::Topic` | `river-levels-alerts`. SSL enforced; not encrypted, because CloudWatch can't publish to a topic using the AWS-managed SNS key. Email subscription to `alertEmail` when set. |
 | `alarms/*` | `AWS::CloudWatch::Alarm` | Five alarms, listed under [Alarms](#alarms). Each notifies the alerts topic on ALARM and on return to OK. |
-| `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. |
+| `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. Named `river-levels-notifications` with `notificationsTopicName` (the regional stacks); otherwise the name is generated. |
 | `crawler-log-group`, `sns-publisher-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
 `RiverLevelsApi` stack:
 
 | Resource | Type | Key settings |
 |----------|------|--------------|
-| `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it. |
-| `api/distribution` | `AWS::CloudFront::Distribution` | Origin: `api-bucket` through origin access control. Managed `CachingOptimized` cache policy and the `api/cors` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
+| `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it, or, with `allowCloudFrontInAccount` (the regional stacks), any CloudFront distribution in the account. |
+| `api/distribution` | `AWS::CloudFront::Distribution` | Not created with `createDistribution: false`. Origin: `api-bucket` through origin access control, or an origin group failing over to `failoverBucket` when given. Managed `CachingOptimized` cache policy and the `api/cors` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
 | `api/alias-a`, `api/alias-aaaa` | `AWS::Route53::RecordSet` | Only when the stage's custom domain is on. Alias records at the domain's apex, in `api-zone`, pointing at the distribution. |
 | `api/cors` | `AWS::CloudFront::ResponseHeadersPolicy` | `Access-Control-Allow-Origin: *`, any request header, `GET`/`HEAD`/`OPTIONS`, 1-day max age, origin override. |
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
-| `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery. 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
+| `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery, and to `otherNotificationsTopicArns` if set. Delivery delay from `deliveryDelay` (30 s in the regional stacks, none in `RiverLevelsApi`). 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
 | `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
 | `api-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | `api-publisher-queue`, batch size 100, 60 s batching window, `ReportBatchItemFailures`. |

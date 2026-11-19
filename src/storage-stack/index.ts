@@ -69,6 +69,12 @@ export interface StorageStackProps extends StackProps {
    * minutes from when the rule was created.
    */
   scheduleOffsetMinutes?: number;
+  /**
+   * A fixed name for the new-reading notifications topic, so stacks in other
+   * regions can subscribe by ARN without cross-region references. Without it,
+   * CloudFormation generates the name.
+   */
+  notificationsTopicName?: string;
   setDestroyPolicyToAllResources?: boolean;
   /**
    * The stations the crawler collects. Defaults to STATIONS in stations.ts.
@@ -160,6 +166,7 @@ export class StorageStack extends Stack {
       {
         displayName: 'river-levels-notifications',
         masterKey: awsSnsKms,
+        topicName: props.notificationsTopicName,
         enforceSSL: true,
         tracingConfig: TracingConfig.ACTIVE,
       },

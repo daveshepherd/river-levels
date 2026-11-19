@@ -52,7 +52,7 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), StorageStacks "RiverLevels-eu-west-1" and "RiverLevels-eu-central-1" (multi-region readings table, not live yet), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), StorageStacks "RiverLevels-eu-west-1" and "RiverLevels-eu-central-1" and ApiStacks "RiverLevelsApi-eu-west-1" and "RiverLevelsApi-eu-central-1" (multi-region readings table, failover copies of the station files, not live yet), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
