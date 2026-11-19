@@ -1,7 +1,4 @@
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import {
   TweetV2PostTweetResult,
   TwitterApi,
@@ -9,7 +6,7 @@ import {
 } from 'twitter-api-v2';
 import { logger, tracer } from './powertools';
 
-/** The X app and account credentials stored in the x-credentials secret (OAuth 1.0a user context). */
+/** The X app and account credentials stored in the X credentials parameter (OAuth 1.0a user context), as JSON. */
 export interface XCredentials {
   appKey: string;
   appSecret: string;
@@ -17,20 +14,23 @@ export interface XCredentials {
   accessSecret: string;
 }
 
-const secretsClient = tracer.captureAWSv3Client(new SecretsManagerClient({}));
+const ssmClient = tracer.captureAWSv3Client(new SSMClient({}));
 let client: TwitterApi | undefined;
 
-/** Reads the credentials secret, throwing if it hasn't been filled in. */
+/** Reads the credentials parameter, throwing if it hasn't been filled in. */
 async function getCredentials(): Promise<XCredentials> {
-  const result = await secretsClient.send(
-    new GetSecretValueCommand({ SecretId: process.env.X_CREDENTIALS_SECRET_ARN }),
+  const result = await ssmClient.send(
+    new GetParameterCommand({
+      Name: process.env.X_CREDENTIALS_PARAMETER,
+      WithDecryption: true,
+    }),
   );
-  const credentials = JSON.parse(result.SecretString ?? '{}') as Partial<XCredentials>;
+  const credentials = JSON.parse(result.Parameter?.Value ?? '{}') as Partial<XCredentials>;
   const missing = (['appKey', 'appSecret', 'accessToken', 'accessSecret'] as const)
     .filter((key) => !credentials[key]);
   if (missing.length) {
     throw new Error(
-      `The X credentials secret is missing ${missing.join(', ')}. Set it before turning posting on.`,
+      `The X credentials parameter is missing ${missing.join(', ')}. Set it before turning posting on.`,
     );
   }
   return credentials as XCredentials;
@@ -64,7 +64,7 @@ async function withLimitsLogged<T>(call: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Posts to the X account in the credentials secret. */
+/** Posts to the X account in the credentials parameter. */
 export async function postToX(text: string): Promise<PostResult> {
   const xClient = await getClient();
   const result = await withLimitsLogged(() =>
@@ -77,7 +77,7 @@ export async function postToX(text: string): Promise<PostResult> {
   return { id: result.data.data.id, rateLimit: result.rateLimit };
 }
 
-/** Deletes a post from the X account in the credentials secret. */
+/** Deletes a post from the X account in the credentials parameter. */
 export async function deleteFromX(id: string): Promise<void> {
   const xClient = await getClient();
   const result = await withLimitsLogged(() =>

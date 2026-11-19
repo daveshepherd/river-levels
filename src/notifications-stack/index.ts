@@ -1,4 +1,5 @@
 import {
+  ArnFormat,
   Aspects,
   CfnOutput,
   Duration,
@@ -16,7 +17,6 @@ import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { ITopic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -44,13 +44,22 @@ export interface NotificationsStackProps extends StackProps {
   /** The stations, for each ford's website link. Defaults to STATIONS in stations.ts. */
   stations?: StationConfig[];
   /**
+   * The SSM SecureString parameter holding the X credentials, created by hand
+   * (CloudFormation can't create SecureString parameters).
+   * @default X_CREDENTIALS_PARAMETER_NAME
+   */
+  credentialsParameterName?: string;
+  /**
    * Post a smoke test to X, and delete it, on deploys that change the smoke
    * test function, failing the deploy if that doesn't work. Only for a stage
-   * whose credentials secret is set, and that posts to a test account.
+   * whose credentials parameter is set, and that posts to a test account.
    */
   smokeTest?: boolean;
   setDestroyPolicyToAllResources?: boolean;
 }
+
+/** Where the X credentials are kept: an SSM SecureString parameter, one per region. */
+export const X_CREDENTIALS_PARAMETER_NAME = '/river-levels/x-credentials';
 
 /**
  * Announces ford state changes. The X notifier is the first channel; others
@@ -58,7 +67,8 @@ export interface NotificationsStackProps extends StackProps {
  */
 export class NotificationsStack extends Stack {
   public readonly stateTable: TableV2;
-  public readonly credentialsSecret: Secret;
+  /** The SSM parameter the X credentials are read from. */
+  public readonly credentialsParameterName: string;
 
   constructor(scope: Construct, id: string, props: NotificationsStackProps) {
     super(scope, id, props);
@@ -73,21 +83,17 @@ export class NotificationsStack extends Stack {
       removalPolicy: retain,
     });
 
-    // Filled in by hand with the X app and account credentials; CDK only
-    // creates it, with empty values, and never overwrites what's set.
-    this.credentialsSecret = new Secret(this, 'x-credentials', {
-      description:
-        'X (Twitter) OAuth 1.0a credentials for the river levels notifier: appKey, appSecret, accessToken, accessSecret',
-      generateSecretString: {
-        generateStringKey: 'unused',
-        secretStringTemplate: JSON.stringify({
-          appKey: '',
-          appSecret: '',
-          accessToken: '',
-          accessSecret: '',
-        }),
-      },
-      removalPolicy: retain,
+    // An SSM SecureString parameter, set by hand with the X app and account
+    // credentials. Standard parameters are free, unlike secrets, and X's
+    // credentials can't be rotated automatically, so there's nothing for
+    // Secrets Manager's rotation to do.
+    this.credentialsParameterName =
+      props.credentialsParameterName ?? X_CREDENTIALS_PARAMETER_NAME;
+    const credentialsParameterArn = this.formatArn({
+      arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      resource: 'parameter',
+      resourceName: this.credentialsParameterName.replace(/^\//, ''),
+      service: 'ssm',
     });
 
     const deadLetterQueue = new Queue(this, 'x-notifier-dead-letter-queue', {
@@ -110,14 +116,14 @@ export class NotificationsStack extends Stack {
         MODE: props.mode,
         STATE_TABLE: this.stateTable.tableName,
         STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
-        X_CREDENTIALS_SECRET_ARN: this.credentialsSecret.secretArn,
+        X_CREDENTIALS_PARAMETER: this.credentialsParameterName,
       },
       logGroup: new LogGroup(this, 'x-notifier-log-group', {
         retention: RetentionDays.ONE_YEAR,
       }),
       memorySize: 256,
       role: new XNotifierRole(this, 'x-notifier-role', {
-        credentialsSecretArn: this.credentialsSecret.secretArn,
+        credentialsParameterArn,
         stateTableArn: this.stateTable.tableArn,
       }),
       timeout: Duration.seconds(30),
@@ -134,13 +140,13 @@ export class NotificationsStack extends Stack {
       const smokeTest = new XSmokeTestFunction(this, 'x-smoke-test-lambda', {
         architecture: Architecture.ARM_64,
         environment: {
-          X_CREDENTIALS_SECRET_ARN: this.credentialsSecret.secretArn,
+          X_CREDENTIALS_PARAMETER: this.credentialsParameterName,
         },
         logGroup: new LogGroup(this, 'x-smoke-test-log-group', {
           retention: RetentionDays.ONE_YEAR,
         }),
         role: new XSmokeTestRole(this, 'x-smoke-test-role', {
-          credentialsSecretArn: this.credentialsSecret.secretArn,
+          credentialsParameterArn,
         }),
         timeout: Duration.seconds(30),
         tracing: Tracing.ACTIVE,
@@ -178,9 +184,9 @@ export class NotificationsStack extends Stack {
     if (destroy) {
       Aspects.of(this).add(new ApplyDestroyPolicyAspect());
     }
-    new CfnOutput(this, 'XCredentialsSecretArn', {
-      description: 'Set this secret to the X credentials before switching the notifier to post',
-      value: this.credentialsSecret.secretArn,
+    new CfnOutput(this, 'XCredentialsParameterName', {
+      description: 'Create this SSM SecureString parameter with the X credentials before switching the notifier to post',
+      value: this.credentialsParameterName,
     });
   }
 }

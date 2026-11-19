@@ -8,7 +8,8 @@ import { Construct } from 'constructs';
 
 export interface XNotifierRoleProps {
   stateTableArn: string;
-  credentialsSecretArn: string;
+  /** The SSM parameter holding the X credentials. */
+  credentialsParameterArn: string;
 }
 
 export class XNotifierRole extends Role {
@@ -34,8 +35,8 @@ export class XNotifierRole extends Role {
             resources: [props.stateTableArn],
           }),
           new PolicyStatement({
-            actions: ['secretsmanager:GetSecretValue'],
-            resources: [props.credentialsSecretArn],
+            actions: ['ssm:GetParameter'],
+            resources: [props.credentialsParameterArn],
           }),
         ],
       }),

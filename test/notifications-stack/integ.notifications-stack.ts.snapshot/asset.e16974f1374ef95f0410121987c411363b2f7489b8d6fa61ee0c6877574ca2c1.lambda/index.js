@@ -18831,19 +18831,22 @@ async function replacePostedState(station, expected, next) {
 }
 
 // src/notifications-stack/x-client.ts
-var import_client_secrets_manager = require("@aws-sdk/client-secrets-manager");
+var import_client_ssm = require("@aws-sdk/client-ssm");
 var import_twitter_api_v2 = __toESM(require_cjs());
-var secretsClient = tracer.captureAWSv3Client(new import_client_secrets_manager.SecretsManagerClient({}));
+var ssmClient = tracer.captureAWSv3Client(new import_client_ssm.SSMClient({}));
 var client;
 async function getCredentials() {
-  const result = await secretsClient.send(
-    new import_client_secrets_manager.GetSecretValueCommand({ SecretId: process.env.X_CREDENTIALS_SECRET_ARN })
+  const result = await ssmClient.send(
+    new import_client_ssm.GetParameterCommand({
+      Name: process.env.X_CREDENTIALS_PARAMETER,
+      WithDecryption: true
+    })
   );
-  const credentials = JSON.parse(result.SecretString ?? "{}");
+  const credentials = JSON.parse(result.Parameter?.Value ?? "{}");
   const missing = ["appKey", "appSecret", "accessToken", "accessSecret"].filter((key) => !credentials[key]);
   if (missing.length) {
     throw new Error(
-      `The X credentials secret is missing ${missing.join(", ")}. Set it before turning posting on.`
+      `The X credentials parameter is missing ${missing.join(", ")}. Set it before turning posting on.`
     );
   }
   return credentials;

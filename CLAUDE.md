@@ -71,7 +71,7 @@ src/api-stack/
 src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by the regional storage stacks
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
-  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, x-credentials secret, alarm
+  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, the X credentials SSM parameter (by name; created by hand), alarm
   x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
   x-smoke-test.lambda.ts     Development only: a CDK trigger runs it when a deploy changes it (its code, the X client or their dependencies) to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post

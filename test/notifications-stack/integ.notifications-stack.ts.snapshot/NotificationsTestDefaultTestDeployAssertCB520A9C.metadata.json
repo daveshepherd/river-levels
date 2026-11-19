@@ -17,7 +17,7 @@
       "data": "CheckBootstrapVersion"
     }
   ],
-  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommande830027512e95106c81e0d93828a2fb0/Default": [
+  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand71e0d94e2865cb169f8f659c1ab15ff3/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -79,7 +79,7 @@
       "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
     }
   ],
-  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommanda071b3394eae6a506cf6510f05816020/Default": [
+  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand8c0b8c4638f922e5553e1d0975fce678/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -105,10 +105,10 @@
       "data": "AssertionResultsAwsApiCallawssdkclientdynamodbGetItemCommand68006de3009ae41c1ff29b235f526ec01"
     }
   ],
-  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommande830027512e95106c81e0d93828a2fb0/Default/Default": [
+  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand71e0d94e2865cb169f8f659c1ab15ff3/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientsnsPublishCommande830027512e95106c81e0d93828a2fb0"
+      "data": "AwsApiCallawssdkclientsnsPublishCommand71e0d94e2865cb169f8f659c1ab15ff3"
     }
   ],
   "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbGetItemCommand68006de3009ae41c1ff29b235f526ec0/Default/Default": [
@@ -129,10 +129,10 @@
       "data": "AwsApiCallawssdkclientdynamodbGetItemCommand68006de3009ae41c1ff29b235f526ec0WaitFor52DAACD2"
     }
   ],
-  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommanda071b3394eae6a506cf6510f05816020/Default/Default": [
+  "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-snsPublishCommand8c0b8c4638f922e5553e1d0975fce678/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientsnsPublishCommanda071b3394eae6a506cf6510f05816020"
+      "data": "AwsApiCallawssdkclientsnsPublishCommand8c0b8c4638f922e5553e1d0975fce678"
     }
   ],
   "/NotificationsTest/DefaultTest/DeployAssert/AwsApiCall@aws-sdk--client-dynamodbGetItemCommand68006de3009ae41c1ff29b235f526ec01/Default/Default": [
