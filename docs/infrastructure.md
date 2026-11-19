@@ -11,6 +11,7 @@ This page describes what the CDK app deploys and how data moves through it. The 
   - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. See [ADR 0001](adr/0001-multi-region-active-active.md) for the plan. History has been copied into its `readings` table.
   - `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in the other two regions, against `RiverLevelsData`'s `readings` table, which they get through cross-region references. **Not live yet:** their crawler schedules and stream mappings are switched off until the cutover. See [Multi-region storage](#multi-region-storage).
   - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, from its own replica of `readings`, for CloudFront to fail over to. **Not live yet:** they only receive what their region's storage stack publishes, which is nothing until the cutover. See [Multi-region station files](#multi-region-station-files).
+  - `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1` ([`NotificationsStack`](../src/notifications-stack/index.ts) with `stateTableName`): the X notifier in the other two regions, against `RiverLevelsData`'s `notifier-state` table, subscribed to their region's `station-status` topic. **Not live yet:** in `log` mode, and their status topics carry nothing until the cutover. See [Multi-region notifications](#multi-region-notifications).
 - **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland). Moving to active-active in three regions ([ADR 0001](adr/0001-multi-region-active-active.md)).
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
@@ -57,6 +58,8 @@ flowchart LR
   subgraph data["AWS · RiverLevelsData stack · eu-west-2 (not used yet)"]
     mrsc[("DynamoDB MRSC global tables<br/>readings · notifier-state<br/>eu-west-2 · eu-west-1 · eu-central-1")]
   end
+
+  regional["RiverLevels-, RiverLevelsApi- and<br/>RiverLevelsNotifications- stacks<br/>eu-west-1 · eu-central-1<br/>(not live yet)"]
 
   xaccount["X account"]
 
@@ -107,6 +110,7 @@ flowchart LR
   crawler & publisher & dlq & crawlerdlq -. "metrics" .-> alarms
   alarms -- "ALARM and OK" --> alerts
   alerts --> email
+  regional -. "each region's replica" .-> mrsc
 ```
 
 Each stack also creates a CloudWatch log group per Lambda (one-year retention) and one IAM role per Lambda. X-Ray tracing is on for all three Lambdas and the notifications topic.
@@ -266,6 +270,12 @@ The `RiverLevelsNotifications` stack's [`x-notifier`](../src/notifications-stack
 The decision only looks at the status, worked out from the latest readings, so copying historical readings into the table can't trigger posts.
 
 Before posting, the notifier claims the change with a conditional write to the state table, so two invocations can't both post it. If posting fails, it restores the previous record and reports the station's messages for retry. After 5 attempts they go to `x-notifier-dead-letter-queue`, which raises the `x-notifier-dead-letters` alarm.
+
+#### Multi-region notifications
+
+A `NotificationsStack` with `stateTableName` imports that table, `notifier-state` from `RiverLevelsData` for the regional stacks, instead of creating `x-notifier-state`. It uses the replica in its own region. Every region's API publisher publishes a status for every batch, so each region's notifier sees the same changes. The claim above is a conditional write to a strongly consistent table, so only one region wins it and posts. A `ReplicatedWriteConflictException`, when two regions write the record at the same moment, fails the station like any other error. The retry reads the record again and sees the winner's claim.
+
+The regional stacks are in `log` mode, whatever the stage, until the cutover. Their status topics carry nothing before then anyway. Before switching one to `post`, create the `/river-levels/x-credentials` parameter in its region (below): SSM doesn't replicate parameters. The `notifier-state` table starts empty, so the first status in it is recorded without posting.
 
 **Modes** (`xNotifierMode()` in [`src/stage.ts`](../src/stage.ts)):
 - `log`: runs everything and records state, but logs the post instead of sending it.
@@ -437,6 +447,8 @@ Logical names as they appear in the CloudFormation template.
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
+`RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1` stacks: the same, except they have no `x-notifier-state` table (they use the region's replica of `notifier-state`) and no smoke test, `MODE` is `log`, and CDK adds a cross-region export reader for the table name.
+
 `RiverLevelsData` stack (not used yet; see [ADR 0001](adr/0001-multi-region-active-active.md)):
 
 | Resource | Type | Key settings |
@@ -466,7 +478,7 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `api-publisher-role` | `dynamodb:Query` | the table |
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
 | `api-publisher-role` | `sns:Publish` | `station-status` |
-| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state` |
+| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state`, or the regional replica of `notifier-state` |
 | `x-notifier-role` | `ssm:GetParameter` | `/river-levels/x-credentials` (decrypted with the AWS-managed `aws/ssm` key, which its key policy allows through SSM) |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
 | `x-smoke-test-role` | `ssm:GetParameter` | `/river-levels/x-credentials` |

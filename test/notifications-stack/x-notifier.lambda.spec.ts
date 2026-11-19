@@ -3,6 +3,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  ReplicatedWriteConflictException,
 } from '@aws-sdk/client-dynamodb';
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import type { Context, SQSEvent } from 'aws-lambda';
@@ -198,6 +199,21 @@ describe('x-notifier', () => {
     const response = await target.handler(sqsEvent(statusMessage('flooded')));
 
     expect(response).toStrictEqual({ batchItemFailures: [] });
+    expect(tweet).not.toHaveBeenCalled();
+  });
+
+  it('retries the station when another region is writing the record at the same time', async () => {
+    stored('clear', 0);
+    dynamoDbMock.on(PutItemCommand).rejects(
+      new ReplicatedWriteConflictException({ message: 'conflict', $metadata: {} }),
+    );
+
+    const response = await target.handler(sqsEvent(statusMessage('flooded')));
+
+    // The retry reads the record again, so it sees the other region's claim
+    expect(response).toStrictEqual({
+      batchItemFailures: [{ itemIdentifier: 'm1' }],
+    });
     expect(tweet).not.toHaveBeenCalled();
   });
 

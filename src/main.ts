@@ -58,7 +58,7 @@ otherRegions.forEach((region, i) => {
   // Keeps this region's copy of the station files current, for CloudFront to
   // fail over to. Each region's topic only carries the readings its crawler
   // wrote, so it subscribes to the other regions' topics too.
-  new ApiStack(app, `RiverLevelsApi-${region}`, {
+  const regionalApi = new ApiStack(app, `RiverLevelsApi-${region}`, {
     alertsTopic: regionalStorage.alertsTopic,
     allowCloudFrontInAccount: true,
     createDistribution: false,
@@ -72,6 +72,19 @@ otherRegions.forEach((region, i) => {
       .filter((other) => other !== region)
       .map(notificationsTopicArn),
     readingsTable: regionalStorage.riverLevelsTable,
+  });
+
+  // Posts ford state changes from this region too. The multi-region state
+  // table means only one region posts each change. Log mode until the
+  // cutover, and until the X credentials parameter is created in this region.
+  new NotificationsStack(app, `RiverLevelsNotifications-${region}`, {
+    alertsTopic: regionalStorage.alertsTopic,
+    // The state table's name comes from RiverLevelsData, in eu-west-2
+    crossRegionReferences: true,
+    env: { region },
+    mode: 'log',
+    stateTableName: dataStack.notifierStateTable.tableName,
+    statusTopic: regionalApi.statusTopic,
   });
 });
 

@@ -13,7 +13,7 @@ import {
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
-import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { AttributeType, ITableV2, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -55,6 +55,12 @@ export interface NotificationsStackProps extends StackProps {
    * whose credentials parameter is set, and that posts to a test account.
    */
   smokeTest?: boolean;
+  /**
+   * The name of an existing state table to use, such as the multi-region
+   * `notifier-state` table from the DataStack, instead of creating one. Its
+   * replica in this stack's region is used.
+   */
+  stateTableName?: string;
   setDestroyPolicyToAllResources?: boolean;
 }
 
@@ -66,7 +72,7 @@ export const X_CREDENTIALS_PARAMETER_NAME = '/river-levels/x-credentials';
  * can subscribe to the station-status topic the same way.
  */
 export class NotificationsStack extends Stack {
-  public readonly stateTable: TableV2;
+  public readonly stateTable: ITableV2;
   /** The SSM parameter the X credentials are read from. */
   public readonly credentialsParameterName: string;
 
@@ -76,12 +82,15 @@ export class NotificationsStack extends Stack {
     const retain = destroy ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN;
 
     // The last state posted for each station, for the cooldown and to
-    // recognise a change
-    this.stateTable = new TableV2(this, 'x-notifier-state', {
-      partitionKey: { name: 'station', type: AttributeType.STRING },
-      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
-      removalPolicy: retain,
-    });
+    // recognise a change. With the multi-region table, the conditional claim
+    // in posted-state.ts lets only one region post each change.
+    this.stateTable = props.stateTableName
+      ? TableV2.fromTableName(this, 'x-notifier-state', props.stateTableName)
+      : new TableV2(this, 'x-notifier-state', {
+        partitionKey: { name: 'station', type: AttributeType.STRING },
+        pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+        removalPolicy: retain,
+      });
 
     // An SSM SecureString parameter, set by hand with the X app and account
     // credentials. Standard parameters are free, unlike secrets, and X's
