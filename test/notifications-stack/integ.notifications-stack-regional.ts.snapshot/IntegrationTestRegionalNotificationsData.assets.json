@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "ebc5d2d89b1f6ed307ba9097ef4016849ae8ebd3ea11e552f9cf0879f85a20e2": {
+      "displayName": "IntegrationTestRegionalNotificationsData Template",
+      "source": {
+        "path": "IntegrationTestRegionalNotificationsData.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-2-3a638092": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-2",
+          "objectKey": "ebc5d2d89b1f6ed307ba9097ef4016849ae8ebd3ea11e552f9cf0879f85a20e2.json",
+          "region": "eu-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

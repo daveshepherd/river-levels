@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "testCases": {
+    "RegionalNotificationsTest/DefaultTest": {
+      "stacks": [
+        "IntegrationTestRegionalNotificationsStack"
+      ],
+      "cdkCommandOptions": {
+        "destroy": {
+          "args": {
+            "force": true
+          }
+        }
+      },
+      "assertionStack": "RegionalNotificationsTestAssertions",
+      "assertionStackName": "RegionalNotificationsTestAssertions"
+    }
+  },
+  "enableLookups": true,
+  "minimumCliVersion": "2.1145.0"
+}
