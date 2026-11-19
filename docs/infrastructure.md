@@ -50,7 +50,7 @@ flowchart LR
     xdlq["SQS<br/>x-notifier-dead-letter-queue"]
     xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
     xstate[("DynamoDB<br/>x-notifier-state")]
-    xsecret["Secrets Manager<br/>x-credentials"]
+    xsecret["SSM SecureString parameter<br/>/river-levels/x-credentials"]
     xsmoke["x-smoke-test Lambda + trigger<br/>(development only)"]
   end
 
@@ -269,13 +269,16 @@ Before posting, the notifier claims the change with a conditional write to the s
 
 **Modes** (`xNotifierMode()` in [`src/stage.ts`](../src/stage.ts)):
 - `log`: runs everything and records state, but logs the post instead of sending it.
-- `post`: posts to the X account whose credentials are in the stage's `x-credentials` secret.
+- `post`: posts to the X account whose credentials are in the stage's `/river-levels/x-credentials` parameter.
 
 Development is in `post`, using a test X account. Production is in `post`, as the kenilworthford.com account, which it took over from flood-readings (below). `local` is always `log`.
 
-**Credentials:** `x-credentials` is a Secrets Manager secret, retained if the stack is deleted. CDK creates it with empty values and never overwrites it. Set it once per account to the X app's OAuth 1.0a user credentials. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app. flood-readings' apps were deleted when it was retired.
+**Credentials:** an SSM Parameter Store **SecureString** parameter, `/river-levels/x-credentials` (`X_CREDENTIALS_PARAMETER_NAME`, output as `XCredentialsParameterName`), holding the X app's OAuth 1.0a user credentials as JSON. It's encrypted with the AWS-managed `aws/ssm` key. Each stage has its own X app: Kenilworth Ford Dev for development, and a separate production app. flood-readings' apps were deleted when it was retired.
 
-| Secret field | X developer portal (app's Keys and tokens tab) |
+- **Created by hand,** once per account and region, because CloudFormation can't create SecureString parameters. The stack only refers to it by name, so deleting the stack leaves it in place.
+- **Why not Secrets Manager:** a standard parameter is free, and a secret costs $0.40 a month, plus the same again for each region it's replicated to. Secrets Manager's main extra is automatic rotation, and X's OAuth 1.0a credentials can't be rotated by API: the consumer keys are only regenerated in the portal, and the access token doesn't expire. A credential that needs automatic refreshing, such as an OAuth 2.0 token, would belong in Secrets Manager.
+
+| JSON field | X developer portal (app's Keys and tokens tab) |
 |--------------|-----------------------------------------------|
 | `appKey` | Consumer Key (API Key) |
 | `appSecret` | Secret Key (API Key Secret) |
@@ -284,11 +287,11 @@ Development is in `post`, using a test X account. Production is in `post`, as th
 
 The bearer token, client ID and client secret aren't used: the bearer token can't post as an account, and the client ID and secret are for OAuth 2.0.
 
-Keep the values out of shell history by writing the JSON to a file, then deleting it:
+Create or update it from a file, to keep the values out of shell history, then delete the file:
 
 ```sh
-aws secretsmanager put-secret-value --region eu-west-2 --secret-id <XCredentialsSecretArn output> \
-  --secret-string file://x-credentials.json
+aws ssm put-parameter --region eu-west-2 --name /river-levels/x-credentials \
+  --type SecureString --overwrite --value file://x-credentials.json
 rm x-credentials.json
 ```
 
@@ -300,8 +303,8 @@ rm x-credentials.json
 **Checking credentials without posting:** `GET /2/users/me` returns the account the credentials belong to and, in the `x-access-level` header, their access. Run it from the repo, which has `twitter-api-v2` installed; it prints only the username and access level:
 
 ```sh
-aws secretsmanager get-secret-value --region eu-west-2 --secret-id <XCredentialsSecretArn output> \
-  --query SecretString --output text \
+aws ssm get-parameter --region eu-west-2 --name /river-levels/x-credentials --with-decryption \
+  --query Parameter.Value --output text \
 | node -e '
 const { TwitterApi } = require("twitter-api-v2");
 let s = "";
@@ -319,7 +322,7 @@ In `post` mode, a missing value fails the post, which retries and then raises th
 
 - **When it runs:** only when the smoke test function's version changes, that is when its bundled code or its configuration changes. The bundle includes `x-client.ts`, `twitter-api-v2` and Powertools, so changing the X client or upgrading those dependencies runs it. Changes to other code, such as the notifier's decision rules or wording, don't, and nor do releases that don't touch it. The trigger's first deploy runs it too.
 - The time keeps the text unique, because X rejects duplicate posts.
-- **Running it by hand,** for example after changing the `x-credentials` secret, which no deploy detects: `aws lambda invoke --region eu-west-2 --function-name <x-smoke-test-lambda name> /dev/stdout`. A `FunctionError` in the output means it failed, and the error is in the response and the logs.
+- **Running it by hand,** for example after changing the credentials parameter, which no deploy detects: `aws lambda invoke --region eu-west-2 --function-name <x-smoke-test-lambda name> /dev/stdout`. A `FunctionError` in the output means it failed, and the error is in the response and the logs.
 - Each run uses two X API writes (a post and a delete).
 - **Posting limits:** X's developer console doesn't show them, so the smoke test logs the limits X returns with the post as `rateLimit`. That covers the 15-minute window (`limit`, `remaining`, `reset`), and the app's (`day`) and account's (`userDay`) 24-hour caps when X sends them. "Posted to X" logs them too, and a failed X call logs them with its status code, so a 429 shows which limit was hit.
 - If a later resource in the same update fails, the rollback runs the previous version's smoke test again, which posts and deletes once more.
@@ -329,7 +332,7 @@ In `post` mode, a missing value fails the post, which retries and then raises th
 
 flood-readings' crawler used to post these announcements. Production took over in November 2026:
 
-1. Production's `x-credentials` secret was set for a new production app in a pay-per-use project, separate from flood-readings' app, and checked with `users/me` (above). Keep the project in credit: notifier posts include a link to the ford's website, which X charges more for than a plain post.
+1. Production's credentials were set (then in a Secrets Manager secret, since moved to the SSM parameter) for a new production app in a pay-per-use project, separate from flood-readings' app, and checked with `users/me` (above). Keep the project in credit: notifier posts include a link to the ford's website, which X charges more for than a plain post.
 2. Production ran in `log` mode first. Ford state changes can be months apart, so it switched to `post` without waiting for one. The development smoke test had shown that posting works, and the `x-notifier-dead-letters` alarm catches a failed post.
 3. Production was switched to `post` (#598), and flood-readings' crawler schedule was disabled as soon as that deploy finished.
 4. flood-readings was decommissioned on 10 November 2026, in its account (238573916854, eu-west-1). Its Serverless stack, readings table and replicas, API bucket, IAM roles and alarm were removed, and their Terraform was deleted from endor-infrastructure (#29). Its X apps were deleted. A final backup of its readings table is kept in that account.
@@ -425,13 +428,12 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `x-notifier-state` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S); attributes `state` and `postedAt` (epoch ms, 0 if only recorded). Point-in-time recovery. Retained when the stack is deleted. |
-| `x-credentials` | `AWS::SecretsManager::Secret` | X OAuth 1.0a credentials, set by hand. Created with empty values and never overwritten. Retained when the stack is deleted. |
 | `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
 | `x-notifier-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
-| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_SECRET_ARN`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_PARAMETER`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
-| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 26, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_SECRET_ARN`. |
+| `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 26, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_PARAMETER`. |
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
@@ -447,7 +449,7 @@ Logical names as they appear in the CloudFormation template.
 - `ReadingsTableName` and `NotifierStateTableName` from `RiverLevelsData`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
-- `XCredentialsSecretArn` from `RiverLevelsNotifications`
+- `XCredentialsParameterName` from `RiverLevelsNotifications`
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
 
@@ -465,9 +467,9 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
 | `api-publisher-role` | `sns:Publish` | `station-status` |
 | `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state` |
-| `x-notifier-role` | `secretsmanager:GetSecretValue` | `x-credentials` |
+| `x-notifier-role` | `ssm:GetParameter` | `/river-levels/x-credentials` (decrypted with the AWS-managed `aws/ssm` key, which its key policy allows through SSM) |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
-| `x-smoke-test-role` | `secretsmanager:GetSecretValue` | `x-credentials` |
+| `x-smoke-test-role` | `ssm:GetParameter` | `/river-levels/x-credentials` |
 | `api-publisher-role` | `sqs:ReceiveMessage`, `DeleteMessage`, `ChangeMessageVisibility`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | `api-publisher-queue` |
 
 ## Deployment
@@ -499,7 +501,7 @@ flowchart LR
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
 - **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
-- **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing or revoked `x-credentials` value, or the X API's limits.
+- **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing parameter or a revoked credential in `/river-levels/x-credentials`, or the X API's limits.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
 ### Alarms
@@ -514,4 +516,4 @@ The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/a
 | `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
 | `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |
 | `api-publisher-dead-letters` | `api-publisher-dead-letter-queue` has any messages | Publisher logs (service `api-publisher`); DynamoDB or S3 errors |
-| `x-notifier-dead-letters` | `x-notifier-dead-letter-queue` has any messages | Notifier logs (service `x-notifier`); usually a missing `x-credentials` value or an X API error |
+| `x-notifier-dead-letters` | `x-notifier-dead-letter-queue` has any messages | Notifier logs (service `x-notifier`); usually a missing `/river-levels/x-credentials` parameter or value, or an X API error |

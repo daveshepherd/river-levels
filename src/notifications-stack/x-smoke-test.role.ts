@@ -7,7 +7,8 @@ import {
 import { Construct } from 'constructs';
 
 export interface XSmokeTestRoleProps {
-  credentialsSecretArn: string;
+  /** The SSM parameter holding the X credentials. */
+  credentialsParameterArn: string;
 }
 
 export class XSmokeTestRole extends Role {
@@ -28,8 +29,8 @@ export class XSmokeTestRole extends Role {
         path: '/service-policy/',
         statements: [
           new PolicyStatement({
-            actions: ['secretsmanager:GetSecretValue'],
-            resources: [props.credentialsSecretArn],
+            actions: ['ssm:GetParameter'],
+            resources: [props.credentialsParameterArn],
           }),
         ],
       }),

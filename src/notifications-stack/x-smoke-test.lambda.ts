@@ -4,7 +4,7 @@ import { deleteFromX, postToX } from './x-client';
 
 /**
  * Posts to X and deletes the post straight away, to check the credentials
- * secret, the X client and the account all work. Run by a CDK trigger during
+ * parameter, the X client and the account all work. Run by a CDK trigger during
  * a development deploy that changes this function; throwing fails the
  * deploy, so production isn't deployed. The text includes the time, because
  * X rejects duplicate posts. It logs the posting limits X reports, and how much of

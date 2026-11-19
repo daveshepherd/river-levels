@@ -60,38 +60,6 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
-  "xcredentials56E4AA86": {
-   "Type": "AWS::SecretsManager::Secret",
-   "Properties": {
-    "Description": "X (Twitter) OAuth 1.0a credentials for the river levels notifier: appKey, appSecret, accessToken, accessSecret",
-    "GenerateSecretString": {
-     "GenerateStringKey": "unused",
-     "SecretStringTemplate": "{\"appKey\":\"\",\"appSecret\":\"\",\"accessToken\":\"\",\"accessSecret\":\"\"}"
-    },
-    "Tags": [
-     {
-      "Key": "endor:ManagedBy",
-      "Value": "cdk"
-     },
-     {
-      "Key": "endor:Stage",
-      "Value": "development"
-     }
-    ]
-   },
-   "UpdateReplacePolicy": "Delete",
-   "DeletionPolicy": "Delete",
-   "Metadata": {
-    "cdk_nag": {
-     "rules_to_suppress": [
-      {
-       "reason": "X credentials are issued by X and set by hand; Secrets Manager cannot rotate them",
-       "id": "AwsSolutions-SMG4"
-      }
-     ]
-    }
-   }
-  },
   "xnotifierdeadletterqueue5047C832": {
    "Type": "AWS::SQS::Queue",
    "Properties": {
@@ -357,10 +325,27 @@
        }
       },
       {
-       "Action": "secretsmanager:GetSecretValue",
+       "Action": "ssm:GetParameter",
        "Effect": "Allow",
        "Resource": {
-        "Ref": "xcredentials56E4AA86"
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":ssm:",
+          {
+           "Ref": "AWS::Region"
+          },
+          ":",
+          {
+           "Ref": "AWS::AccountId"
+          },
+          ":parameter/river-levels/x-credentials"
+         ]
+        ]
        }
       }
      ],
@@ -422,7 +407,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "af3f9cf0d4dcc40acd59f6945ff024e7a6ad08159e996506c28f19e77c441871.zip"
+     "S3Key": "e16974f1374ef95f0410121987c411363b2f7489b8d6fa61ee0c6877574ca2c1.zip"
     },
     "Description": "src/notifications-stack/x-notifier.lambda.ts",
     "Environment": {
@@ -432,9 +417,7 @@
        "Ref": "xnotifierstateA1B1B132"
       },
       "STATIONS": "[{\"id\":\"kenilworth\",\"measureId\":\"2627-level-stage-i-15_min-mASD\",\"ford\":{\"floodedAboveMetres\":1.23,\"impassableAboveMetres\":1.4,\"website\":\"https://kenilworthford.com\"}}]",
-      "X_CREDENTIALS_SECRET_ARN": {
-       "Ref": "xcredentials56E4AA86"
-      },
+      "X_CREDENTIALS_PARAMETER": "/river-levels/x-credentials",
       "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
      }
     },
@@ -507,11 +490,9 @@
   }
  },
  "Outputs": {
-  "XCredentialsSecretArn": {
-   "Description": "Set this secret to the X credentials before switching the notifier to post",
-   "Value": {
-    "Ref": "xcredentials56E4AA86"
-   }
+  "XCredentialsParameterName": {
+   "Description": "Create this SSM SecureString parameter with the X credentials before switching the notifier to post",
+   "Value": "/river-levels/x-credentials"
   },
   "PublishOutputRefxnotifierstateA1B1B132C3649023": {
    "Value": {

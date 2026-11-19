@@ -106,14 +106,3 @@ NagSuppressions.addResourceSuppressionsByPath(
     },
   ],
 );
-NagSuppressions.addResourceSuppressionsByPath(
-  stackUnderTest,
-  '/IntegrationTestNotificationsStack/x-credentials/Resource',
-  [
-    {
-      id: 'AwsSolutions-SMG4',
-      reason:
-        'X credentials are issued by X and set by hand; Secrets Manager cannot rotate them',
-    },
-  ],
-);

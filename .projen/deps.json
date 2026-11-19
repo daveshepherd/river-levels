@@ -134,11 +134,11 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-secrets-manager",
+      "name": "@aws-sdk/client-sns",
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-sns",
+      "name": "@aws-sdk/client-ssm",
       "type": "runtime"
     },
     {
