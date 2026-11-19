@@ -1,0 +1,36 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "e16974f1374ef95f0410121987c411363b2f7489b8d6fa61ee0c6877574ca2c1": {
+      "displayName": "x-notifier-lambda/Code",
+      "source": {
+        "path": "asset.e16974f1374ef95f0410121987c411363b2f7489b8d6fa61ee0c6877574ca2c1.lambda",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-eu-west-1-82e89256": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "e16974f1374ef95f0410121987c411363b2f7489b8d6fa61ee0c6877574ca2c1.zip",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        }
+      }
+    },
+    "b123280447f4a1a969ff6fa6b27eba8d87a840990b9e28418a9473a10ac8f6c7": {
+      "displayName": "IntegrationTestRegionalNotificationsStack Template",
+      "source": {
+        "path": "IntegrationTestRegionalNotificationsStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-1-0664ee5d": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "b123280447f4a1a969ff6fa6b27eba8d87a840990b9e28418a9473a10ac8f6c7.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

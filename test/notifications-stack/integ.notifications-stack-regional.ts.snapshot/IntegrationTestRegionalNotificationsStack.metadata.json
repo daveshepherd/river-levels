@@ -1,0 +1,369 @@
+{
+  "/IntegrationTestRegionalNotificationsStack": [
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "IntegrationTestRegionalNotificationsStack.template.json"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deadLetterQueue": {
+          "queue": "*",
+          "maxReceiveCount": "*"
+        },
+        "enforceSSL": true,
+        "visibilityTimeout": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-log-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/XCredentialsParameterName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "XCredentialsParameterName"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierdeadletterqueue5047C832"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierqueue4AFB83AF"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-log-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierloggroup0C99F60C"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierroleAEDE4425"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role/x-notifier-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierlambdaFE8EA2B4"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-lambda/SqsEventSource:IntegrationTestRegionalNotificationsStackxnotifierqueue985C1208": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "target": "*",
+        "batchSize": "*",
+        "maxBatchingWindow": "*",
+        "maxConcurrency": "*",
+        "reportBatchItemFailures": true,
+        "enabled": "*",
+        "eventSourceArn": "*",
+        "filters": "*",
+        "filterEncryption": "*",
+        "metricsConfig": "*",
+        "provisionedPollerConfig": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierdeadletterqueuePolicy217DFEE2"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierqueuePolicy361D54A1"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierqueueIntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD343782427"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role/x-notifier-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierrolexnotifierpolicy95ADB25C"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierroleDefaultPolicyBFA3C2BC"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-lambda/SqsEventSource:IntegrationTestRegionalNotificationsStackxnotifierqueue985C1208/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierlambdaSqsEventSourceIntegrationTestRegionalNotificationsStackxnotifierqueue985C12083CAC43F5"
+    }
+  ]
+}

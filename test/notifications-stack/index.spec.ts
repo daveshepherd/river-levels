@@ -52,6 +52,31 @@ describe('NotificationsStack', () => {
     });
   });
 
+  test('that an existing state table can be used instead of creating one', () => {
+    const { stack, template } = synth({ stateTableName: 'notifier-state' });
+
+    template.resourceCountIs('AWS::DynamoDB::GlobalTable', 0);
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: Match.objectLike({ STATE_TABLE: 'notifier-state' }),
+      },
+    });
+    template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          {
+            Action: ['dynamodb:GetItem', 'dynamodb:PutItem'],
+            Effect: 'Allow',
+            Resource: stack.resolve(stack.stateTable.tableArn),
+          },
+        ]),
+      },
+    });
+    expect(JSON.stringify(stack.resolve(stack.stateTable.tableArn))).toContain(
+      ':table/notifier-state',
+    );
+  });
+
   test('that the X credentials come from an SSM parameter, not a secret', () => {
     const { template } = synth();
 
