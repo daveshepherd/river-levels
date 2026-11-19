@@ -233,6 +233,7 @@ export class StorageStack extends Stack {
       alertEmail: props.alertEmail,
       crawler,
       crawlerDeadLetterQueue,
+      live,
       snsPublisher,
       snsPublisherFailureQueue,
     });

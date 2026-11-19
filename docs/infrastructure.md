@@ -3,16 +3,15 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** nine, all deployed by `cdk deploy --all`:
-  - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts)): the crawler, the readings table and the new-reading notifications
-  - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)): publishes each station's status and chart as JSON files in S3. It imports the readings table, the notifications topic and the alerts topic from `RiverLevels`, so those can't be renamed or replaced while it uses them.
+- **Stacks:** twelve, all deployed by `cdk deploy --all`. The app runs active-active in `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt) ([ADR 0001](adr/0001-multi-region-active-active.md)):
+  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)), in eu-west-2: the strongly consistent (MRSC) global tables `readings` and `notifier-state`, with replicas in all three regions. The other stacks get their names through exports, or cross-region references in the other regions.
+  - `RiverLevels-eu-west-2`, `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in each region, against its replica of `readings`. See [Multi-region storage](#multi-region-storage).
+  - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)), in eu-west-2: publishes each station's status and chart as JSON files in S3, and serves them through CloudFront, failing over to eu-west-1's copy. It imports the notifications and alerts topics from `RiverLevels-eu-west-2`, so those can't be renamed or replaced while it uses them.
+  - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, for CloudFront to fail over to. See [Multi-region station files](#multi-region-station-files).
+  - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts) with `stateTableName`), in eu-west-2, and `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1`: post ford state changes to X, against `notifier-state`, so only one region posts each change. See [Multi-region notifications](#multi-region-notifications).
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
-  - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)): posts ford state changes to X. It imports the `station-status` topic from `RiverLevelsApi` and the alerts topic from `RiverLevels`.
-  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)): strongly consistent (MRSC) global tables in `eu-west-2`, `eu-west-1` and `eu-central-1`, for running active-active in three regions. See [ADR 0001](adr/0001-multi-region-active-active.md) for the plan. History has been copied into its `readings` table.
-  - `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in the other two regions, against `RiverLevelsData`'s `readings` table, which they get through cross-region references. **Not live yet:** their crawler schedules and stream mappings are switched off until the cutover. See [Multi-region storage](#multi-region-storage).
-  - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, from its own replica of `readings`, for CloudFront to fail over to. **Not live yet:** they only receive what their region's storage stack publishes, which is nothing until the cutover. See [Multi-region station files](#multi-region-station-files).
-  - `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1` ([`NotificationsStack`](../src/notifications-stack/index.ts) with `stateTableName`): the X notifier in the other two regions, against `RiverLevelsData`'s `notifier-state` table, subscribed to their region's `station-status` topic. **Not live yet:** in `log` mode, and their status topics carry nothing until the cutover. See [Multi-region notifications](#multi-region-notifications).
-- **Primary region:** `eu-west-2` (London), with a DynamoDB replica in `eu-west-1` (Ireland). Moving to active-active in three regions ([ADR 0001](adr/0001-multi-region-active-active.md)).
+  - `RiverLevels` ([`StorageStack`](../src/storage-stack/index.ts), `live: false`): the original eu-west-2 storage stack and its table (with a replica in eu-west-1), switched off since the cutover. It still exports the old table and topics (`exportValue` in `main.ts`) until the stacks that imported them have deployed without them. **To be deleted** in the next step; its table is retained.
+- **Regions:** `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt), all active. London is CloudFront's primary origin, with Ireland as its fallback.
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
 
 ## Architecture
@@ -21,12 +20,11 @@ This page describes what the CDK app deploys and how data moves through it. The 
 flowchart LR
   ea["Environment Agency<br/>flood-monitoring API<br/>(one measure per station)"]
 
-  subgraph aws["AWS · RiverLevels stack · eu-west-2"]
+  subgraph aws["AWS · RiverLevels-eu-west-2 stack · eu-west-2"]
     direction LR
     rule["EventBridge rule<br/>every 10 min"]
     crawler["crawler Lambda<br/>arm64 · 256 MB · 60 s"]
-    table[("DynamoDB global table<br/>station + timestamp")]
-    stream{{"DynamoDB stream<br/>NEW_AND_OLD_IMAGES"}}
+    stream{{"DynamoDB stream of the eu-west-2 replica<br/>filter: origin = eu-west-2"}}
     publisher["sns-publisher Lambda<br/>arm64 · 128 MB · 30 s"]
     topic["SNS topic<br/>river-levels-notifications"]
     dlq["SQS<br/>sns-publisher-failure-queue"]
@@ -50,16 +48,18 @@ flowchart LR
     xqueue["SQS<br/>x-notifier-queue"]
     xdlq["SQS<br/>x-notifier-dead-letter-queue"]
     xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
-    xstate[("DynamoDB<br/>x-notifier-state")]
     xsecret["SSM SecureString parameter<br/>/river-levels/x-credentials"]
     xsmoke["x-smoke-test Lambda + trigger<br/>(development only)"]
   end
 
-  subgraph data["AWS · RiverLevelsData stack · eu-west-2 (not used yet)"]
+  subgraph data["AWS · RiverLevelsData stack · eu-west-2"]
     mrsc[("DynamoDB MRSC global tables<br/>readings · notifier-state<br/>eu-west-2 · eu-west-1 · eu-central-1")]
   end
 
-  regional["RiverLevels-, RiverLevelsApi- and<br/>RiverLevelsNotifications- stacks<br/>eu-west-1 · eu-central-1<br/>(not live yet)"]
+  regional["RiverLevels-, RiverLevelsApi- and<br/>RiverLevelsNotifications- stacks<br/>eu-west-1 · eu-central-1<br/>(the same pipeline in each region)"]
+  regionaltopics["SNS topics river-levels-notifications<br/>eu-west-1 · eu-central-1"]
+  regionalbucket[("S3 api-bucket<br/>RiverLevelsApi-eu-west-1")]
+  legacy["RiverLevels stack · eu-west-2<br/>original table + eu-west-1 replica<br/>(switched off, to be deleted)"]
 
   xaccount["X account"]
 
@@ -70,7 +70,6 @@ flowchart LR
 
   parentzone["kenilworthford.com zone<br/>(endor-infrastructure)"]
 
-  replica[("DynamoDB replica<br/>eu-west-1")]
   subs["Subscribers<br/>(outside this repo)"]
   email["Alert email<br/>(ALERT_EMAIL)"]
   website["kenilworthford.com<br/>website"]
@@ -78,9 +77,8 @@ flowchart LR
   rule -- "invoke (3 retries)" --> crawler
   rule -. "invoke failed after retries" .-> crawlerdlq
   crawler -- "HTTPS GET readings" --> ea
-  crawler -- "Query latest / UpdateItem" --> table
-  table -. "replication" .-> replica
-  table --> stream
+  crawler -- "Query latest / conditional PutItem" --> mrsc
+  mrsc --> stream
   stream -- "batches of up to 100" --> publisher
   publisher -- "PublishBatch, 10 per call" --> topic
   stream -. "after 5 failed retries" .-> dlq
@@ -88,19 +86,21 @@ flowchart LR
   topic -- "raw message delivery" --> apiqueue
   apiqueue -- "batches, 60 s window" --> apipublisher
   apiqueue -. "after 5 receives" .-> apidlq
-  apipublisher -- "Query latest 12 / last year" --> table
+  regionaltopics -- "raw message delivery, 30 s delay" --> apiqueue
+  apipublisher -- "Query latest 12 / last year" --> mrsc
   apipublisher -- "PutObject" --> bucket
   apipublisher -- "each station's status, every batch" --> statustopic
   statustopic -- "raw message delivery" --> xqueue
   xqueue -- "batches of 10" --> xnotifier
   xqueue -. "after 5 receives" .-> xdlq
-  xnotifier -- "last posted state" --> xstate
+  xnotifier -- "claim the change (notifier-state)" --> mrsc
   xnotifier -- "credentials" --> xsecret
   xnotifier -- "post on a state change (post mode)" --> xaccount
   xsmoke -- "credentials" --> xsecret
   xsmoke -. "post and delete when the smoke test changes" .-> xaccount
   xdlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
+  cdn -. "on 403 or 5xx" .-> regionalbucket
   website -- "GET /status, /chart" --> cdn
   parentzone -. "NS delegation (to do)" .-> zone
   cert -. "validated in" .-> zone
@@ -111,6 +111,7 @@ flowchart LR
   alarms -- "ALARM and OK" --> alerts
   alerts --> email
   regional -. "each region's replica" .-> mrsc
+  regional --> regionaltopics
 ```
 
 Each stack also creates a CloudWatch log group per Lambda (one-year retention) and one IAM role per Lambda. X-Ray tracing is on for all three Lambdas and the notifications topic.
@@ -169,14 +170,24 @@ The thresholds are named constants at the top of `crawler.lambda.ts`: `DEFAULT_R
 
 #### Multi-region storage
 
-A `StorageStack` given `readingsTableName` (the regional stacks today, every region after the cutover) works differently:
+A `StorageStack` given `readingsTableName` (every region's, since the cutover) works differently from the original `RiverLevels` stack:
 
 - **It doesn't create a table.** It uses the `RiverLevelsData` `readings` replica in its own region. CDK only knows a replica's stream ARN as a wildcard, so `readings-stream-lookup` (an `AwsCustomResource`) looks up the real one with `DescribeTable`.
 - **The crawler only creates new readings.** With `READINGS_ORIGIN` set to its region, it writes each reading with `PutItem` and `attribute_not_exists(timestamp)`, adding `origin` with its region. On an MRSC table that condition sees every region's writes, so when crawlers in several regions fetch the same reading, exactly one creates it. A write that hits `ReplicatedWriteConflictException`, because another region is writing the same reading, is retried up to 3 times, after which the retry normally fails the condition. Existing readings are never overwritten, so a value the Environment Agency revises later isn't picked up.
 - **The SNS publisher only publishes its own region's readings.** Every replica's stream carries every write, so its stream mapping filters on `NewImage.origin` equal to its region. Readings copied from the old table have `origin: migration`, which no region matches.
-- **Staggered schedules:** `scheduleOffsetMinutes` runs the crawler at a fixed offset past each 10 minutes (`cron(3/10 * * * ? *)` in `eu-west-1` and `cron(6/10 * * * ? *)` in `eu-central-1`).
-- **`live: false`** deploys the stack with the crawler rule disabled and the stream mapping switched off.
-- **`notificationsTopicName`** gives the new-reading topic a fixed name (`river-levels-notifications` in the regional stacks), so other regions' API stacks can subscribe by ARN without cross-region references.
+- **Staggered schedules:** `scheduleOffsetMinutes` runs the crawler at a fixed offset past each 10 minutes (`cron(0/10 * * * ? *)` in `eu-west-2`, `cron(3/10 * * * ? *)` in `eu-west-1` and `cron(6/10 * * * ? *)` in `eu-central-1`). Each crawler fetches what's new since the latest reading in the table, whichever region stored it, so a region that's down is covered by the others.
+- **`live: false`** deploys the stack with the crawler rule disabled, the stream mapping switched off and no `crawler-not-running` alarm. Only the original `RiverLevels` stack uses it now.
+- **`notificationsTopicName`** gives the new-reading topic a fixed name (`river-levels-notifications` in every region), so other regions' API stacks can subscribe by ARN without cross-region references.
+
+#### The multi-region cutover
+
+The release that moved every region onto `readings` and `notifier-state` (switching `RiverLevels` off, and `RiverLevels-eu-west-2` and the other regions on) needs these first, in each account:
+
+1. **Copy the readings stored since the last copy** into `readings`, with `copy-readings.mjs --since`. Crawlers fetch everything since the latest reading in the table only when it's less than `MAX_LOOKBACK_DAYS` (7) old; otherwise they backfill 24 hours, which would leave a gap. After the copy, the crawlers fill in the readings between it and the deploy themselves, and the conditional writes skip any the copy already has.
+2. **Copy the `x-notifier-state` record** to `notifier-state`, so the cooldown and the last posted state carry over. Without it, the first status is recorded without posting.
+3. **Create `/river-levels/x-credentials`** in eu-west-1 and eu-central-1.
+
+After the deploy, **confirm the alert email subscription** for `RiverLevels-eu-west-2`'s alerts topic, which is new. Readings the crawlers fill in are new `INSERT`s in `readings`, so they're published again on the new topics; the API publishers are the only subscribers, and rebuilding the station files is harmless.
 
 ### 2. Publish: on every stream batch
 
@@ -240,11 +251,11 @@ The `api/distribution` CloudFront distribution serves the bucket, which stays pr
 An `ApiStack` in a region that doesn't serve the API (the regional stacks) differs from `RiverLevelsApi`:
 
 - **No distribution** (`createDistribution: false`), and so no `ApiDomainName` output.
-- **It subscribes to every region's new readings.** Each region's `river-levels-notifications` topic only carries the readings its own crawler wrote, so `api-publisher-queue` also subscribes to the other regions' topics by ARN (`otherNotificationsTopicArns`), with the subscription's region set. Today the regional stacks subscribe to each other's topics. `RiverLevels` in eu-west-2 joins at the cutover.
+- **It subscribes to every region's new readings.** Each region's `river-levels-notifications` topic only carries the readings its own crawler wrote, so `api-publisher-queue` also subscribes to the other regions' topics by ARN (`otherNotificationsTopicArns`), with the subscription's region set. `RiverLevelsApi` in eu-west-2 does the same, with the same delay.
 - **Delivery is delayed 30 seconds** (`deliveryDelay`), so a reading written in another region has reached this region's replica before the publisher queries it.
 - **CloudFront can read the bucket** (`allowCloudFrontInAccount`). The serving distribution is in another stack, and naming it in this bucket's policy would make the two stacks depend on each other, so the policy allows any CloudFront distribution in the account (`AWS:SourceAccount` and a `distribution/*` source ARN).
 
-`ApiDistribution` also takes a `failoverBucket`: an origin group with `api-bucket` as primary and that bucket as fallback, switching on `403`, `500`, `502`, `503` or `504` (`FAILOVER_STATUS_CODES`). Nothing passes it yet; `RiverLevelsApi` gets eu-west-1's bucket at the cutover. An origin group takes two origins, so eu-central-1's bucket is a spare.
+`ApiDistribution` also takes a `failoverBucket`: an origin group with `api-bucket` as primary and that bucket as fallback, switching on `403`, `500`, `502`, `503` or `504` (`FAILOVER_STATUS_CODES`). `RiverLevelsApi` passes eu-west-1's bucket. An origin group takes two origins, so eu-central-1's bucket is a spare. The distribution refers to the failover bucket by name, not as the other stack's `Bucket`, so origin access control doesn't try to add the distribution to that bucket's policy, which would make the two stacks depend on each other.
 
 ### 5. Notifications: posting ford state changes to X
 
@@ -273,9 +284,9 @@ Before posting, the notifier claims the change with a conditional write to the s
 
 #### Multi-region notifications
 
-A `NotificationsStack` with `stateTableName` imports that table, `notifier-state` from `RiverLevelsData` for the regional stacks, instead of creating `x-notifier-state`. It uses the replica in its own region. Every region's API publisher publishes a status for every batch, so each region's notifier sees the same changes. The claim above is a conditional write to a strongly consistent table, so only one region wins it and posts. A `ReplicatedWriteConflictException`, when two regions write the record at the same moment, fails the station like any other error. The retry reads the record again and sees the winner's claim.
+A `NotificationsStack` with `stateTableName` imports that table, `notifier-state` from `RiverLevelsData` in every region, instead of creating `x-notifier-state`. It uses the replica in its own region. Every region's API publisher publishes a status for every batch, so each region's notifier sees the same changes. The claim above is a conditional write to a strongly consistent table, so only one region wins it and posts. A `ReplicatedWriteConflictException`, when two regions write the record at the same moment, fails the station like any other error. The retry reads the record again and sees the winner's claim.
 
-The regional stacks are in `log` mode, whatever the stage, until the cutover. Their status topics carry nothing before then anyway. Before switching one to `post`, create the `/river-levels/x-credentials` parameter in its region (below): SSM doesn't replicate parameters. The `notifier-state` table starts empty, so the first status in it is recorded without posting.
+Every region's notifier uses the stage's mode. Each region needs its own `/river-levels/x-credentials` parameter (below), because SSM doesn't replicate parameters. A region without it fails the post and restores the claim, and the retry, or another region, posts it. Only `RiverLevelsNotifications` in eu-west-2 runs the smoke test. The original `x-notifier-state` table is no longer in the stack, but is retained.
 
 **Modes** (`xNotifierMode()` in [`src/stage.ts`](../src/stage.ts)):
 - `log`: runs everything and records state, but logs the post instead of sending it.
@@ -395,9 +406,11 @@ The website needs no change: its `apiEndpoint` stays `https://api.<dev.>kenilwor
 
 Logical names as they appear in the CloudFormation template.
 
+`RiverLevels-<region>` stacks (and the original `RiverLevels` stack, switched off):
+
 | Resource | Type | Key settings |
 |----------|------|--------------|
-| `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). |
+| `river-levels-table` | `AWS::DynamoDB::GlobalTable` | Only without `readingsTableName`: the original `RiverLevels` stack's. Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Replica in each of `replicaRegions` (`eu-west-1`). Retained when the stack is deleted. |
 | `crawler-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `DYNAMODB_READINGS_TABLE`, `STATIONS` (JSON station list), and `READINGS_ORIGIN` (the region) with `readingsTableName`. |
 | `crawler-cron` | `AWS::Events::Rule` | `rate(10 minutes)`, or `cron(<offset>/10 * * * ? *)` with `scheduleOffsetMinutes`. 3 retry attempts, then `crawler-dead-letter-queue`. Disabled when the stack isn't `live`. |
 | `readings-stream-lookup` | `Custom::AWS` | Only with `readingsTableName`. `DynamoDB.describeTable` on the regional replica, for `Table.LatestStreamArn`. |
@@ -406,8 +419,8 @@ Logical names as they appear in the CloudFormation template.
 | `sns-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | DynamoDB stream, starting position `LATEST`, batch size 100. `ReportBatchItemFailures` and bisect on error. 5 retries, then on-failure destination. With `readingsTableName`, a filter on `NewImage.origin` equal to the region. Disabled when the stack isn't `live`. |
 | `sns-publisher-failure-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. Receives stream batches that still fail after retries. |
 | `alarms/alerts` | `AWS::SNS::Topic` | `river-levels-alerts`. SSL enforced; not encrypted, because CloudWatch can't publish to a topic using the AWS-managed SNS key. Email subscription to `alertEmail` when set. |
-| `alarms/*` | `AWS::CloudWatch::Alarm` | Five alarms, listed under [Alarms](#alarms). Each notifies the alerts topic on ALARM and on return to OK. |
-| `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. Named `river-levels-notifications` with `notificationsTopicName` (the regional stacks); otherwise the name is generated. |
+| `alarms/*` | `AWS::CloudWatch::Alarm` | Five alarms, listed under [Alarms](#alarms), or four without `live`. Each notifies the alerts topic on ALARM and on return to OK. |
+| `river-levels-notifications` | `AWS::SNS::Topic` | Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. X-Ray active. Named `river-levels-notifications` with `notificationsTopicName` (every `RiverLevels-<region>` stack); otherwise the name is generated. |
 | `crawler-log-group`, `sns-publisher-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
 `RiverLevelsApi` stack:
@@ -419,7 +432,7 @@ Logical names as they appear in the CloudFormation template.
 | `api/alias-a`, `api/alias-aaaa` | `AWS::Route53::RecordSet` | Only when the stage's custom domain is on. Alias records at the domain's apex, in `api-zone`, pointing at the distribution. |
 | `api/cors` | `AWS::CloudFront::ResponseHeadersPolicy` | `Access-Control-Allow-Origin: *`, any request header, `GET`/`HEAD`/`OPTIONS`, 1-day max age, origin override. |
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
-| `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery, and to `otherNotificationsTopicArns` if set. Delivery delay from `deliveryDelay` (30 s in the regional stacks, none in `RiverLevelsApi`). 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
+| `api-publisher-queue` | `AWS::SQS::Queue` | Subscribed to `river-levels-notifications` with raw message delivery, and to `otherNotificationsTopicArns` if set. Delivery delay from `deliveryDelay` (30 s in every API stack). 6-minute visibility timeout. Redrives to `api-publisher-dead-letter-queue` after 5 receives. |
 | `api-publisher-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
 | `api-publisher-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 60 s timeout, X-Ray active. Env: `API_BUCKET`, `DYNAMODB_READINGS_TABLE`, `STATIONS`. |
 | `api-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | `api-publisher-queue`, batch size 100, 60 s batching window, `ReportBatchItemFailures`. |
@@ -437,7 +450,7 @@ Logical names as they appear in the CloudFormation template.
 
 | Resource | Type | Key settings |
 |----------|------|--------------|
-| `x-notifier-state` | `AWS::DynamoDB::GlobalTable` | Partition key `station` (S); attributes `state` and `postedAt` (epoch ms, 0 if only recorded). Point-in-time recovery. Retained when the stack is deleted. |
+| `x-notifier-state` | `AWS::DynamoDB::GlobalTable` | Only without `stateTableName`; every deployed stack uses `notifier-state` instead. Partition key `station` (S); attributes `state` and `postedAt` (epoch ms, 0 if only recorded). Point-in-time recovery. Retained when the stack is deleted. |
 | `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
 | `x-notifier-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
 | `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_PARAMETER`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
@@ -447,9 +460,9 @@ Logical names as they appear in the CloudFormation template.
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
 
-`RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1` stacks: the same, except they have no `x-notifier-state` table (they use the region's replica of `notifier-state`) and no smoke test, `MODE` is `log`, and CDK adds a cross-region export reader for the table name.
+`RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1` stacks: the same, except there's no smoke test, and CDK adds a cross-region export reader for the table name.
 
-`RiverLevelsData` stack (not used yet; see [ADR 0001](adr/0001-multi-region-active-active.md)):
+`RiverLevelsData` stack (see [ADR 0001](adr/0001-multi-region-active-active.md)):
 
 | Resource | Type | Key settings |
 |----------|------|--------------|
@@ -457,7 +470,7 @@ Logical names as they appear in the CloudFormation template.
 | `notifier-state` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, same three regions. Partition key `station` (S). Point-in-time recovery. Deletion protection on. Retained when the stack is deleted. |
 
 **Stack outputs:**
-- `RiverLevelsTable` (the table ARN) from `RiverLevels`
+- `RiverLevelsTable` (the table ARN) from each `RiverLevels-<region>` stack, and the original table's from `RiverLevels`
 - `ReadingsTableName` and `NotifierStateTableName` from `RiverLevelsData`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
@@ -471,14 +484,14 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 
 | Role | Permission | Resource |
 |------|------------|----------|
-| `crawler-role` | `dynamodb:Query`, `dynamodb:UpdateItem`, and `dynamodb:PutItem` with `readingsTableName` | the table, or the regional replica of `readings` |
+| `crawler-role` | `dynamodb:Query`, `dynamodb:UpdateItem`, and `dynamodb:PutItem` with `readingsTableName` | the region's replica of `readings` (the original table in `RiverLevels`) |
 | `sns-publisher-role` | `dynamodb:DescribeStream`, `GetRecords`, `GetShardIterator`, `ListStreams` | the table stream |
 | `sns-publisher-role` | `sns:Publish` | the topic |
 | `sns-publisher-role` | `sqs:SendMessage`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | the failure queue |
-| `api-publisher-role` | `dynamodb:Query` | the table |
+| `api-publisher-role` | `dynamodb:Query` | the region's replica of `readings` |
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
 | `api-publisher-role` | `sns:Publish` | `station-status` |
-| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | `x-notifier-state`, or the regional replica of `notifier-state` |
+| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | the region's replica of `notifier-state` |
 | `x-notifier-role` | `ssm:GetParameter` | `/river-levels/x-credentials` (decrypted with the AWS-managed `aws/ssm` key, which its key policy allows through SSM) |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
 | `x-smoke-test-role` | `ssm:GetParameter` | `/river-levels/x-credentials` |
@@ -518,12 +531,12 @@ flowchart LR
 
 ### Alarms
 
-The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). All of them email `ALERT_EMAIL` through the `river-levels-alerts` topic, both when they fire and when they recover.
+The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). Each region has its own `river-levels-alerts` topic, in its `RiverLevels-<region>` stack, and every alarm emails `ALERT_EMAIL` through its region's topic, both when it fires and when it recovers. Each topic's email subscription has to be confirmed once. The original `RiverLevels` stack's alerts topic has no subscription.
 
 | Alarm | Fires when | Where to look |
 |-------|-----------|---------------|
 | `crawler-errors` | The crawler reports errors in every 10-minute window for 30 minutes. One bad run (up to 3 errors with Lambda's async retries) doesn't trigger it. | Crawler logs; the flood API's availability |
-| `crawler-not-running` | No crawler invocations in 30 minutes. Missing data counts as breaching. | The `crawler-cron` rule is enabled; `crawler-dead-letter-queue` |
+| `crawler-not-running` | No crawler invocations in 30 minutes. Missing data counts as breaching. Not created in a stack that isn't `live`. | The `crawler-cron` rule is enabled; `crawler-dead-letter-queue` |
 | `crawler-dead-letters` | `crawler-dead-letter-queue` has any messages | EventBridge couldn't invoke the crawler; check its permissions and throttling |
 | `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
 | `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |

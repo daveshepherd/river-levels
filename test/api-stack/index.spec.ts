@@ -292,6 +292,30 @@ describe('ApiStack', () => {
     });
   });
 
+  test('that failing over to a bucket in another stack does not change that bucket\'s policy', () => {
+    const app = new App();
+    const fixtures = new Stack(app, 'Fixtures', { env: { region: 'eu-west-2' } });
+    const regionalApi = new ApiStack(app, 'RegionalApi', {
+      allowCloudFrontInAccount: true,
+      createDistribution: false,
+      crossRegionReferences: true,
+      env: { region: 'eu-west-1' },
+      notificationsTopic: new Topic(fixtures, 'regional-notifications'),
+      readingsTable: TableV2.fromTableName(fixtures, 'regional-table', 'readings'),
+    });
+    new ApiStack(app, 'ApiStack', {
+      crossRegionReferences: true,
+      env: { region: 'eu-west-2' },
+      failoverBucket: regionalApi.apiBucket,
+      notificationsTopic: new Topic(fixtures, 'notifications'),
+      readingsTable: TableV2.fromTableName(fixtures, 'table', 'readings'),
+    });
+
+    // A dependency cycle between the stacks would fail the synth
+    expect(() => app.synth()).not.toThrow();
+    expect(regionalApi.dependencies.map((stack) => stack.stackName)).not.toContain('ApiStack');
+  });
+
   test('that the distribution fails over to another region\'s bucket', () => {
     const app = new App();
     const failoverBucket = Bucket.fromBucketAttributes(new Stack(app, 'Other', { env: { region: 'eu-west-1' } }), 'failover', {
