@@ -23,7 +23,7 @@ import {
   RecordTarget,
 } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { stationKeys } from './station-keys';
 
@@ -110,6 +110,16 @@ export class ApiDistribution extends Construct {
     });
 
     const { customDomain } = props;
+    // Referenced by name, not as the other stack's Bucket, so origin access
+    // control doesn't add this distribution to that bucket's policy, which
+    // would make the two stacks depend on each other
+    const failoverBucket = props.failoverBucket
+      ? Bucket.fromBucketAttributes(this, 'failover-bucket', {
+        bucketName: props.failoverBucket.bucketName,
+        bucketRegionalDomainName: props.failoverBucket.bucketRegionalDomainName,
+        region: props.failoverBucket.env.region,
+      })
+      : undefined;
     this.distribution = new Distribution(this, 'distribution', {
       ...(customDomain
         ? {
@@ -131,12 +141,10 @@ export class ApiDistribution extends Construct {
             function: legacyPaths,
           },
         ],
-        origin: props.failoverBucket
+        origin: failoverBucket
           ? new OriginGroup({
             primaryOrigin: S3BucketOrigin.withOriginAccessControl(props.bucket),
-            fallbackOrigin: S3BucketOrigin.withOriginAccessControl(
-              props.failoverBucket,
-            ),
+            fallbackOrigin: S3BucketOrigin.withOriginAccessControl(failoverBucket),
             fallbackStatusCodes: FAILOVER_STATUS_CODES,
           })
           : S3BucketOrigin.withOriginAccessControl(props.bucket),

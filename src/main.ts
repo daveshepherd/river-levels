@@ -41,23 +41,34 @@ const notificationsTopicName = 'river-levels-notifications';
 const notificationsTopicArn = (region: string) =>
   `arn:${Aws.PARTITION}:sns:${region}:${Aws.ACCOUNT_ID}:${notificationsTopicName}`;
 
-// The other two regions, against the multi-region readings table. Not live
-// until the cutover, so they don't crawl or publish alongside eu-west-2.
-otherRegions.forEach((region, i) => {
-  const regionalStorage = new StorageStack(app, `RiverLevels-${region}`, {
-    alertEmail,
-    crossRegionReferences: true,
-    env: { region },
-    live: false,
-    notificationsTopicName,
-    readingsTableName: dataStack.readingsTable.tableName,
-    // eu-west-2 will run at 0 minutes past each 10
-    scheduleOffsetMinutes: 3 * (i + 1),
-  });
+// Every region crawls and publishes, against the multi-region readings table.
+// The conditional writes store each reading once, and each region publishes
+// the readings it wrote.
+const regions = [env.region, ...otherRegions];
+const storageStacks = new Map(
+  regions.map((region, i) => [
+    region,
+    new StorageStack(app, `RiverLevels-${region}`, {
+      alertEmail,
+      crossRegionReferences: true,
+      env: { region },
+      notificationsTopicName,
+      readingsTableName: dataStack.readingsTable.tableName,
+      // 0, 3 and 6 minutes past each 10, so the crawlers don't all run at once
+      scheduleOffsetMinutes: 3 * i,
+    }),
+  ]),
+);
+const otherNotificationsTopicArns = (region: string) =>
+  regions.filter((other) => other !== region).map(notificationsTopicArn);
 
-  // Keeps this region's copy of the station files current, for CloudFront to
-  // fail over to. Each region's topic only carries the readings its crawler
-  // wrote, so it subscribes to the other regions' topics too.
+// The other two regions' copies of the station files, for CloudFront to fail
+// over to, and their X notifiers. Each region's topic only carries the
+// readings its crawler wrote, so each API publisher subscribes to the other
+// regions' topics too.
+const regionalApiStacks = new Map<string, ApiStack>();
+for (const region of otherRegions) {
+  const regionalStorage = storageStacks.get(region)!;
   const regionalApi = new ApiStack(app, `RiverLevelsApi-${region}`, {
     alertsTopic: regionalStorage.alertsTopic,
     allowCloudFrontInAccount: true,
@@ -68,31 +79,46 @@ otherRegions.forEach((region, i) => {
     deliveryDelay: Duration.seconds(30),
     env: { region },
     notificationsTopic: regionalStorage.riverLevelsNotificationsTopic,
-    otherNotificationsTopicArns: otherRegions
-      .filter((other) => other !== region)
-      .map(notificationsTopicArn),
+    otherNotificationsTopicArns: otherNotificationsTopicArns(region),
     readingsTable: regionalStorage.riverLevelsTable,
   });
+  // The other regions' topics are subscribed to by ARN, so they have to exist
+  for (const other of regions.filter((r) => r !== region)) {
+    regionalApi.addDependency(storageStacks.get(other)!);
+  }
+  regionalApiStacks.set(region, regionalApi);
 
-  // Posts ford state changes from this region too. The multi-region state
-  // table means only one region posts each change. Log mode until the
-  // cutover, and until the X credentials parameter is created in this region.
+  // The multi-region state table means only one region posts each change.
+  // Needs the X credentials parameter in this region.
   new NotificationsStack(app, `RiverLevelsNotifications-${region}`, {
     alertsTopic: regionalStorage.alertsTopic,
     // The state table's name comes from RiverLevelsData, in eu-west-2
     crossRegionReferences: true,
     env: { region },
-    mode: 'log',
+    mode: xNotifierMode(stage),
     stateTableName: dataStack.notifierStateTable.tableName,
     statusTopic: regionalApi.statusTopic,
   });
-});
+}
 
-const storageStack = new StorageStack(app, 'RiverLevels', {
-  alertEmail,
+// The original eu-west-2 storage stack, with its own table. Switched off since
+// the cutover to the multi-region table, and to be deleted (keeping the table
+// until it's no longer needed).
+const legacyStorageStack = new StorageStack(app, 'RiverLevels', {
   env,
+  live: false,
   replicaRegions: ['eu-west-1'],
 });
+// Kept until the stacks that imported them have been deployed without them,
+// because CloudFormation won't remove an export that's still imported
+legacyStorageStack.exportValue(legacyStorageStack.riverLevelsTable.tableArn);
+legacyStorageStack.exportValue(legacyStorageStack.riverLevelsTable.tableName);
+legacyStorageStack.exportValue(
+  legacyStorageStack.riverLevelsNotificationsTopic.topicArn,
+);
+legacyStorageStack.exportValue(legacyStorageStack.alertsTopic.topicArn);
+
+const storageStack = storageStacks.get(env.region)!;
 
 const domainName = apiDomainName(stage);
 const customDomainEnabled = apiCustomDomainEnabled(stage);
@@ -108,6 +134,8 @@ const apiDomainStack = new ApiDomainStack(app, 'RiverLevelsApiDomain', {
 
 const apiStack = new ApiStack(app, 'RiverLevelsApi', {
   alertsTopic: storageStack.alertsTopic,
+  // The certificate and hosted zone are in us-east-1, the failover bucket in
+  // eu-west-1
   crossRegionReferences: true,
   customDomain:
     customDomainEnabled && apiDomainStack.certificate
@@ -117,16 +145,26 @@ const apiStack = new ApiStack(app, 'RiverLevelsApi', {
         hostedZone: apiDomainStack.hostedZone,
       }
       : undefined,
+  // Time for a reading written in another region to reach this replica
+  deliveryDelay: Duration.seconds(30),
   env,
+  // Served when this bucket fails. An origin group takes two origins, so
+  // eu-central-1's copy is a spare.
+  failoverBucket: regionalApiStacks.get('eu-west-1')!.apiBucket,
   notificationsTopic: storageStack.riverLevelsNotificationsTopic,
+  otherNotificationsTopicArns: otherNotificationsTopicArns(env.region),
   readingsTable: storageStack.riverLevelsTable,
 });
+for (const region of otherRegions) {
+  apiStack.addDependency(storageStacks.get(region)!);
+}
 
 new NotificationsStack(app, 'RiverLevelsNotifications', {
   alertsTopic: storageStack.alertsTopic,
   env,
   mode: xNotifierMode(stage),
   smokeTest: xSmokeTestEnabled(stage),
+  stateTableName: dataStack.notifierStateTable.tableName,
   statusTopic: apiStack.statusTopic,
 });
 

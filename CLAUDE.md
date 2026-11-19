@@ -52,7 +52,7 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: StorageStack "RiverLevels", ApiStack "RiverLevelsApi", NotificationsStack "RiverLevelsNotifications" and DataStack "RiverLevelsData" in eu-west-2 (replica in eu-west-1), StorageStacks "RiverLevels-eu-west-1" and "RiverLevels-eu-central-1", ApiStacks "RiverLevelsApi-eu-west-1" and "RiverLevelsApi-eu-central-1" and NotificationsStacks "RiverLevelsNotifications-eu-west-1" and "RiverLevelsNotifications-eu-central-1" (multi-region readings and notifier-state tables, failover copies of the station files, not live yet), ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/main.ts                  App entry point: DataStack "RiverLevelsData" (MRSC readings and notifier-state tables) in eu-west-2; in each of eu-west-2, eu-west-1 and eu-central-1 a StorageStack "RiverLevels-<region>"; ApiStack "RiverLevelsApi" (with the CloudFront distribution, failing over to eu-west-1) and NotificationsStack "RiverLevelsNotifications" in eu-west-2, "RiverLevelsApi-<region>" and "RiverLevelsNotifications-<region>" in the other two; the original StorageStack "RiverLevels" (switched off, to be deleted); ApiDomainStack "RiverLevelsApiDomain" in us-east-1
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
@@ -68,7 +68,7 @@ src/api-stack/
   api-publisher.lambda.ts    SQS batches of new-reading notifications → stations/{id}/status.json and chart.json in S3
   status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
   distribution.ts            CloudFront in front of the bucket; legacy-paths function maps /status and /chart
-src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by the regional storage and notifications stacks
+src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
   index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, the X credentials SSM parameter (by name; created by hand), alarm

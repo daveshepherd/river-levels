@@ -288,6 +288,12 @@ describe('StorageStack', () => {
 
     template.hasResourceProperties('AWS::Events::Rule', { State: 'DISABLED' });
     template.hasResourceProperties('AWS::Lambda::EventSourceMapping', { Enabled: false });
+    // It would always be in alarm
+    template.resourcePropertiesCountIs(
+      'AWS::CloudWatch::Alarm',
+      { MetricName: 'Invocations' },
+      0,
+    );
   });
 
   test('that a live stack leaves the stream mapping enabled by default', () => {
@@ -296,6 +302,11 @@ describe('StorageStack', () => {
 
     template.hasResourceProperties('AWS::Events::Rule', { State: 'ENABLED' });
     template.hasResourceProperties('AWS::Lambda::EventSourceMapping', { Enabled: Match.absent() });
+    template.resourcePropertiesCountIs(
+      'AWS::CloudWatch::Alarm',
+      { MetricName: 'Invocations' },
+      1,
+    );
   });
 
   test('that the crawler can run at an offset past each 10 minutes', () => {
