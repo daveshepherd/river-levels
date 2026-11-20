@@ -52,7 +52,7 @@ Gotchas:
 ## Layout
 
 ```
-src/main.ts                  App entry point: DataStack "RiverLevelsData" (MRSC readings and notifier-state tables) in eu-west-2; in each of eu-west-2, eu-west-1 and eu-central-1 a StorageStack "RiverLevels-<region>"; ApiStack "RiverLevelsApi" (with the CloudFront distribution, failing over to eu-west-1) and NotificationsStack "RiverLevelsNotifications" in eu-west-2, "RiverLevelsApi-<region>" and "RiverLevelsNotifications-<region>" in the other two; the original StorageStack "RiverLevels" (switched off, to be deleted); ApiDomainStack "RiverLevelsApiDomain" in us-east-1
+src/main.ts                  App entry point: DataStack "RiverLevelsData" (MRSC readings and notifier-state tables) in eu-west-2; in each of eu-west-2, eu-west-1 and eu-central-1 a StorageStack "RiverLevels-<region>"; ApiStack "RiverLevelsApi" (with the CloudFront distribution, failing over to eu-west-1) and NotificationsStack "RiverLevelsNotifications" in eu-west-2, "RiverLevelsApi-<region>" and "RiverLevelsNotifications-<region>" in the other two; ApiDomainStack "RiverLevelsApiDomain" in us-east-1
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
