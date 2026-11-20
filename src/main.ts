@@ -101,23 +101,6 @@ for (const region of otherRegions) {
   });
 }
 
-// The original eu-west-2 storage stack, with its own table. Switched off since
-// the cutover to the multi-region table, and to be deleted (keeping the table
-// until it's no longer needed).
-const legacyStorageStack = new StorageStack(app, 'RiverLevels', {
-  env,
-  live: false,
-  replicaRegions: ['eu-west-1'],
-});
-// Kept until the stacks that imported them have been deployed without them,
-// because CloudFormation won't remove an export that's still imported
-legacyStorageStack.exportValue(legacyStorageStack.riverLevelsTable.tableArn);
-legacyStorageStack.exportValue(legacyStorageStack.riverLevelsTable.tableName);
-legacyStorageStack.exportValue(
-  legacyStorageStack.riverLevelsNotificationsTopic.topicArn,
-);
-legacyStorageStack.exportValue(legacyStorageStack.alertsTopic.topicArn);
-
 const storageStack = storageStacks.get(env.region)!;
 
 const domainName = apiDomainName(stage);

@@ -1,6 +1,6 @@
 # ADR 0001: Run active-active in three EU regions
 
-- **Status:** Accepted, being implemented
+- **Status:** Accepted, implemented (cut over on 2026-11-19)
 - **Date:** 2026-11-11
 
 ## Context
@@ -50,6 +50,8 @@ Run the whole app in **`eu-west-2`, `eu-west-1` and `eu-central-1`** (Frankfurt)
 3. Copy the history into the new readings table and verify it.
 4. Deploy the app to all three regions against the new tables, switch over, and add CloudFront origin failover.
 5. Delete the old table, and update `docs/infrastructure.md`.
+
+All five steps are done. The original `RiverLevels` stack and its tables were removed after the cutover.
 
 ## Alternatives considered
 
