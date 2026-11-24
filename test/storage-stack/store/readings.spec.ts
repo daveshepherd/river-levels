@@ -4,7 +4,6 @@ import {
   PutItemCommand,
   QueryCommand,
   ReplicatedWriteConflictException,
-  UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
@@ -15,7 +14,8 @@ import * as target from '../../../src/storage-stack/store/readings';
 
 beforeEach(() => {
   dynamoDBClientMock.reset();
-  delete process.env.READINGS_ORIGIN;
+  process.env.READINGS_ORIGIN = 'eu-west-1';
+  process.env.DYNAMODB_READINGS_TABLE = 'readings';
 });
 
 describe('readings store', () => {
@@ -83,39 +83,6 @@ describe('readings store', () => {
     expect(actualRequest).toStrictEqual(expectedRequest);
   });
 
-  it('test records are saved when a list is provided', async () => {
-    process.env.DYNAMODB_READINGS_TABLE = 'my-dynamodb-table';
-
-    const readingsToSave = [
-      {
-        date: new Date('2020-01-01T11:45:00Z'),
-        depth: 0.83,
-      },
-      {
-        date: new Date('2020-01-01T11:30:00Z'),
-        depth: 0.831,
-      },
-      {
-        date: new Date('2020-01-01T11:15:00Z'),
-        depth: 0.831,
-      },
-    ];
-
-    await target.updateReadings('kenilworth', readingsToSave);
-
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 3);
-
-    const actualRequest =
-      dynamoDBClientMock.commandCalls(UpdateItemCommand)[0].firstArg.input;
-
-    expect(actualRequest.Key.station).toEqual({ S: 'kenilworth' });
-    expect(
-      [1577879100000, 1577878200000, 1577877300000].includes(
-        parseFloat(actualRequest.Key.timestamp.N),
-      ),
-    ).toBeTruthy();
-  });
-
   it('returns null when the stored item is missing fields', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
       Items: [{ station: { S: 'kenilworth' }, timestamp: { N: '1577836800000' } }],
@@ -130,24 +97,25 @@ describe('readings store', () => {
     await expect(target.getLatestReading('kenilworth')).rejects.toThrow('query failed');
   });
 
-  it('rethrows when a reading update fails', async () => {
-    dynamoDBClientMock.on(UpdateItemCommand).rejects(new Error('update failed'));
-
-    await expect(
-      target.updateReadings('kenilworth', [{ date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 }]),
-    ).rejects.toThrow('update failed');
-  });
-
   it('makes no calls when there are no readings', async () => {
     await target.updateReadings('kenilworth', []);
 
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 0);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutItemCommand, 0);
+  });
+
+  it('refuses to write without READINGS_ORIGIN', async () => {
+    delete process.env.READINGS_ORIGIN;
+
+    await expect(
+      target.updateReadings('kenilworth', [{ date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 }]),
+    ).rejects.toThrow('READINGS_ORIGIN must be set');
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutItemCommand, 0);
   });
 
   it(`writes no more than ${target.MAX_CONCURRENT_WRITES} readings at once`, async () => {
     let inFlight = 0;
     let maxInFlight = 0;
-    dynamoDBClientMock.on(UpdateItemCommand).callsFake(async () => {
+    dynamoDBClientMock.on(PutItemCommand).callsFake(async () => {
       inFlight++;
       maxInFlight = Math.max(maxInFlight, inFlight);
       await new Promise((resolve) => setImmediate(resolve));
@@ -161,18 +129,13 @@ describe('readings store', () => {
 
     await target.updateReadings('kenilworth', readings);
 
-    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 25);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutItemCommand, 25);
     expect(maxInFlight).toBe(target.MAX_CONCURRENT_WRITES);
   });
 
-  describe('with READINGS_ORIGIN set', () => {
+  describe('writing readings', () => {
     const reading = { date: new Date('2020-01-01T11:45:00Z'), depth: 0.83 };
     const conflict = () => new ReplicatedWriteConflictException({ message: 'conflict', $metadata: {} });
-
-    beforeEach(() => {
-      process.env.READINGS_ORIGIN = 'eu-west-1';
-      process.env.DYNAMODB_READINGS_TABLE = 'readings';
-    });
 
     it('creates a reading only if it is new, tagged with the region', async () => {
       dynamoDBClientMock.on(PutItemCommand).resolves({});
@@ -190,7 +153,6 @@ describe('readings store', () => {
         },
         TableName: 'readings',
       });
-      expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateItemCommand, 0);
     });
 
     it('skips a reading another region already wrote', async () => {

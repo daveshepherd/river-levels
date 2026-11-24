@@ -56,7 +56,7 @@ src/main.ts                  App entry point: DataStack "RiverLevelsData" (MRSC 
 src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
-  index.ts                   StorageStack: DynamoDB global table, crawler, SNS publisher
+  index.ts                   StorageStack: crawler and SNS publisher against the region's replica of the readings table
   crawler.lambda.ts          Runs every 10 minutes: fetches new readings and writes them to DynamoDB
   stations.ts                The crawler's station list and its validation
   sns-publisher.lambda.ts    DynamoDB stream → SNS PublishBatch (sent in chunks of 10)
@@ -71,7 +71,7 @@ src/api-stack/
 src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
-  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, state table, the X credentials SSM parameter (by name; created by hand), alarm
+  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, the X credentials SSM parameter (by name; created by hand), alarm; uses the region's replica of notifier-state
   x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
   x-smoke-test.lambda.ts     Development only: a CDK trigger runs it when a deploy changes it (its code, the X client or their dependencies) to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
@@ -81,7 +81,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 
 ## Data and contracts
 
-- **DynamoDB table:** partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`. In the multi-region `readings` table, items also have `origin` (S): the region whose crawler wrote it, or `migration` for copied history. Stream filters rely on it, so every write there must set it.
+- **DynamoDB `readings` table** (multi-region, in `RiverLevelsData`): partition key `station` (S), sort key `timestamp` (N, epoch milliseconds), attribute `reading_depth` (N, metres). Streams are on with `NEW_AND_OLD_IMAGES`. Items also have `origin` (S): the region whose crawler wrote it, or `migration` for copied history. Stream filters rely on it, so every write there must set it.
 - **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
 - **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days. CloudFront also serves Kenilworth's at `/status` and `/chart`, the paths the website calls; keep those working.
 - **Station status messages** on the `station-status` topic: `{station, depth, direction, rate, state?, lastUpdate}`, published once per batch per station, whether or not anything changed.

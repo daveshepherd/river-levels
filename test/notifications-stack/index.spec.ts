@@ -13,6 +13,7 @@ function synth(props: Partial<NotificationsStackProps> = {}) {
     alertsTopic: new Topic(fixtures, 'alerts'),
     env: { region: 'eu-west-2' },
     mode: 'log',
+    stateTableName: 'notifier-state',
     statusTopic: new Topic(fixtures, 'status'),
     ...props,
   });
@@ -41,19 +42,8 @@ describe('NotificationsStack', () => {
     });
   });
 
-  test('that the state table is retained', () => {
-    const { template } = synth();
-
-    template.hasResource('AWS::DynamoDB::GlobalTable', {
-      DeletionPolicy: 'Retain',
-      Properties: Match.objectLike({
-        KeySchema: [{ AttributeName: 'station', KeyType: 'HASH' }],
-      }),
-    });
-  });
-
-  test('that an existing state table can be used instead of creating one', () => {
-    const { stack, template } = synth({ stateTableName: 'notifier-state' });
+  test('that it uses the multi-region state table instead of creating one', () => {
+    const { stack, template } = synth();
 
     template.resourceCountIs('AWS::DynamoDB::GlobalTable', 0);
     template.hasResourceProperties('AWS::Lambda::Function', {

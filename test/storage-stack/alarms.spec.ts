@@ -7,6 +7,7 @@ function synth(alertEmail?: string) {
   const stack = new StorageStack(app, 'StorageStack', {
     env: { region: 'eu-west-2' },
     alertEmail,
+    readingsTableName: 'readings',
   });
   return { stack, template: Template.fromStack(stack) };
 }
