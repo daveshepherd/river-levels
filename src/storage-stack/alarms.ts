@@ -23,12 +23,6 @@ export interface StorageAlarmsProps {
    * confirmed from the email AWS sends before alerts are delivered.
    */
   alertEmail?: string;
-  /**
-   * Whether the crawler is scheduled. Without a schedule there's no
-   * crawler-not-running alarm, which would otherwise always be in alarm.
-   * @default true
-   */
-  live?: boolean;
 }
 
 /**
@@ -67,19 +61,17 @@ export class StorageAlarms extends Construct {
       treatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
-    if (props.live ?? true) {
-      this.addAlarm(action, 'crawler-not-running', {
-        alarmDescription:
-          'The crawler has not been invoked for 30 minutes. Check the crawler-cron EventBridge rule.',
-        metric: props.crawler.metricInvocations({
-          period: Duration.minutes(30),
-        }),
-        threshold: 1,
-        evaluationPeriods: 1,
-        comparisonOperator: ComparisonOperator.LESS_THAN_THRESHOLD,
-        treatMissingData: TreatMissingData.BREACHING,
-      });
-    }
+    this.addAlarm(action, 'crawler-not-running', {
+      alarmDescription:
+        'The crawler has not been invoked for 30 minutes. Check the crawler-cron EventBridge rule.',
+      metric: props.crawler.metricInvocations({
+        period: Duration.minutes(30),
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.LESS_THAN_THRESHOLD,
+      treatMissingData: TreatMissingData.BREACHING,
+    });
 
     this.addAlarm(action, 'crawler-dead-letters', {
       alarmDescription:

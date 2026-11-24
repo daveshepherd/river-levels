@@ -5,12 +5,7 @@ import {
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
-import {
-  AttributeType,
-  ITableV2,
-  StreamViewType,
-  TableV2,
-} from 'aws-cdk-lib/aws-dynamodb';
+import { ITableV2, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Alias } from 'aws-cdk-lib/aws-kms';
@@ -48,21 +43,14 @@ export interface StorageStackProps extends StackProps {
    * synths and integ tests don't need one.
    */
   alertEmail?: string;
-  replicaRegions?: Array<string>;
   /**
-   * Use the multi-region (MRSC) readings table, by name, instead of creating
-   * a table. The crawler then only creates readings that don't exist yet,
-   * tagged with this stack's region in `origin`, and the SNS publisher only
-   * publishes readings with this region's `origin`, so each reading is
-   * published once across regions. `replicaRegions` is ignored.
+   * The multi-region (MRSC) readings table, by name. The stack uses its
+   * replica in this stack's region. The crawler only creates readings that
+   * don't exist yet, tagged with this region in `origin`, and the SNS
+   * publisher only publishes readings with this region's `origin`, so each
+   * reading is published once across regions.
    */
-  readingsTableName?: string;
-  /**
-   * Whether the crawler's schedule and the SNS publisher's stream mapping are
-   * switched on. Off deploys a region without it crawling or publishing.
-   * @default true
-   */
-  live?: boolean;
+  readingsTableName: string;
   /**
    * Minutes past each 10 that the crawler runs, so crawlers in different
    * regions don't all run at once. Without it, the crawler runs every 10
@@ -92,30 +80,11 @@ export class StorageStack extends Stack {
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
-    const live = props.live ?? true;
-    const multiRegion = props.readingsTableName !== undefined;
-    const riverLevelsTable = props.readingsTableName
-      ? this.importReadingsTable(props.readingsTableName)
-      : new TableV2(this, 'river-levels-table', {
-        deletionProtection: !props?.setDestroyPolicyToAllResources,
-        dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
-        partitionKey: { name: 'station', type: AttributeType.STRING },
-        pointInTimeRecoverySpecification: {
-          pointInTimeRecoveryEnabled: true,
-          recoveryPeriodInDays: 35,
-        },
-        sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
-        replicas: props.replicaRegions
-          ? props.replicaRegions.map(function (replicaRegion) {
-            return { region: replicaRegion };
-          })
-          : [],
-      });
+    const riverLevelsTable = this.importReadingsTable(props.readingsTableName);
     this.riverLevelsTable = riverLevelsTable;
     this.riverLevelsTableName = riverLevelsTable.tableName;
 
     const executionRole = new CrawlerRole(this, 'crawler-role', {
-      conditionalWrites: multiRegion,
       dynamoDbTableArn: riverLevelsTable.tableArn,
     });
 
@@ -126,7 +95,7 @@ export class StorageStack extends Stack {
       architecture: Architecture.ARM_64,
       environment: {
         DYNAMODB_READINGS_TABLE: this.riverLevelsTableName,
-        ...(multiRegion ? { READINGS_ORIGIN: this.region } : {}),
+        READINGS_ORIGIN: this.region,
         STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
       },
       logGroup: crawlerLogGroup,
@@ -142,7 +111,6 @@ export class StorageStack extends Stack {
       retentionPeriod: Duration.days(14),
     });
     new Rule(this, 'crawler-cron', {
-      enabled: live,
       schedule:
         props.scheduleOffsetMinutes === undefined
           ? Schedule.rate(Duration.minutes(10))
@@ -204,19 +172,15 @@ export class StorageStack extends Stack {
       events: [
         new DynamoEventSource(riverLevelsTable, {
           bisectBatchOnError: true,
-          // Only set when off, so a live stack's mapping is unchanged
-          enabled: live ? undefined : false,
           // Every replica's stream has every reading; only publish the ones
           // this region wrote
-          filters: multiRegion
-            ? [
-              FilterCriteria.filter({
-                dynamodb: {
-                  NewImage: { origin: { S: FilterRule.isEqual(this.region) } },
-                },
-              }),
-            ]
-            : undefined,
+          filters: [
+            FilterCriteria.filter({
+              dynamodb: {
+                NewImage: { origin: { S: FilterRule.isEqual(this.region) } },
+              },
+            }),
+          ],
           onFailure: new SqsDlq(snsPublisherFailureQueue),
           reportBatchItemFailures: true,
           retryAttempts: 5,
@@ -233,7 +197,6 @@ export class StorageStack extends Stack {
       alertEmail: props.alertEmail,
       crawler,
       crawlerDeadLetterQueue,
-      live,
       snsPublisher,
       snsPublisherFailureQueue,
     });

@@ -4,7 +4,6 @@ import {
   PutItemCommand,
   QueryCommand,
   ReplicatedWriteConflictException,
-  UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { logger, tracer } from '../powertools';
 import { Reading } from '../reading';
@@ -49,31 +48,6 @@ export async function getLatestReading(
     };
   }
   return null;
-}
-
-async function updateReading(station: string, reading: Reading) {
-  try {
-    await dynamoDbClient.send(
-      new UpdateItemCommand({
-        ExpressionAttributeValues: {
-          ':reading_depth': { N: reading.depth.toString() },
-        },
-        Key: {
-          station: { S: station },
-          timestamp: { N: reading.date.getTime().toString() },
-        },
-        TableName: process.env.DYNAMODB_READINGS_TABLE,
-        UpdateExpression: 'SET reading_depth = :reading_depth',
-      }),
-    );
-  } catch (error) {
-    logger.error('Error updating a reading in DynamoDB', {
-      station,
-      date: reading.date.toISOString(),
-      error: error as Error,
-    });
-    throw error;
-  }
 }
 
 /** How many times to retry a write that conflicts with another region's write to the same reading. */
@@ -130,32 +104,25 @@ async function putNewReading(
 
 /**
  * Writes a station's readings, with at most MAX_CONCURRENT_WRITES in flight.
- *
- * With READINGS_ORIGIN set (the multi-region readings table), only creates
- * readings that don't exist yet, tagged with that region. Otherwise creates
- * new readings and overwrites existing ones.
+ * Only creates readings that don't exist yet, tagged with READINGS_ORIGIN,
+ * this crawler's region.
  */
 export async function updateReadings(station: string, readings: Reading[]) {
   const origin = process.env.READINGS_ORIGIN;
+  if (!origin) {
+    throw new Error('READINGS_ORIGIN must be set to the crawler\'s region');
+  }
   let created = 0;
   for (let i = 0; i < readings.length; i += MAX_CONCURRENT_WRITES) {
     const batch = readings.slice(i, i + MAX_CONCURRENT_WRITES);
-    if (origin) {
-      const results = await Promise.all(
-        batch.map((reading) => putNewReading(station, reading, origin)),
-      );
-      created += results.filter(Boolean).length;
-    } else {
-      await Promise.all(batch.map((reading) => updateReading(station, reading)));
-    }
+    const results = await Promise.all(
+      batch.map((reading) => putNewReading(station, reading, origin)),
+    );
+    created += results.filter(Boolean).length;
   }
-  if (origin) {
-    logger.info('Readings written', {
-      station,
-      created,
-      alreadyPresent: readings.length - created,
-    });
-  } else {
-    logger.info('Readings updated', { station, count: readings.length });
-  }
+  logger.info('Readings written', {
+    station,
+    created,
+    alreadyPresent: readings.length - created,
+  });
 }

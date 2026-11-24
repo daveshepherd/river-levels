@@ -34,7 +34,7 @@ describe('CrawlerRole', () => {
       PolicyDocument: {
         Statement: [
           {
-            Action: ['dynamodb:Query', 'dynamodb:UpdateItem'],
+            Action: ['dynamodb:PutItem', 'dynamodb:Query'],
             Resource: 'someArn',
           },
         ],
