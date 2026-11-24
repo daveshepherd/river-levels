@@ -295,8 +295,7 @@
       {
        "Action": [
         "dynamodb:PutItem",
-        "dynamodb:Query",
-        "dynamodb:UpdateItem"
+        "dynamodb:Query"
        ],
        "Effect": "Allow",
        "Resource": {

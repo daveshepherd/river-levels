@@ -31,7 +31,7 @@
      "Payload": "\"{\\\"readingsLimit\\\":1}\""
     },
     "flattenResponse": "false",
-    "salt": "1795041606969"
+    "salt": "1795560626782"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -240,7 +240,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1795041606969"
+    "salt": "1795560626783"
    },
    "DependsOn": [
     "LambdaInvoke65d9b14047bbf63b418a533e51656c7d",
@@ -500,7 +500,7 @@
     }
    }
   },
-  "AwsApiCallDynamoDBPutItem588f369f5c2c6cc6af683f2cd2080f65": {
+  "AwsApiCallDynamoDBPutItem71a585fd395ad52c5ae25883826b29b3": {
    "Type": "Custom::DeployAssert@SdkCallDynamoDBPutItem",
    "Properties": {
     "ServiceToken": {
@@ -512,7 +512,7 @@
     "service": "DynamoDB",
     "api": "PutItem",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1795041606969\"},\"reading_depth\":{\"N\":\"1.1\"},\"origin\":{\"S\":\"eu-west-1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1795560626788\"},\"reading_depth\":{\"N\":\"1.1\"},\"origin\":{\"S\":\"eu-west-1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -531,12 +531,12 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1795041606970"
+    "salt": "1795560626789"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
-  "AwsApiCallDynamoDBPutItem9cf0a1e4f9b4719387fa36fd026978e4": {
+  "AwsApiCallDynamoDBPutItemb0ab6c679410fce235af6e24fdd619d7": {
    "Type": "Custom::DeployAssert@SdkCallDynamoDBPutItem",
    "Properties": {
     "ServiceToken": {
@@ -548,7 +548,7 @@
     "service": "DynamoDB",
     "api": "PutItem",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1795041606970\"},\"reading_depth\":{\"N\":\"1.1\"},\"origin\":{\"S\":\"eu-central-1\"}}",
+     "Item": "{\"station\":{\"S\":\"test_station\"},\"timestamp\":{\"N\":\"1795560626789\"},\"reading_depth\":{\"N\":\"1.1\"},\"origin\":{\"S\":\"eu-central-1\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -567,7 +567,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1795041606970"
+    "salt": "1795560626790"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -583,7 +583,7 @@
     },
     "service": "SQS",
     "api": "ReceiveMessage",
-    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1795041606969}\"}}]}}}",
+    "expected": "{\"$ObjectLike\":{\"Messages\":{\"$ArrayWith\":[{\"$ObjectLike\":{\"Body\":\"{\\\"reading_depth\\\":1.1,\\\"station\\\":\\\"test_station\\\",\\\"timestamp\\\":1795560626788}\"}}]}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81WaitFor1F63D388"
     },
@@ -608,7 +608,7 @@
      "WaitTimeSeconds": "20"
     },
     "flattenResponse": "false",
-    "salt": "1795041606970"
+    "salt": "1795560626790"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"

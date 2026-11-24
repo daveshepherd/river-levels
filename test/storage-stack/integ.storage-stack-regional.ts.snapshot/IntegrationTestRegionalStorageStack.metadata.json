@@ -158,7 +158,6 @@
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
-        "enabled": true,
         "schedule": "*",
         "targets": "*"
       }
@@ -186,6 +185,7 @@
       "data": {
         "displayName": "*",
         "masterKey": "*",
+        "topicName": "*",
         "enforceSSL": true,
         "tracingConfig": "Active"
       }
