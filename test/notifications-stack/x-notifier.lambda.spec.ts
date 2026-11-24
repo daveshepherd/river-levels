@@ -1,15 +1,7 @@
-import {
-  ConditionalCheckFailedException,
-  DynamoDBClient,
-  GetItemCommand,
-  PutItemCommand,
-  ReplicatedWriteConflictException,
-} from '@aws-sdk/client-dynamodb';
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import type { Context, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
-import { COOLDOWN_MS } from '../../src/notifications-stack/decide';
 import { resetXClient } from '../../src/notifications-stack/x-client';
 import * as target from '../../src/notifications-stack/x-notifier.lambda';
 
@@ -38,7 +30,6 @@ jest.mock('twitter-api-v2', () => ({
   }),
 }));
 
-const dynamoDbMock = mockClient(DynamoDBClient);
 const ssmMock = mockClient(SSMClient);
 
 const NOW = 1_800_000_000_000;
@@ -49,14 +40,16 @@ const CREDENTIALS = {
   accessSecret: 'a',
 };
 
-function statusMessage(state: string | undefined, lastUpdate = '2027-01-15T08:00:00.000Z') {
+function announcement(transition = 'risingFlooded', station = 'kenilworth') {
   return JSON.stringify({
-    station: 'kenilworth',
+    id: `${station}:flooded:${NOW}`,
+    station,
+    transition,
+    state: 'flooded',
+    previousState: 'clear',
     depth: 1.3,
-    direction: 'rising',
-    rate: 'fast',
-    ...(state ? { state } : {}),
-    lastUpdate,
+    lastUpdate: '2027-01-15T08:00:00.000Z',
+    announcedAt: new Date(NOW).toISOString(),
   });
 }
 
@@ -66,35 +59,17 @@ function sqsEvent(...bodies: string[]): SQSEvent {
   } as SQSEvent;
 }
 
-function stored(state: string, postedAt: number) {
-  dynamoDbMock.on(GetItemCommand).resolves({
-    Item: {
-      station: { S: 'kenilworth' },
-      state: { S: state },
-      postedAt: { N: postedAt.toString() },
-    },
-  });
-}
-
-function puts() {
-  return dynamoDbMock.commandCalls(PutItemCommand).map((c) => c.args[0].input);
-}
-
 beforeEach(() => {
   jest.useFakeTimers({ now: NOW });
-  dynamoDbMock.reset();
   ssmMock.reset();
   tweet.mockReset();
   twitterApi.mockReset();
   resetXClient();
-  dynamoDbMock.on(GetItemCommand).resolves({});
-  dynamoDbMock.on(PutItemCommand).resolves({});
   ssmMock
     .on(GetParameterCommand)
     .resolves({ Parameter: { Value: JSON.stringify(CREDENTIALS) } });
   tweet.mockResolvedValue({ data: { id: '123', text: '' } });
   process.env.MODE = 'post';
-  process.env.STATE_TABLE = 'state-table';
   process.env.X_CREDENTIALS_PARAMETER = '/river-levels/x-credentials';
   process.env.STATIONS = JSON.stringify([
     {
@@ -114,64 +89,10 @@ afterEach(() => {
 });
 
 describe('x-notifier', () => {
-  it('records the first state without posting', async () => {
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
+  it('posts an announcement with the ford website', async () => {
+    const response = await target.handler(sqsEvent(announcement()));
 
     expect(response).toStrictEqual({ batchItemFailures: [] });
-    expect(tweet).not.toHaveBeenCalled();
-    expect(puts()).toStrictEqual([
-      {
-        ConditionExpression: 'attribute_not_exists(station)',
-        Item: {
-          station: { S: 'kenilworth' },
-          state: { S: 'flooded' },
-          postedAt: { N: '0' },
-        },
-        TableName: 'state-table',
-      },
-    ]);
-  });
-
-  it('does nothing when the state is unchanged', async () => {
-    stored('flooded', 0);
-
-    await target.handler(sqsEvent(statusMessage('flooded')));
-
-    expect(puts()).toHaveLength(0);
-    expect(tweet).not.toHaveBeenCalled();
-  });
-
-  it('holds a change back during the cooldown', async () => {
-    stored('flooded', NOW - COOLDOWN_MS + 60_000);
-
-    await target.handler(sqsEvent(statusMessage('clear')));
-
-    expect(puts()).toHaveLength(0);
-    expect(tweet).not.toHaveBeenCalled();
-  });
-
-  it('claims the change, then posts it with the ford website', async () => {
-    stored('clear', 0);
-
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
-
-    expect(response).toStrictEqual({ batchItemFailures: [] });
-    expect(puts()).toStrictEqual([
-      {
-        ConditionExpression: '#state = :state AND postedAt = :postedAt',
-        ExpressionAttributeNames: { '#state': 'state' },
-        ExpressionAttributeValues: {
-          ':state': { S: 'clear' },
-          ':postedAt': { N: '0' },
-        },
-        Item: {
-          station: { S: 'kenilworth' },
-          state: { S: 'flooded' },
-          postedAt: { N: NOW.toString() },
-        },
-        TableName: 'state-table',
-      },
-    ]);
     expect(twitterApi).toHaveBeenCalledWith(CREDENTIALS);
     expect(tweet).toHaveBeenCalledTimes(1);
     expect(tweet.mock.calls[0][0]).toMatch(
@@ -179,71 +100,42 @@ describe('x-notifier', () => {
     );
   });
 
-  it('only logs in log mode, but still records the change', async () => {
+  it('posts without a link for a station with no website', async () => {
+    await target.handler(sqsEvent(announcement('droppingClear', 'warwick')));
+
+    expect(tweet).toHaveBeenCalledTimes(1);
+    expect(tweet.mock.calls[0][0]).not.toMatch(/See /);
+  });
+
+  it('only logs in log mode', async () => {
     process.env.MODE = 'log';
-    stored('clear', 0);
 
-    await target.handler(sqsEvent(statusMessage('flooded')));
+    const response = await target.handler(sqsEvent(announcement()));
 
-    expect(puts()).toHaveLength(1);
+    expect(response).toStrictEqual({ batchItemFailures: [] });
     expect(tweet).not.toHaveBeenCalled();
     expect(ssmMock).toHaveReceivedCommandTimes(GetParameterCommand, 0);
   });
 
-  it('does not post when another invocation claimed the change first', async () => {
-    stored('clear', 0);
-    dynamoDbMock.on(PutItemCommand).rejects(
-      new ConditionalCheckFailedException({ message: 'taken', $metadata: {} }),
+  it('retries only the announcement that failed to post', async () => {
+    tweet.mockRejectedValueOnce(new Error('X is down'));
+
+    const response = await target.handler(
+      sqsEvent(announcement(), announcement('droppingClear')),
     );
-
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
-
-    expect(response).toStrictEqual({ batchItemFailures: [] });
-    expect(tweet).not.toHaveBeenCalled();
-  });
-
-  it('retries the station when another region is writing the record at the same time', async () => {
-    stored('clear', 0);
-    dynamoDbMock.on(PutItemCommand).rejects(
-      new ReplicatedWriteConflictException({ message: 'conflict', $metadata: {} }),
-    );
-
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
-
-    // The retry reads the record again, so it sees the other region's claim
-    expect(response).toStrictEqual({
-      batchItemFailures: [{ itemIdentifier: 'm1' }],
-    });
-    expect(tweet).not.toHaveBeenCalled();
-  });
-
-  it('restores the record and retries the station when posting fails', async () => {
-    stored('clear', 0);
-    tweet.mockRejectedValue(new Error('X is down'));
-
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
 
     expect(response).toStrictEqual({
       batchItemFailures: [{ itemIdentifier: 'm1' }],
     });
-    const [claim, restore] = puts();
-    expect(claim.Item?.state).toStrictEqual({ S: 'flooded' });
-    expect(restore).toMatchObject({
-      ExpressionAttributeValues: {
-        ':state': { S: 'flooded' },
-        ':postedAt': { N: NOW.toString() },
-      },
-      Item: { state: { S: 'clear' }, postedAt: { N: '0' } },
-    });
+    expect(tweet).toHaveBeenCalledTimes(2);
   });
 
-  it('fails the station when the credentials parameter is not filled in', async () => {
-    stored('clear', 0);
+  it('fails the announcement when the credentials parameter is not filled in', async () => {
     ssmMock.on(GetParameterCommand).resolves({
       Parameter: { Value: JSON.stringify({ ...CREDENTIALS, appKey: '', accessSecret: '' }) },
     });
 
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
+    const response = await target.handler(sqsEvent(announcement()));
 
     expect(response).toStrictEqual({
       batchItemFailures: [{ itemIdentifier: 'm1' }],
@@ -251,42 +143,22 @@ describe('x-notifier', () => {
     expect(tweet).not.toHaveBeenCalled();
   });
 
-  it('fails the station when the parameter has no value', async () => {
-    stored('clear', 0);
+  it('fails the announcement when the parameter has no value', async () => {
     ssmMock.on(GetParameterCommand).resolves({});
 
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
+    const response = await target.handler(sqsEvent(announcement()));
 
     expect(response.batchItemFailures).toHaveLength(1);
   });
 
-  it('uses the newest status for a station and reports all its messages on failure', async () => {
-    stored('clear', 0);
-    tweet.mockRejectedValue(new Error('X is down'));
-
+  it('ignores messages that are not JSON or not announcements', async () => {
+    const status = JSON.stringify({ station: 'kenilworth', depth: 1.3, state: 'flooded' });
     const response = await target.handler(
-      sqsEvent(
-        statusMessage('impassable', '2027-01-15T08:15:00.000Z'),
-        statusMessage('clear', '2027-01-15T08:00:00.000Z'),
-        statusMessage('flooded', '2027-01-15T08:30:00.000Z'),
-      ),
-    );
-
-    expect(puts()[0].Item?.state).toStrictEqual({ S: 'flooded' });
-    expect(response.batchItemFailures).toStrictEqual([
-      { itemIdentifier: 'm1' },
-      { itemIdentifier: 'm2' },
-      { itemIdentifier: 'm3' },
-    ]);
-  });
-
-  it('ignores statuses without a ford state and messages that are not JSON', async () => {
-    const response = await target.handler(
-      sqsEvent(statusMessage(undefined), 'not json'),
+      sqsEvent('not json', status, announcement('toString')),
     );
 
     expect(response).toStrictEqual({ batchItemFailures: [] });
-    expect(dynamoDbMock).toHaveReceivedCommandTimes(GetItemCommand, 0);
+    expect(tweet).not.toHaveBeenCalled();
   });
 
   it('adds the Lambda context to log entries when one is passed', async () => {
@@ -296,10 +168,8 @@ describe('x-notifier', () => {
   });
 
   it('reuses the X client within a container', async () => {
-    stored('clear', 0);
-    await target.handler(sqsEvent(statusMessage('flooded')));
-    stored('flooded', 0);
-    await target.handler(sqsEvent(statusMessage('clear')));
+    await target.handler(sqsEvent(announcement()));
+    await target.handler(sqsEvent(announcement('droppingClear')));
 
     expect(tweet).toHaveBeenCalledTimes(2);
     expect(ssmMock).toHaveReceivedCommandTimes(GetParameterCommand, 1);
@@ -307,26 +177,5 @@ describe('x-notifier', () => {
       Name: '/river-levels/x-credentials',
       WithDecryption: true,
     });
-  });
-});
-
-describe('getPostedState', () => {
-  it('treats an incomplete record as none', async () => {
-    dynamoDbMock.on(GetItemCommand).resolves({
-      Item: { station: { S: 'kenilworth' }, state: { S: 'clear' } },
-    });
-
-    await target.handler(sqsEvent(statusMessage('flooded')));
-
-    expect(puts()[0].ConditionExpression).toBe('attribute_not_exists(station)');
-  });
-
-  it('rethrows errors other than a lost claim', async () => {
-    stored('clear', 0);
-    dynamoDbMock.on(PutItemCommand).rejects(new Error('throttled'));
-
-    const response = await target.handler(sqsEvent(statusMessage('flooded')));
-
-    expect(response.batchItemFailures).toHaveLength(1);
   });
 });

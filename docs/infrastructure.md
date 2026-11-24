@@ -44,6 +44,10 @@ flowchart LR
 
   subgraph notifications["AWS · RiverLevelsNotifications stack · eu-west-2"]
     direction LR
+    annqueue["SQS<br/>ford-announcer-queue"]
+    anndlq["SQS<br/>ford-announcer-dead-letter-queue"]
+    announcer["ford-announcer Lambda<br/>arm64 · 256 MB · 30 s"]
+    anntopic["SNS topic<br/>ford-announcements"]
     xqueue["SQS<br/>x-notifier-queue"]
     xdlq["SQS<br/>x-notifier-dead-letter-queue"]
     xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
@@ -88,15 +92,19 @@ flowchart LR
   apipublisher -- "Query latest 12 / last year" --> mrsc
   apipublisher -- "PutObject" --> bucket
   apipublisher -- "each station's status, every batch" --> statustopic
-  statustopic -- "raw message delivery" --> xqueue
+  statustopic -- "raw message delivery" --> annqueue
+  annqueue -- "batches of 10" --> announcer
+  annqueue -. "after 5 receives" .-> anndlq
+  announcer -- "claim the change (notifier-state)" --> mrsc
+  announcer -- "once per state change" --> anntopic
+  anntopic -- "raw message delivery" --> xqueue
   xqueue -- "batches of 10" --> xnotifier
   xqueue -. "after 5 receives" .-> xdlq
-  xnotifier -- "claim the change (notifier-state)" --> mrsc
   xnotifier -- "credentials" --> xsecret
   xnotifier -- "post on a state change (post mode)" --> xaccount
   xsmoke -- "credentials" --> xsecret
   xsmoke -. "post and delete when the smoke test changes" .-> xaccount
-  xdlq -. "metrics" .-> alarms
+  xdlq & anndlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
   cdn -. "on 403 or 5xx" .-> regionalbucket
   website -- "GET /status, /chart" --> cdn
@@ -254,7 +262,7 @@ An `ApiStack` in a region that doesn't serve the API (the regional stacks) diffe
 
 `ApiDistribution` also takes a `failoverBucket`: an origin group with `api-bucket` as primary and that bucket as fallback, switching on `403`, `500`, `502`, `503` or `504` (`FAILOVER_STATUS_CODES`). `RiverLevelsApi` passes eu-west-1's bucket. An origin group takes two origins, so eu-central-1's bucket is a spare. The distribution refers to the failover bucket by name, not as the other stack's `Bucket`, so origin access control doesn't try to add the distribution to that bucket's policy, which would make the two stacks depend on each other.
 
-### 5. Notifications: posting ford state changes to X
+### 5. Notifications: announcing ford state changes
 
 After writing a station's `status.json`, the API publisher also publishes the status to the `station-status` SNS topic, once per batch, whether or not anything changed:
 
@@ -262,31 +270,43 @@ After writing a station's `status.json`, the API publisher also publishes the st
 {"station":"kenilworth","depth":1.3,"direction":"rising","rate":"fast","state":"flooded","lastUpdate":"2020-01-01T15:15:00.000Z"}
 ```
 
-The `RiverLevelsNotifications` stack's [`x-notifier`](../src/notifications-stack/x-notifier.lambda.ts) reads them through `x-notifier-queue`. For each station in a batch, it takes the newest status and compares its ford `state` with the last state posted, which is kept in the `notifier-state` table ([`decide.ts`](../src/notifications-stack/decide.ts)):
+The `RiverLevelsNotifications` stack splits this into an announcer, which decides when a change is announced, and a deliverer per channel. X is the only channel so far.
 
-- **Nothing recorded yet:** records the state without posting, so a deploy doesn't announce the current state.
+The [`ford-announcer`](../src/notifications-stack/ford-announcer.lambda.ts) reads the statuses through `ford-announcer-queue`. For each station in a batch, it takes the newest status and compares its ford `state` with the last state announced, which is kept in the `notifier-state` table ([`decide.ts`](../src/notifications-stack/decide.ts)):
+
+- **Nothing recorded yet:** records the state without announcing, so a deploy doesn't announce the current state.
 - **Same state:** nothing.
-- **Changed, less than 60 minutes after the last post:** held back. A state that flips back and forth near a threshold isn't posted over and over. A change that persists is posted once the hour is up, because the status arrives with every batch.
-- **Changed, otherwise:** posted. The post's wording ([`messages.ts`](../src/notifications-stack/messages.ts)) is ported from flood-readings, with one of several variants picked at random:
-  - rising to flooded
-  - rising to impassable (from either state)
-  - dropping from impassable to flooded
-  - dropping to clear
+- **Changed, less than 60 minutes after the last announcement:** held back. A state that flips back and forth near a threshold isn't announced over and over. A change that persists is announced once the hour is up, because the status arrives with every batch.
+- **Changed, otherwise:** announced. It claims the change with a conditional write to the state table, so two invocations can't both announce it, then publishes one message to the `ford-announcements` topic. If publishing fails, it restores the previous record and reports the station's messages for retry. After 5 attempts they go to `ford-announcer-dead-letter-queue`, which raises the `ford-announcer-dead-letters` alarm.
 
-  The post ends with "See <website> for more details." when the station's `ford.website` is set.
+An announcement ([`announcement.ts`](../src/notifications-stack/announcement.ts)):
 
-The decision only looks at the status, worked out from the latest readings, so copying historical readings into the table can't trigger posts.
+```json
+{"id":"kenilworth:flooded:1800000000000","station":"kenilworth","transition":"risingFlooded","state":"flooded","previousState":"clear","depth":1.3,"lastUpdate":"2027-01-15T08:00:00.000Z","announcedAt":"2027-01-15T08:01:12.000Z"}
+```
 
-Before posting, the notifier claims the change with a conditional write to the state table, so two invocations can't both post it. If posting fails, it restores the previous record and reports the station's messages for retry. After 5 attempts they go to `x-notifier-dead-letter-queue`, which raises the `x-notifier-dead-letters` alarm.
+The decision only looks at the status, worked out from the latest readings, so copying historical readings into the table can't trigger announcements.
+
+#### Posting to X
+
+The [`x-notifier`](../src/notifications-stack/x-notifier.lambda.ts) reads the announcements through `x-notifier-queue` and posts each one. The post's wording ([`messages.ts`](../src/notifications-stack/messages.ts)) is ported from flood-readings, with one of several variants picked at random for each `transition`:
+- `risingFlooded`: rising to flooded
+- `risingImpassable`: rising to impassable (from either state)
+- `droppingFlooded`: dropping from impassable to flooded
+- `droppingClear`: dropping to clear
+
+The post ends with "See <website> for more details." when the station's `ford.website` is set.
+
+A post that fails is retried on its own; after 5 attempts the announcement goes to `x-notifier-dead-letter-queue`, which raises the `x-notifier-dead-letters` alarm. The claim stays, so the change isn't announced again on the other channels. A message in the queue that isn't an announcement, such as a status left from before the announcer existed, is logged and skipped. SQS can deliver a message twice, rarely, so a post can occasionally be duplicated.
 
 #### Multi-region notifications
 
-Every `NotificationsStack` imports `notifier-state` from `RiverLevelsData`, named by `stateTableName`, instead of creating a table. It uses the replica in its own region. Every region's API publisher publishes a status for every batch, so each region's notifier sees the same changes. The claim above is a conditional write to a strongly consistent table, so only one region wins it and posts. A `ReplicatedWriteConflictException`, when two regions write the record at the same moment, fails the station like any other error. The retry reads the record again and sees the winner's claim.
+Every `NotificationsStack` imports `notifier-state` from `RiverLevelsData`, named by `stateTableName`, instead of creating a table. It uses the replica in its own region. Every region's API publisher publishes a status for every batch, so each region's announcer sees the same changes. The claim is a conditional write to a strongly consistent table, so only one region wins it and publishes the announcement, to its own region's `ford-announcements` topic, and that region's deliverers deliver it. A `ReplicatedWriteConflictException`, when two regions write the record at the same moment, fails the station like any other error. The retry reads the record again and sees the winner's claim.
 
-Every region's notifier uses the stage's mode. Each region needs its own `/river-levels/x-credentials` parameter (below), because SSM doesn't replicate parameters. A region without it fails the post and restores the claim, and the retry, or another region, posts it. Only `RiverLevelsNotifications` in eu-west-2 runs the smoke test.
+Every region's notifier uses the stage's mode. Each region needs its own `/river-levels/x-credentials` parameter (below), because SSM doesn't replicate parameters. A region without it fails the post, which ends in that region's `x-notifier-dead-letter-queue`, because the other regions don't see the announcement. Only `RiverLevelsNotifications` in eu-west-2 runs the smoke test.
 
 **Modes** (`xNotifierMode()` in [`src/stage.ts`](../src/stage.ts)):
-- `log`: runs everything and records state, but logs the post instead of sending it.
+- `log`: announces as usual, but the X notifier logs the post instead of sending it.
 - `post`: posts to the X account whose credentials are in the stage's `/river-levels/x-credentials` parameter.
 
 Development is in `post`, using a test X account. Production is in `post`, as the kenilworthford.com account, which it took over from flood-readings (below). `local` is always `log`.
@@ -446,9 +466,15 @@ Logical names as they appear in the CloudFormation template.
 
 | Resource | Type | Key settings |
 |----------|------|--------------|
-| `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
+| `ford-announcements` | `AWS::SNS::Topic` | `river-levels-ford-announcements`. Encrypted with the AWS-managed `alias/aws/sns` key. SSL enforced. |
+| `ford-announcer-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `ford-announcer-dead-letter-queue` after 5 receives. |
+| `ford-announcer-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
+| `ford-announcer-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `ANNOUNCEMENTS_TOPIC_ARN`, `STATE_TABLE`. Event source: `ford-announcer-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `ford-announcer-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
+| `ford-announcer-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+| `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `ford-announcements` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
 | `x-notifier-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
-| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATE_TABLE`, `STATIONS`, `X_CREDENTIALS_PARAMETER`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATIONS`, `X_CREDENTIALS_PARAMETER`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 | `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 26, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_PARAMETER`. |
@@ -486,7 +512,9 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `api-publisher-role` | `dynamodb:Query` | the region's replica of `readings` |
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
 | `api-publisher-role` | `sns:Publish` | `station-status` |
-| `x-notifier-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | the region's replica of `notifier-state` |
+| `ford-announcer-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | the region's replica of `notifier-state` |
+| `ford-announcer-role` | `sns:Publish` | `ford-announcements` |
+| `ford-announcer-role` | SQS consume (added by CDK) | `ford-announcer-queue` |
 | `x-notifier-role` | `ssm:GetParameter` | `/river-levels/x-credentials` (decrypted with the AWS-managed `aws/ssm` key, which its key policy allows through SSM) |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
 | `x-smoke-test-role` | `ssm:GetParameter` | `/river-levels/x-credentials` |
@@ -520,7 +548,8 @@ flowchart LR
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
-- **Posts:** the `x-notifier` logs (service `x-notifier`) record each recorded state, held-back change, post ("Posted to X" with the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
+- **Announcements:** the `ford-announcer` logs (service `ford-announcer`) record each first state recorded, held-back change and announcement ("Announced a state change" with its `id` and `transition`). Failed announcements end up in `ford-announcer-dead-letter-queue`.
+- **Posts:** the `x-notifier` logs (service `x-notifier`) record each post ("Posted to X" with the announcement's `id`, the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
 - **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing parameter or a revoked credential in `/river-levels/x-credentials`, or the X API's limits.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
@@ -536,4 +565,5 @@ The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/a
 | `sns-publisher-iterator-age` | The publisher is 15 minutes or more behind the stream for 10 minutes | Publisher logs; SNS errors or throttling |
 | `sns-publisher-failures` | `sns-publisher-failure-queue` has any messages | The queued stream positions; recover readings from the table |
 | `api-publisher-dead-letters` | `api-publisher-dead-letter-queue` has any messages | Publisher logs (service `api-publisher`); DynamoDB or S3 errors |
+| `ford-announcer-dead-letters` | `ford-announcer-dead-letter-queue` has any messages | Announcer logs (service `ford-announcer`); DynamoDB or SNS errors. No channel got the change |
 | `x-notifier-dead-letters` | `x-notifier-dead-letter-queue` has any messages | Notifier logs (service `x-notifier`); usually a missing `/river-levels/x-credentials` parameter or value, or an X API error |

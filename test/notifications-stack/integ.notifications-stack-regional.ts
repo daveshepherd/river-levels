@@ -2,6 +2,8 @@ import 'source-map-support/register';
 import { ExpectedResult, IntegTest, Match } from '@aws-cdk/integ-tests-alpha';
 import { App, Aspects, Duration, Stack, Tags } from 'aws-cdk-lib';
 import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { DataStack } from '../../src/data-stack';
 import { ApplyDestroyPolicyAspect } from '../../src/destroy-policy';
@@ -36,6 +38,15 @@ const stackUnderTest = new NotificationsStack(app, 'IntegrationTestRegionalNotif
   stations: [{ id: 'kenilworth', measureId: '2627-level-stage-i-15_min-mASD' }],
   statusTopic,
 });
+// Receives the announcements, so the test can check what was announced
+const announcementsDLQ = new Queue(stackUnderTest, 'test-dlq', { enforceSSL: true });
+const announcementsQueue = new Queue(stackUnderTest, 'test-queue', {
+  deadLetterQueue: { queue: announcementsDLQ, maxReceiveCount: 5 },
+  enforceSSL: true,
+});
+stackUnderTest.announcementsTopic.addSubscription(
+  new SqsSubscription(announcementsQueue, { rawMessageDelivery: true }),
+);
 for (const stack of [data, fixtures, stackUnderTest]) {
   Tags.of(stack).add('endor:ManagedBy', 'cdk');
   Tags.of(stack).add('endor:Stage', 'development');
@@ -84,12 +95,42 @@ function expectRecordedState(state: string, postedAt: unknown) {
     });
 }
 
-// The first status is recorded without posting, then a change is claimed,
-// both through the conditional writes on the multi-region table
+// The first status is recorded without announcing, then a change is claimed,
+// both through the conditional writes on the multi-region table, and
+// announced once
 publishStatus('clear')
   .next(expectRecordedState('clear', '0'))
   .next(publishStatus('flooded'))
-  .next(expectRecordedState('flooded', Match.stringLikeRegexp('^[1-9][0-9]+$')));
+  .next(expectRecordedState('flooded', Match.stringLikeRegexp('^[1-9][0-9]+$')))
+  .next(
+    integ.assertions
+      .awsApiCall('SQS', 'ReceiveMessage', {
+        MaxNumberOfMessages: 10,
+        QueueUrl: announcementsQueue.queueUrl,
+        WaitTimeSeconds: 20,
+      })
+      .expect(
+        ExpectedResult.objectLike({
+          Messages: [
+            Match.objectLike({
+              Body: Match.serializedJson(
+                Match.objectLike({
+                  station: 'kenilworth',
+                  transition: 'risingFlooded',
+                  state: 'flooded',
+                  previousState: 'clear',
+                }),
+              ),
+            }),
+          ],
+        }),
+      )
+      .waitForAssertions({
+        totalTimeout: Duration.minutes(5),
+        interval: Duration.seconds(15),
+        backoffRate: 2,
+      }),
+  );
 
 NagSuppressions.addStackSuppressions(stackUnderTest, [
   {
@@ -109,17 +150,18 @@ NagSuppressions.addStackSuppressions(stackUnderTest, [
     reason: 'the cross-region reference provider is managed by CDK and pins its own runtime',
   },
 ]);
-NagSuppressions.addResourceSuppressionsByPath(
-  stackUnderTest,
-  '/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Resource',
-  [
-    {
-      id: 'AwsSolutions-SQS3',
-      reason:
-        'this queue is the dead-letter queue for the X notifier queue, so it does not need a DLQ of its own',
-    },
-  ],
-);
+for (const queue of ['ford-announcer-dead-letter-queue', 'x-notifier-dead-letter-queue', 'test-dlq']) {
+  NagSuppressions.addResourceSuppressionsByPath(
+    stackUnderTest,
+    `/IntegrationTestRegionalNotificationsStack/${queue}/Resource`,
+    [
+      {
+        id: 'AwsSolutions-SQS3',
+        reason: 'this queue is itself a dead-letter queue, so it does not need one of its own',
+      },
+    ],
+  );
+}
 NagSuppressions.addStackSuppressions(data, [
   {
     id: 'AwsSolutions-IAM4',

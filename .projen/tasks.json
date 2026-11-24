@@ -76,6 +76,9 @@
           "spawn": "bundle:api-stack/api-publisher.lambda"
         },
         {
+          "spawn": "bundle:notifications-stack/ford-announcer.lambda"
+        },
+        {
           "spawn": "bundle:notifications-stack/x-notifier.lambda"
         },
         {
@@ -120,6 +123,45 @@
             "--target=node26",
             "--platform=node",
             "--outfile=assets/api-stack/api-publisher.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/ford-announcer.lambda": {
+      "name": "bundle:notifications-stack/ford-announcer.lambda",
+      "description": "Create a JavaScript bundle from src/notifications-stack/ford-announcer.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/ford-announcer.lambda.ts",
+            "--target=node26",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/ford-announcer.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
+        }
+      ]
+    },
+    "bundle:notifications-stack/ford-announcer.lambda:watch": {
+      "name": "bundle:notifications-stack/ford-announcer.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/notifications-stack/ford-announcer.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/notifications-stack/ford-announcer.lambda.ts",
+            "--target=node26",
+            "--platform=node",
+            "--outfile=assets/notifications-stack/ford-announcer.lambda/index.js",
             "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",

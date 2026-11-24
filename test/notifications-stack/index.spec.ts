@@ -21,20 +21,37 @@ function synth(props: Partial<NotificationsStackProps> = {}) {
 }
 
 describe('NotificationsStack', () => {
-  test('that the notifier is given its mode, table, secret and stations', () => {
-    const { stack, template } = synth({
+  test('that the announcer is given the state table and the announcements topic', () => {
+    const { stack, template } = synth();
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Description: 'src/notifications-stack/ford-announcer.lambda.ts',
+      Runtime: 'nodejs26.x',
+      Timeout: 30,
+      TracingConfig: { Mode: 'Active' },
+      Environment: {
+        Variables: {
+          ANNOUNCEMENTS_TOPIC_ARN: stack.resolve(stack.announcementsTopic.topicArn),
+          STATE_TABLE: 'notifier-state',
+        },
+      },
+    });
+  });
+
+  test('that the X notifier is given its mode, stations and credentials parameter', () => {
+    const { template } = synth({
       mode: 'post',
       stations: [{ id: 'a', measureId: 'm' }],
     });
 
     template.hasResourceProperties('AWS::Lambda::Function', {
+      Description: 'src/notifications-stack/x-notifier.lambda.ts',
       Runtime: 'nodejs26.x',
       Timeout: 30,
       TracingConfig: { Mode: 'Active' },
       Environment: {
         Variables: {
           MODE: 'post',
-          STATE_TABLE: stack.resolve(stack.stateTable.tableName),
           STATIONS: JSON.stringify([{ id: 'a', measureId: 'm' }]),
           X_CREDENTIALS_PARAMETER: '/river-levels/x-credentials',
         },
@@ -42,26 +59,35 @@ describe('NotificationsStack', () => {
     });
   });
 
+  test('that announcements go to an encrypted topic', () => {
+    synth().template.hasResourceProperties('AWS::SNS::Topic', {
+      DisplayName: 'river-levels-ford-announcements',
+      KmsMasterKeyId: Match.anyValue(),
+    });
+  });
+
+  test('that statuses feed the announcer and announcements feed the X notifier', () => {
+    const { stack, template } = synth();
+
+    const subscriptions = Object.values(template.findResources('AWS::SNS::Subscription'));
+    expect(subscriptions).toHaveLength(2);
+    for (const subscription of subscriptions) {
+      expect(subscription.Properties).toMatchObject({ Protocol: 'sqs', RawMessageDelivery: true });
+    }
+    expect(subscriptions.map((sub) => sub.Properties.TopicArn)).toContainEqual(
+      stack.resolve(stack.announcementsTopic.topicArn),
+    );
+    template.resourcePropertiesCountIs(
+      'AWS::Lambda::EventSourceMapping',
+      { BatchSize: 10, FunctionResponseTypes: ['ReportBatchItemFailures'] },
+      2,
+    );
+  });
+
   test('that it uses the multi-region state table instead of creating one', () => {
     const { stack, template } = synth();
 
     template.resourceCountIs('AWS::DynamoDB::GlobalTable', 0);
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      Environment: {
-        Variables: Match.objectLike({ STATE_TABLE: 'notifier-state' }),
-      },
-    });
-    template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
-      PolicyDocument: {
-        Statement: Match.arrayWith([
-          {
-            Action: ['dynamodb:GetItem', 'dynamodb:PutItem'],
-            Effect: 'Allow',
-            Resource: stack.resolve(stack.stateTable.tableArn),
-          },
-        ]),
-      },
-    });
     expect(JSON.stringify(stack.resolve(stack.stateTable.tableArn))).toContain(
       ':table/notifier-state',
     );
@@ -74,27 +100,24 @@ describe('NotificationsStack', () => {
     template.resourceCountIs('AWS::SSM::Parameter', 0);
   });
 
-  test('that station statuses are queued with raw delivery and a dead-letter queue', () => {
+  test('that each queue has a dead-letter queue', () => {
     const { template } = synth();
 
-    template.hasResourceProperties('AWS::SNS::Subscription', {
-      Protocol: 'sqs',
-      RawMessageDelivery: true,
-    });
-    template.hasResourceProperties('AWS::SQS::Queue', {
-      VisibilityTimeout: 180,
-      RedrivePolicy: Match.objectLike({ maxReceiveCount: 5 }),
-    });
-    template.hasResourceProperties('AWS::Lambda::EventSourceMapping', {
-      BatchSize: 10,
-      FunctionResponseTypes: ['ReportBatchItemFailures'],
-    });
+    template.resourcePropertiesCountIs(
+      'AWS::SQS::Queue',
+      {
+        VisibilityTimeout: 180,
+        RedrivePolicy: Match.objectLike({ maxReceiveCount: 5 }),
+      },
+      2,
+    );
   });
 
-  test('that the notifier can only use its table and credentials parameter', () => {
+  test('that the announcer can only use the state table and the announcements topic', () => {
     const { stack, template } = synth();
 
     template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      Description: 'Read and claim the last state announced per station, and publish announcements',
       PolicyDocument: {
         Statement: [
           {
@@ -102,6 +125,21 @@ describe('NotificationsStack', () => {
             Effect: 'Allow',
             Resource: stack.resolve(stack.stateTable.tableArn),
           },
+          {
+            Action: 'sns:Publish',
+            Effect: 'Allow',
+            Resource: stack.resolve(stack.announcementsTopic.topicArn),
+          },
+        ],
+      },
+    });
+  });
+
+  test('that the X notifier can only read its credentials parameter', () => {
+    synth().template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      Description: 'Read the X credentials, to post announcements',
+      PolicyDocument: {
+        Statement: [
           {
             Action: 'ssm:GetParameter',
             Effect: 'Allow',
@@ -114,9 +152,10 @@ describe('NotificationsStack', () => {
     });
   });
 
-  test('that the dead-letter queue alarm notifies the alerts topic', () => {
+  test('that each dead-letter queue has an alarm that notifies the alerts topic', () => {
     const { template } = synth();
 
+    template.resourceCountIs('AWS::CloudWatch::Alarm', 2);
     template.hasResourceProperties('AWS::CloudWatch::Alarm', {
       MetricName: 'ApproximateNumberOfMessagesVisible',
       AlarmActions: [Match.anyValue()],
