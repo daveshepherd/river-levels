@@ -393,7 +393,9 @@
           "execArgs": [
             "cdk",
             "deploy",
-            "--all"
+            "--all",
+            "--concurrency",
+            "4"
           ],
           "receiveArgs": true
         }

@@ -4,7 +4,7 @@
 
 Collects river level readings from the [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/reference), stores them in DynamoDB, publishes each new reading to SNS, and keeps a status and chart file for each station for the [kenilworthford.com](https://kenilworthford.com) website.
 
-Every 10 minutes a crawler Lambda fetches new readings for each station in [`src/storage-stack/stations.ts`](src/storage-stack/stations.ts) (currently Kenilworth) and writes them to a DynamoDB global table in `eu-west-2`, replicated to `eu-west-1`. A second Lambda reads the table's stream and publishes each new reading to the `river-levels-notifications` SNS topic as:
+It runs active-active in `eu-west-2`, `eu-west-1` and `eu-central-1`. Every 10 minutes a crawler Lambda in each region fetches new readings for each station in [`src/storage-stack/stations.ts`](src/storage-stack/stations.ts) (currently Kenilworth) and writes any that are new to a strongly consistent DynamoDB global table, so each reading is stored once. In each region a second Lambda reads the table's stream and publishes the readings that region wrote to its `river-levels-notifications` SNS topic as:
 
 ```json
 {"reading_depth": 0.694, "station": "kenilworth", "timestamp": 1718374500000}
@@ -17,7 +17,7 @@ The `RiverLevelsApi` stack queues those notifications and, once per batch, rewri
 - `stations/{id}/status.json`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is `clear`, `flooded` or `impassable`
 - `stations/{id}/chart.json`: every reading from the last year, as `[[timestamp, depth], ...]`
 
-Each station's status is also published to a `station-status` topic, and a notifier posts each ford state change (clear, flooded, impassable) to X, at most once an hour per station.
+Each station's status is also published to a `station-status` topic. An announcer announces each ford state change (clear, flooded, impassable) once, at most once an hour per station, and a notifier posts it to X.
 
 CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
 

@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from 'fs';
 import { App, Aws, Duration, Tags } from 'aws-cdk-lib';
 import { ApiDomainStack } from './api-domain-stack';
 import { ApiStack } from './api-stack';
@@ -153,11 +152,8 @@ new NotificationsStack(app, 'RiverLevelsNotifications', {
 
 Tags.of(app).add('endor:ManagedBy', 'cdk');
 Tags.of(app).add('endor:Stage', stage);
-
-let version = 'local';
-if (existsSync('./dist/releasetag.txt')) {
-  version = readFileSync('./dist/releasetag.txt', 'utf-8');
-}
-Tags.of(app).add('endor:Version', version);
+// No release version tag: one that changes every release updates every
+// resource in every stack, so each deploy takes far longer and AWS Config
+// records a change for each resource. The GitHub release records the version.
 
 app.synth();
