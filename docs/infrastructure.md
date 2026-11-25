@@ -3,7 +3,7 @@
 This page describes what the CDK app deploys and how data moves through it. The source of truth is the code in [`src/`](../src). If you change the infrastructure, update this page in the same PR.
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
-- **Stacks:** eleven, all deployed by `cdk deploy --all`. The app runs active-active in `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt) ([ADR 0001](adr/0001-multi-region-active-active.md)):
+- **Stacks:** eleven, all deployed by `cdk deploy --all --concurrency 4`. The app runs active-active in `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt) ([ADR 0001](adr/0001-multi-region-active-active.md)):
   - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)), in eu-west-2: the strongly consistent (MRSC) global tables `readings` and `notifier-state`, with replicas in all three regions. The other stacks get their names through exports, or cross-region references in the other regions.
   - `RiverLevels-eu-west-2`, `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in each region, against its replica of `readings`. See [Multi-region storage](#multi-region-storage).
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)), in eu-west-2: publishes each station's status and chart as JSON files in S3, and serves them through CloudFront, failing over to eu-west-1's copy. It imports the notifications and alerts topics from `RiverLevels-eu-west-2`, so those can't be renamed or replaced while it uses them.
@@ -497,7 +497,7 @@ Logical names as they appear in the CloudFormation template.
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
 - `XCredentialsParameterName` from `RiverLevelsNotifications`
 
-**Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset), and `endor:Version` (the release tag, or `local`).
+**Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset). There's no release version tag: a tag whose value changes every release would update every resource in every stack, making each deploy take about 25 minutes and adding an AWS Config charge per resource. The GitHub release records which version is deployed.
 
 ## IAM
 
@@ -532,9 +532,9 @@ flowchart LR
   dev --> prod["deploy_production<br/>environment: production"]
 ```
 
-- The deploy jobs check out the released commit and download the release job's `dist` artifact, which provides `releasetag.txt` for the `endor:Version` tag. They don't rebuild or re-run tests: the release job already did that for the same commit, and `cdk deploy` bundles the Lambdas through the `build` hook in `cdk.json`.
+- The deploy jobs check out the released commit and download the release job's `dist` artifact. They don't rebuild or re-run tests: the release job already did that for the same commit, and `cdk deploy` bundles the Lambdas through the `build` hook in `cdk.json`.
 - **Each account is CDK-bootstrapped in both `eu-west-2` and `us-east-1`**, because `RiverLevelsApiDomain` deploys to us-east-1. The bootstrap (`CDKToolkit` stacks, qualifier `hnb659fds`, version 32) is managed by Terraform in endor-infrastructure's `modules/cdk_bootstrap`. **Don't run `cdk bootstrap` against these accounts**, as it would drift from Terraform. To upgrade, regenerate the template there. The GitHub deploy role can assume the bootstrap roles in any region.
-- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all` and so deploys all four stacks, including `RiverLevelsApiDomain` in us-east-1, with `STAGE` set to `development` or `production` for the `endor:Stage` tag.
+- Both deploy jobs run `yarn deploy --require-approval never` in `eu-west-2`, which runs `cdk deploy --all --concurrency 4` and so deploys all eleven stacks, including those in eu-west-1, eu-central-1 and us-east-1, with `STAGE` set to `development` or `production` for the `endor:Stage` tag. Stacks that don't depend on each other, such as the three regional storage stacks, deploy at the same time, and stacks with no changes are skipped.
 - Both jobs also pass `ALERT_EMAIL` from the `ALERT_EMAIL` GitHub secret (a repository secret, or an environment secret to use a different address per environment). The synth fails if it is missing for a deployed stage. AWS emails a confirmation link after the first deploy, and alerts aren't delivered until it is clicked.
 - Each job signs in to AWS through GitHub OIDC with the role in that environment's `AWS_DEPLOYMENT_ROLE_ARN` secret. Approval rules or required reviewers on the `production` environment are configured in GitHub, not in this repo.
 - Pull requests are merged only by the Mergify queue, once `build` and `CodeQL` pass. PRs from `trustedAuthors` (the sole maintainer) need no approval; everyone else's need one, and fork PRs also need their workflow runs approved first. Draft PRs and PRs labelled `do-not-merge` are held. The repository settings are described in [`docs/github-configuration.md`](github-configuration.md), which projen generates.
