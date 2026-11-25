@@ -17,7 +17,7 @@
       "data": "CheckBootstrapVersion"
     }
   ],
-  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommandc4bc38c5987830200e874294eaf530a6/Default": [
+  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommand7e39f92eb4e4048487602d94eb89bb4f/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -79,7 +79,7 @@
       "data": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA"
     }
   ],
-  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommanda15a070b054814d3b6b3b293f22df3a2/Default": [
+  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommand7b67283223f56045a309a0f130809291/Default": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": "*"
@@ -105,10 +105,30 @@
       "data": "AssertionResultsAwsApiCallawssdkclientdynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb1999321"
     }
   ],
-  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommandc4bc38c5987830200e874294eaf530a6/Default/Default": [
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/Default": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": "*"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/AssertionResults": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientsnsPublishCommandc4bc38c5987830200e874294eaf530a6"
+      "data": "AssertionResultsAwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommand7e39f92eb4e4048487602d94eb89bb4f/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallawssdkclientsnsPublishCommand7e39f92eb4e4048487602d94eb89bb4f"
     }
   ],
   "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-dynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb199932/Default/Default": [
@@ -129,10 +149,10 @@
       "data": "AwsApiCallawssdkclientdynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb199932WaitFor9D7F200E"
     }
   ],
-  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommanda15a070b054814d3b6b3b293f22df3a2/Default/Default": [
+  "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-snsPublishCommand7b67283223f56045a309a0f130809291/Default/Default": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "AwsApiCallawssdkclientsnsPublishCommanda15a070b054814d3b6b3b293f22df3a2"
+      "data": "AwsApiCallawssdkclientsnsPublishCommand7b67283223f56045a309a0f130809291"
     }
   ],
   "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-dynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb1999321/Default/Default": [
@@ -151,6 +171,24 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "AwsApiCallawssdkclientdynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb1999321WaitFor1DF0CE00"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/Default/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/WaitFor/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81WaitForRole2F1163F7"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/WaitFor/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81WaitFor1F63D388"
     }
   ],
   "/RegionalNotificationsTestAssertions/AwsApiCall@aws-sdk--client-dynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb199932/WaitFor/IsCompleteProvider/Invoke": [
@@ -175,6 +213,18 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "AwsApiCallawssdkclientdynamodbGetItemCommandbeb3434e1ab7f72c1ae036dceb1999321WaitForTimeoutProviderInvoke8E2A89A9"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/WaitFor/IsCompleteProvider/Invoke": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81WaitForIsCompleteProviderInvoke70877175"
+    }
+  ],
+  "/RegionalNotificationsTestAssertions/AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81/WaitFor/TimeoutProvider/Invoke": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AwsApiCallSQSReceiveMessage16bfee7c880b9be3eee60fac4f90fd81WaitForTimeoutProviderInvoke0EB044E1"
     }
   ]
 }
