@@ -13,16 +13,19 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { ITableV2, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
-import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
+import { Alias } from 'aws-cdk-lib/aws-kms';
+import { Architecture, Tracing, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { ITopic } from 'aws-cdk-lib/aws-sns';
+import { ITopic, Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Trigger } from 'aws-cdk-lib/triggers';
 import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import type { NotifierMode } from '../stage';
+import { FordAnnouncerFunction } from './ford-announcer-function';
+import { FordAnnouncerRole } from './ford-announcer.role';
 import { XNotifierFunction } from './x-notifier-function';
 import { XNotifierRole } from './x-notifier.role';
 import { XSmokeTestFunction } from './x-smoke-test-function';
@@ -66,11 +69,14 @@ export interface NotificationsStackProps extends StackProps {
 export const X_CREDENTIALS_PARAMETER_NAME = '/river-levels/x-credentials';
 
 /**
- * Announces ford state changes. The X notifier is the first channel; others
- * can subscribe to the station-status topic the same way.
+ * Announces ford state changes and delivers them. The ford announcer decides
+ * when a change is announced and publishes it once to the ford-announcements
+ * topic; each channel (X first) subscribes to that topic with its own queue.
  */
 export class NotificationsStack extends Stack {
   public readonly stateTable: ITableV2;
+  /** Each announced ford state change, for the channels to deliver. */
+  public readonly announcementsTopic: Topic;
   /** The SSM parameter the X credentials are read from. */
   public readonly credentialsParameterName: string;
 
@@ -78,13 +84,48 @@ export class NotificationsStack extends Stack {
     super(scope, id, props);
     const destroy = props.setDestroyPolicyToAllResources ?? false;
 
-    // The last state posted for each station, for the cooldown and to
-    // recognise a change. With the multi-region table, the conditional claim
-    // in posted-state.ts lets only one region post each change.
+    // The last state announced for each station, for the cooldown and to
+    // recognise a change. The conditional claim in posted-state.ts on this
+    // multi-region table lets only one region announce each change.
     this.stateTable = TableV2.fromTableName(
       this,
       'x-notifier-state',
       props.stateTableName,
+    );
+    const stations = validateStations(props.stations ?? STATIONS);
+    const alarmAction = props.alertsTopic
+      ? new SnsAction(props.alertsTopic)
+      : undefined;
+
+    this.announcementsTopic = new Topic(this, 'ford-announcements', {
+      displayName: 'river-levels-ford-announcements',
+      enforceSSL: true,
+      masterKey: Alias.fromAliasName(this, 'aws-managed-sns-key', 'alias/aws/sns'),
+    });
+
+    const announcer = new FordAnnouncerFunction(this, 'ford-announcer-lambda', {
+      architecture: Architecture.ARM_64,
+      environment: {
+        ANNOUNCEMENTS_TOPIC_ARN: this.announcementsTopic.topicArn,
+        STATE_TABLE: this.stateTable.tableName,
+      },
+      logGroup: new LogGroup(this, 'ford-announcer-log-group', {
+        retention: RetentionDays.ONE_YEAR,
+      }),
+      memorySize: 256,
+      role: new FordAnnouncerRole(this, 'ford-announcer-role', {
+        announcementsTopicArn: this.announcementsTopic.topicArn,
+        stateTableArn: this.stateTable.tableArn,
+      }),
+      timeout: Duration.seconds(30),
+      tracing: Tracing.ACTIVE,
+    });
+    this.subscribe(
+      'ford-announcer',
+      props.statusTopic,
+      announcer,
+      'Station statuses failed to be announced after 5 attempts, so a ford state change may not have been announced on any channel. They are in the ford announcer dead-letter queue.',
+      alarmAction,
     );
 
     // An SSM SecureString parameter, set by hand with the X app and account
@@ -100,26 +141,11 @@ export class NotificationsStack extends Stack {
       service: 'ssm',
     });
 
-    const deadLetterQueue = new Queue(this, 'x-notifier-dead-letter-queue', {
-      enforceSSL: true,
-      retentionPeriod: Duration.days(14),
-    });
-    const queue = new Queue(this, 'x-notifier-queue', {
-      deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 5 },
-      enforceSSL: true,
-      // At least 6 times the function timeout, as AWS recommends for SQS event sources
-      visibilityTimeout: Duration.minutes(3),
-    });
-    props.statusTopic.addSubscription(
-      new SqsSubscription(queue, { rawMessageDelivery: true }),
-    );
-
     const notifier = new XNotifierFunction(this, 'x-notifier-lambda', {
       architecture: Architecture.ARM_64,
       environment: {
         MODE: props.mode,
-        STATE_TABLE: this.stateTable.tableName,
-        STATIONS: JSON.stringify(validateStations(props.stations ?? STATIONS)),
+        STATIONS: JSON.stringify(stations),
         X_CREDENTIALS_PARAMETER: this.credentialsParameterName,
       },
       logGroup: new LogGroup(this, 'x-notifier-log-group', {
@@ -128,16 +154,16 @@ export class NotificationsStack extends Stack {
       memorySize: 256,
       role: new XNotifierRole(this, 'x-notifier-role', {
         credentialsParameterArn,
-        stateTableArn: this.stateTable.tableArn,
       }),
       timeout: Duration.seconds(30),
       tracing: Tracing.ACTIVE,
     });
-    notifier.addEventSource(
-      new SqsEventSource(queue, {
-        batchSize: 10,
-        reportBatchItemFailures: true,
-      }),
+    this.subscribe(
+      'x-notifier',
+      this.announcementsTopic,
+      notifier,
+      'Announcements failed to post to X after 5 attempts, so a ford state change may not have been posted. They are in the X notifier dead-letter queue.',
+      alarmAction,
     );
 
     if (props.smokeTest) {
@@ -166,10 +192,47 @@ export class NotificationsStack extends Stack {
       });
     }
 
-    if (props.alertsTopic) {
-      const alarm = new Alarm(this, 'x-notifier-dead-letters', {
-        alarmDescription:
-          'Station statuses failed to notify after 5 attempts, so a ford state change may not have been posted. They are in the X notifier dead-letter queue.',
+    if (destroy) {
+      Aspects.of(this).add(new ApplyDestroyPolicyAspect());
+    }
+    new CfnOutput(this, 'XCredentialsParameterName', {
+      description: 'Create this SSM SecureString parameter with the X credentials before switching the notifier to post',
+      value: this.credentialsParameterName,
+    });
+  }
+
+  /**
+   * Feeds a topic to a function through an SQS queue, with raw message
+   * delivery and partial batch failures. A message that fails 5 times goes to
+   * a dead-letter queue, and with an alarm action, any dead letter alarms.
+   */
+  private subscribe(
+    id: string,
+    topic: ITopic,
+    handler: IFunction,
+    alarmDescription: string,
+    alarmAction?: SnsAction,
+  ) {
+    const deadLetterQueue = new Queue(this, `${id}-dead-letter-queue`, {
+      enforceSSL: true,
+      retentionPeriod: Duration.days(14),
+    });
+    const queue = new Queue(this, `${id}-queue`, {
+      deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 5 },
+      enforceSSL: true,
+      // At least 6 times the function timeout, as AWS recommends for SQS event sources
+      visibilityTimeout: Duration.minutes(3),
+    });
+    topic.addSubscription(new SqsSubscription(queue, { rawMessageDelivery: true }));
+    handler.addEventSource(
+      new SqsEventSource(queue, {
+        batchSize: 10,
+        reportBatchItemFailures: true,
+      }),
+    );
+    if (alarmAction) {
+      const alarm = new Alarm(this, `${id}-dead-letters`, {
+        alarmDescription,
         comparisonOperator:
           ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
         evaluationPeriods: 1,
@@ -180,17 +243,8 @@ export class NotificationsStack extends Stack {
         threshold: 1,
         treatMissingData: TreatMissingData.NOT_BREACHING,
       });
-      const action = new SnsAction(props.alertsTopic);
-      alarm.addAlarmAction(action);
-      alarm.addOkAction(action);
+      alarm.addAlarmAction(alarmAction);
+      alarm.addOkAction(alarmAction);
     }
-
-    if (destroy) {
-      Aspects.of(this).add(new ApplyDestroyPolicyAspect());
-    }
-    new CfnOutput(this, 'XCredentialsParameterName', {
-      description: 'Create this SSM SecureString parameter with the X credentials before switching the notifier to post',
-      value: this.credentialsParameterName,
-    });
   }
 }

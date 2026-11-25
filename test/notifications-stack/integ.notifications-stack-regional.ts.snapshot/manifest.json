@@ -88,7 +88,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/b123280447f4a1a969ff6fa6b27eba8d87a840990b9e28418a9473a10ac8f6c7.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/aa371a990e5b90f52e914d56eb442f2e2d015477849e0f645171dd912870d0f9.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -125,7 +125,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/36e43fbedfba75e32273cf27fb22d1bda52fb2292504369603d623b752065330.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1/6733b5fa582d658a00d30be30fa8b00a8b4e78dc2dc9b5f95fc1c2085cd10174.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -140,6 +140,7 @@
       "dependencies": [
         "IntegrationTestRegionalNotificationsFixtures",
         "IntegrationTestRegionalNotificationsData",
+        "IntegrationTestRegionalNotificationsStack",
         "RegionalNotificationsTestAssertions.assets"
       ],
       "additionalMetadataFile": "RegionalNotificationsTestAssertions.metadata.json",
@@ -709,6 +710,10 @@
             "unconfiguredBehavesLike": {
               "v2": true
             }
+          },
+          "@aws-cdk/aws-iam:importedUserAndGroupStackSafeDefaultPolicyName": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the default policy of an imported user or group gets a name that includes the stack name"
           }
         }
       }

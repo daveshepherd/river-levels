@@ -4,8 +4,8 @@ import {
   GetItemCommand,
   PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import { tracer } from './announcer-powertools';
 import { PostedState } from './decide';
-import { tracer } from './powertools';
 import type { FordState } from '../api-stack/status';
 
 // Created once per Lambda container and reused across invocations.

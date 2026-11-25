@@ -5,7 +5,131 @@
       "data": "IntegrationTestRegionalNotificationsStack.template.json"
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcements": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "displayName": "*",
+        "enforceSSL": true,
+        "masterKey": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-log-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-dead-letter-queue": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
@@ -14,7 +138,7 @@
       }
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
@@ -142,15 +266,6 @@
       "data": {
         "addEnvironment": [
           "*",
-          "*"
-        ]
-      }
-    },
-    {
-      "type": "aws:cdk:analytics:method",
-      "data": {
-        "addEnvironment": [
-          "*",
           "*",
           {
             "removeInEdge": true
@@ -159,10 +274,52 @@
       }
     }
   ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true,
+        "retentionPeriod": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deadLetterQueue": {
+          "queue": "*",
+          "maxReceiveCount": "*"
+        },
+        "enforceSSL": true,
+        "visibilityTimeout": "*"
+      }
+    }
+  ],
   "/IntegrationTestRegionalNotificationsStack/XCredentialsParameterName": [
     {
       "type": "aws:cdk:logicalId",
       "data": "XCredentialsParameterName"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-dlq": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "enforceSSL": true
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deadLetterQueue": {
+          "queue": "*",
+          "maxReceiveCount": "*"
+        },
+        "enforceSSL": true
+      }
     }
   ],
   "/IntegrationTestRegionalNotificationsStack/BootstrapVersion": [
@@ -177,13 +334,129 @@
       "data": "CheckBootstrapVersion"
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Resource": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcements/Resource": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "xnotifierdeadletterqueue5047C832"
+      "data": "fordannouncements7B54CAD9"
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcements/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topics": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-log-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerloggroup3E57A4BD"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerrole05A40DFA"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role/ford-announcer-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerlambdaA2D1A71A"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-lambda/SqsEventSource:IntegrationTestRegionalNotificationsStackfordannouncerqueue82D0D062": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "target": "*",
+        "batchSize": "*",
+        "maxBatchingWindow": "*",
+        "maxConcurrency": "*",
+        "reportBatchItemFailures": true,
+        "enabled": "*",
+        "eventSourceArn": "*",
+        "filters": "*",
+        "filterEncryption": "*",
+        "metricsConfig": "*",
+        "provisionedPollerConfig": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-dead-letter-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerdeadletterqueue134FDB9F"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-dead-letter-queue/Policy": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
@@ -193,13 +466,13 @@
       }
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Resource": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue/Resource": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "xnotifierqueue4AFB83AF"
+      "data": "fordannouncerqueueA62C2E7B"
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue/Policy": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
@@ -209,7 +482,7 @@
       }
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3": [
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3": [
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
@@ -243,14 +516,6 @@
         "description": "*",
         "path": "*",
         "statements": "*"
-      }
-    },
-    {
-      "type": "aws:cdk:analytics:method",
-      "data": {
-        "addStatements": [
-          {}
-        ]
       }
     },
     {
@@ -324,22 +589,152 @@
       }
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy/Resource": [
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Resource": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "xnotifierdeadletterqueuePolicy217DFEE2"
+      "data": "xnotifierdeadletterqueue5047C832"
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy/Resource": [
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy": [
     {
-      "type": "aws:cdk:logicalId",
-      "data": "xnotifierqueuePolicy361D54A1"
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
     }
   ],
-  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3/Resource": [
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Resource": [
     {
       "type": "aws:cdk:logicalId",
-      "data": "xnotifierqueueIntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD343782427"
+      "data": "xnotifierqueue4AFB83AF"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsStackfordannouncements905808F5": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-dlq/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testdlqE3F3EA6D"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-dlq/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueueA58C838B"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue/Policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "queues": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue/IntegrationTestRegionalNotificationsStackfordannouncements905808F5": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "topic": "*",
+        "endpoint": "*",
+        "protocol": "sqs",
+        "rawMessageDelivery": true,
+        "filterPolicy": "*",
+        "filterPolicyWithMessageBody": "*",
+        "region": "*",
+        "deadLetterQueue": "*"
+      }
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/Publish/Output{\"Ref\":\"testqueueA58C838B\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputReftestqueueA58C838BE85F9255"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcements/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncementsPolicyAEB26051"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role/ford-announcer-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerrolefordannouncerpolicy59A4D395"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerroleDefaultPolicy549E7B44"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-lambda/SqsEventSource:IntegrationTestRegionalNotificationsStackfordannouncerqueue82D0D062/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerlambdaSqsEventSourceIntegrationTestRegionalNotificationsStackfordannouncerqueue82D0D062F6753806"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerdeadletterqueuePolicyBDB66643"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerqueuePolicyD085A14B"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/ford-announcer-queue/IntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "fordannouncerqueueIntegrationTestRegionalNotificationsFixturesstationstatus9CEEAFD3B947C64C"
     }
   ],
   "/IntegrationTestRegionalNotificationsStack/x-notifier-role/x-notifier-policy/Resource": [
@@ -364,6 +759,42 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "xnotifierlambdaSqsEventSourceIntegrationTestRegionalNotificationsStackxnotifierqueue985C12083CAC43F5"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-dead-letter-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierdeadletterqueuePolicy217DFEE2"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierqueuePolicy361D54A1"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/x-notifier-queue/IntegrationTestRegionalNotificationsStackfordannouncements905808F5/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "xnotifierqueueIntegrationTestRegionalNotificationsStackfordannouncements905808F586F71B7A"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-dlq/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testdlqPolicy5921D4DA"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueuePolicyB9530952"
+    }
+  ],
+  "/IntegrationTestRegionalNotificationsStack/test-queue/IntegrationTestRegionalNotificationsStackfordannouncements905808F5/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "testqueueIntegrationTestRegionalNotificationsStackfordannouncements905808F5C9547333"
     }
   ]
 }

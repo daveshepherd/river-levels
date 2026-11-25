@@ -71,8 +71,10 @@ src/api-stack/
 src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
-  index.ts                   NotificationsStack: x-notifier, its queue and dead-letter queue, the X credentials SSM parameter (by name; created by hand), alarm; uses the region's replica of notifier-state
-  x-notifier.lambda.ts       station-status topic → posts ford state changes to X (log or post mode)
+  index.ts                   NotificationsStack: ford-announcer and the ford-announcements topic, x-notifier, a queue, dead-letter queue and alarm for each, the X credentials SSM parameter (by name; created by hand); uses the region's replica of notifier-state
+  ford-announcer.lambda.ts   station-status topic → decides and claims each ford state change (notifier-state) → ford-announcements topic, once across regions
+  x-notifier.lambda.ts       ford-announcements topic → posts each announcement to X (log or post mode)
+  announcement.ts            The announcement message format the channels read
   x-smoke-test.lambda.ts     Development only: a CDK trigger runs it when a deploy changes it (its code, the X client or their dependencies) to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
 test/<stack>/                Jest specs mirror src/. integ.*.ts are integ-runner tests
@@ -85,13 +87,14 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 - **Stations:** listed in `src/storage-stack/stations.ts` (`id`, `measureId`, optional `maxDepthRiseMetres`), validated at synth time and passed to the crawler as the `STATIONS` env var. Only `kenilworth` (measure `2627-level-stage-i-15_min-mASD`, 15-minute readings) is configured. Never change an existing `id`: it is the table's partition key and appears in SNS messages.
 - **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days. CloudFront also serves Kenilworth's at `/status` and `/chart`, the paths the website calls; keep those working.
 - **Station status messages** on the `station-status` topic: `{station, depth, direction, rate, state?, lastUpdate}`, published once per batch per station, whether or not anything changed.
+- **Announcements** on the `ford-announcements` topic: `{id, station, transition, state, previousState, depth, lastUpdate, announcedAt}` (`announcement.ts`), published once per ford state change, by the region that claimed it. Each channel subscribes with its own queue.
 - **SNS message body** (other systems subscribe to this, so keep it backward compatible): `{"reading_depth": number, "station": string, "timestamp": number}`. A message is published only on `INSERT` stream events.
 - **Stream failures:** the publisher returns `batchItemFailures` so retries resume from the first unpublished record. After 5 retries, the batch goes to `sns-publisher-failure-queue`.
 
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher, the ford announcer and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `ford-announcer` in `announcer-powertools.ts`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.

@@ -7,7 +7,6 @@ import {
 import { Construct } from 'constructs';
 
 export interface XNotifierRoleProps {
-  stateTableArn: string;
   /** The SSM parameter holding the X credentials. */
   credentialsParameterArn: string;
 }
@@ -26,14 +25,9 @@ export class XNotifierRole extends Role {
     });
     this.addManagedPolicy(
       new ManagedPolicy(this, 'x-notifier-policy', {
-        description:
-          'Read and record the last state posted per station, and read the X credentials',
+        description: 'Read the X credentials, to post announcements',
         path: '/service-policy/',
         statements: [
-          new PolicyStatement({
-            actions: ['dynamodb:GetItem', 'dynamodb:PutItem'],
-            resources: [props.stateTableArn],
-          }),
           new PolicyStatement({
             actions: ['ssm:GetParameter'],
             resources: [props.credentialsParameterArn],
