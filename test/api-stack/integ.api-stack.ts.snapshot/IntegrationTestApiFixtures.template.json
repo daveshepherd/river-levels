@@ -48,6 +48,46 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
   },
+  "pushsubscriptionstable20B891BD": {
+   "Type": "AWS::DynamoDB::GlobalTable",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "id",
+      "KeyType": "HASH"
+     }
+    ],
+    "Replicas": [
+     {
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": {
+       "Ref": "AWS::Region"
+      },
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
   "notificationsBCF85F58": {
    "Type": "AWS::SNS::Topic",
    "Properties": {
@@ -114,6 +154,11 @@
   "PublishOutputRefreadingstableB815496E57727300": {
    "Value": {
     "Ref": "readingstableB815496E"
+   }
+  },
+  "PublishOutputRefpushsubscriptionstable20B891BD1D17A60B": {
+   "Value": {
+    "Ref": "pushsubscriptionstable20B891BD"
    }
   }
  },

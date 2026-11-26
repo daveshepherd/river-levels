@@ -23,6 +23,20 @@
       }
     }
   ],
+  "/IntegrationTestApiFixtures/push-subscriptions-table": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "partitionKey": {
+          "name": "*",
+          "type": "S"
+        },
+        "pointInTimeRecoverySpecification": {
+          "pointInTimeRecoveryEnabled": true
+        }
+      }
+    }
+  ],
   "/IntegrationTestApiFixtures/notifications": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -47,6 +61,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "readingstableB815496E"
+    }
+  ],
+  "/IntegrationTestApiFixtures/push-subscriptions-table/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionstable20B891BD"
     }
   ],
   "/IntegrationTestApiFixtures/notifications/Resource": [
@@ -81,6 +101,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "PublishOutputRefreadingstableB815496E57727300"
+    }
+  ],
+  "/IntegrationTestApiFixtures/Publish/Output{\"Ref\":\"pushsubscriptionstable20B891BD\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PublishOutputRefpushsubscriptionstable20B891BD1D17A60B"
     }
   ],
   "/IntegrationTestApiFixtures/notifications/Policy/Resource": [

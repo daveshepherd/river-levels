@@ -33,7 +33,7 @@
      "ExpressionAttributeNames": "{\"#timestamp\":\"timestamp\"}"
     },
     "flattenResponse": "false",
-    "salt": "1794436146334"
+    "salt": "1795731276941"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -145,7 +145,7 @@
      "ConsistentRead": "true"
     },
     "flattenResponse": "false",
-    "salt": "1794436146334"
+    "salt": "1795731276942"
    },
    "DependsOn": [
     "AwsApiCallDynamoDBputItem0057a4b5ceed223b9b7335c24abed3d9"

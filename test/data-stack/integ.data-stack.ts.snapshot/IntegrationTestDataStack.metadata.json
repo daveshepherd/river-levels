@@ -101,6 +101,51 @@
       }
     }
   ],
+  "/IntegrationTestDataStack/push-subscriptions": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "deletionProtection": false,
+        "multiRegionConsistency": "STRONG",
+        "partitionKey": {
+          "name": "*",
+          "type": "S"
+        },
+        "pointInTimeRecoverySpecification": {
+          "pointInTimeRecoveryEnabled": true
+        },
+        "removalPolicy": "destroy",
+        "replicas": [
+          {
+            "region": "*"
+          },
+          {
+            "region": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addReplica": [
+          {
+            "region": "*"
+          }
+        ]
+      }
+    }
+  ],
   "/IntegrationTestDataStack/ReadingsTableName": [
     {
       "type": "aws:cdk:logicalId",
@@ -111,6 +156,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "NotifierStateTableName"
+    }
+  ],
+  "/IntegrationTestDataStack/PushSubscriptionsTableName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PushSubscriptionsTableName"
     }
   ],
   "/IntegrationTestDataStack/BootstrapVersion": [
@@ -135,6 +186,12 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "notifierstateEF9F54ED"
+    }
+  ],
+  "/IntegrationTestDataStack/push-subscriptions/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsFF38FC72"
     }
   ],
   "/IntegrationTestDataStack/Publish/Output{\"Ref\":\"readingsA064D750\"}": [
