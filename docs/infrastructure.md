@@ -8,7 +8,7 @@ This page describes what the CDK app deploys and how data moves through it. The 
   - `RiverLevels-eu-west-2`, `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in each region, against its replica of `readings`. See [Multi-region storage](#multi-region-storage).
   - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)), in eu-west-2: publishes each station's status and chart as JSON files in S3, and serves them through CloudFront, failing over to eu-west-1's copy. It also serves the web push subscription API (see [Web push subscriptions](#6-web-push-subscriptions)). It imports the notifications and alerts topics from `RiverLevels-eu-west-2`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, for CloudFront to fail over to. See [Multi-region station files](#multi-region-station-files).
-  - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)), in eu-west-2, and `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1`: post ford state changes to X, against `notifier-state`, so only one region posts each change. See [Multi-region notifications](#multi-region-notifications).
+  - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)), in eu-west-2, and `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1`: announce ford state changes to X and by web push, against `notifier-state`, so only one region announces each change. See [Multi-region notifications](#multi-region-notifications).
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
 - **Regions:** `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt), all active. London is CloudFront's primary origin, with Ireland as its fallback.
 - **Environments:** `development` and `production`, deployed by GitHub Actions to separate AWS accounts
@@ -54,6 +54,10 @@ flowchart LR
     xnotifier["x-notifier Lambda<br/>arm64 · 256 MB · 30 s"]
     xsecret["SSM SecureString parameter<br/>/river-levels/x-credentials"]
     xsmoke["x-smoke-test Lambda + trigger<br/>(development only)"]
+    wpqueue["SQS<br/>web-push-deliverer-queue"]
+    wpdlq["SQS<br/>web-push-deliverer-dead-letter-queue"]
+    wpdeliverer["web-push-deliverer Lambda<br/>arm64 · 256 MB · 30 s"]
+    vapid["SSM SecureString parameter<br/>/river-levels/vapid-keys"]
   end
 
   subgraph data["AWS · RiverLevelsData stack · eu-west-2"]
@@ -105,7 +109,13 @@ flowchart LR
   xnotifier -- "post on a state change (post mode)" --> xaccount
   xsmoke -- "credentials" --> xsecret
   xsmoke -. "post and delete when the smoke test changes" .-> xaccount
-  xdlq & anndlq -. "metrics" .-> alarms
+  anntopic -- "raw message delivery" --> wpqueue
+  wpqueue -- "batches of 10" --> wpdeliverer
+  wpqueue -. "after 5 receives" .-> wpdlq
+  wpdeliverer -- "Scan / DeleteItem gone (push-subscriptions)" --> mrsc
+  wpdeliverer -- "VAPID keys" --> vapid
+  wpdeliverer -- "web push on a state change" --> pushservices["Browser push services<br/>FCM · Mozilla · Apple · WNS"]
+  xdlq & anndlq & wpdlq -. "metrics" .-> alarms
   cdn -- "GetObject (origin access control)" --> bucket
   cdn -. "on 403 or 5xx" .-> regionalbucket
   website -- "GET /status, /chart" --> cdn
@@ -275,7 +285,7 @@ After writing a station's `status.json`, the API publisher also publishes the st
 {"station":"kenilworth","depth":1.3,"direction":"rising","rate":"fast","state":"flooded","lastUpdate":"2020-01-01T15:15:00.000Z"}
 ```
 
-The `RiverLevelsNotifications` stack splits this into an announcer, which decides when a change is announced, and a deliverer per channel. X is the only channel so far.
+The `RiverLevelsNotifications` stack splits this into an announcer, which decides when a change is announced, and a deliverer per channel: X, and web push to subscribed browsers (see [Web push subscriptions](#6-web-push-subscriptions)).
 
 The [`ford-announcer`](../src/notifications-stack/ford-announcer.lambda.ts) reads the statuses through `ford-announcer-queue`. For each station in a batch, it takes the newest status and compares its ford `state` with the last state announced, which is kept in the `notifier-state` table ([`decide.ts`](../src/notifications-stack/decide.ts)):
 
@@ -386,7 +396,7 @@ While in `log` mode, production recorded each state change in `x-notifier-state`
 
 ### 6. Web push subscriptions
 
-The kenilworthford.com website (a PWA) will offer to notify a browser of ford state changes through web push. This part stores the browsers' subscriptions. A later change adds the deliverer, which sends each announcement on `ford-announcements` to them, and the website change that subscribes.
+The kenilworthford.com website (a PWA) will offer to notify a browser of ford state changes through web push. The API stores the browsers' subscriptions, and the `web-push-deliverer` sends each announcement to them (see [Sending notifications](#sending-notifications)). The website change that subscribes is still to come.
 
 The [`push-subscriptions`](../src/api-stack/push-subscriptions.lambda.ts) Lambda ([`PushSubscriptionsApi`](../src/api-stack/push-subscriptions.ts)) has a function URL, which `api/distribution` serves at `/push/*`:
 
@@ -396,7 +406,7 @@ The [`push-subscriptions`](../src/api-stack/push-subscriptions.lambda.ts) Lambda
 
 **Validation:** the body must be JSON and at most 2 KB. The endpoint must be an `https` URL, with no port or credentials, at a browser push service: `fcm.googleapis.com` (Chrome, Edge), `*.push.services.mozilla.com` (Firefox), `*.push.apple.com` (Safari) or `*.notify.windows.com` (older Edge). So the deliverer only ever sends to a push service. `p256dh` must be base64url for 65 bytes and `auth` for 16 bytes ([RFC 8291](https://www.rfc-editor.org/rfc/rfc8291)).
 
-**Storage:** the `push-subscriptions` table in `RiverLevelsData`, keyed by `id`, the SHA-256 hex digest of the endpoint. Items hold `endpoint`, `p256dh`, `auth` and `subscribedAt` (ISO 8601). It's a multi-region table like the others, because the deliverer will run in whichever region announces a change. `RiverLevelsApi` gets its name from an export, `pushSubscriptions.tableName`.
+**Storage:** the `push-subscriptions` table in `RiverLevelsData`, keyed by `id`, the SHA-256 hex digest of the endpoint. Items hold `endpoint`, `p256dh`, `auth` and `subscribedAt` (ISO 8601). It's a multi-region table like the others, because the deliverer runs in whichever region announces a change. `RiverLevelsApi` gets its name from an export, `pushSubscriptions.tableName`.
 
 **CORS:** the function URL's own CORS configuration answers the preflight and adds the headers: `POST` and `DELETE`, the `content-type` header, a 1-day max age, and each stage's origins from `pushAllowedOrigins()` in [`stage.ts`](../src/stage.ts):
 
@@ -405,11 +415,50 @@ The [`push-subscriptions`](../src/api-stack/push-subscriptions.lambda.ts) Lambda
 | `production` | `https://kenilworthford.com` |
 | `development`, `local` | `https://dev.kenilworthford.com`, `http://localhost:8080` (the website's dev server) |
 
-**CloudFront:** the `/push/*` behaviour allows every method, uses the managed `CachingDisabled` cache policy and the `AllViewerExceptHostHeader` origin request policy, which passes the `Origin` header on for CORS. It's HTTPS only. It isn't failed over: CloudFront origin groups only fail over `GET`, `HEAD` and `OPTIONS`, so the API is only in eu-west-2 (`pushSubscriptions` is only passed to `RiverLevelsApi`, and needs `createDistribution`). If eu-west-2 is down, subscribing fails until it's back; delivery won't depend on it.
+**CloudFront:** the `/push/*` behaviour allows every method, uses the managed `CachingDisabled` cache policy and the `AllViewerExceptHostHeader` origin request policy, which passes the `Origin` header on for CORS. It's HTTPS only. It isn't failed over: CloudFront origin groups only fail over `GET`, `HEAD` and `OPTIONS`, so the API is only in eu-west-2 (`pushSubscriptions` is only passed to `RiverLevelsApi`, and needs `createDistribution`). If eu-west-2 is down, subscribing fails until it's back; delivery doesn't depend on it.
 
-**Abuse:** the function URL has no IAM auth, because browsers call it without credentials, and origin access control would make them sign each request body. Anyone can call it, directly or through CloudFront. Reserved concurrency of 2 caps the cost of a flood of requests: extra requests get `429`. Validation keeps out anything that isn't a push subscription. Subscriptions for made-up endpoints at a real push service fail delivery, and the deliverer will delete a subscription when the push service answers `404` or `410`.
+**Abuse:** the function URL has no IAM auth, because browsers call it without credentials, and origin access control would make them sign each request body. Anyone can call it, directly or through CloudFront. Reserved concurrency of 2 caps the cost of a flood of requests: extra requests get `429`. Validation keeps out anything that isn't a push subscription. Subscriptions for made-up endpoints at a real push service fail delivery, and the deliverer deletes a subscription when the push service answers `404` or `410`.
 
 **Privacy:** an endpoint identifies a browser, though not a person, so the Lambda never logs one: its logs (service `push-subscriptions`) use the subscription `id` and the push service's host. A deleted subscription stays in point-in-time recovery backups for up to 35 days. Subscriptions aren't used for anything but sending ford announcements.
+
+#### Sending notifications
+
+Every `NotificationsStack` has a [`web-push-deliverer`](../src/notifications-stack/web-push-deliverer.lambda.ts), subscribed to its region's `ford-announcements` topic through `web-push-deliverer-queue`, like the X notifier. Only the region that claims a change publishes it, so only that region's deliverer sends it. Each reads its own region's replica of `push-subscriptions`, named by `pushSubscriptionsTableName`.
+
+For each announcement it scans the table and sends to every subscription, 10 at a time, with the [`web-push`](https://github.com/web-push-libs/web-push) library (kept on 3.x; 4.0.0 came out in November 2026 after three years without a release). It doesn't read the VAPID keys when there are no subscriptions. The notification, which the website's service worker shows:
+
+```json
+{"title":"Kenilworth ford: flooded","body":"Watch out! The ford may be flooded, but may be passable.","url":"https://kenilworthford.com","tag":"kenilworth","state":"flooded","announcementId":"kenilworth:flooded:1800000000000"}
+```
+
+The `body` is the X post's wording, without "See … for more details", because tapping the notification opens `url`, the ford's website. Each send has a 6-hour `TTL` (an offline browser gets nothing staler), `high` urgency, and the station as its `Topic`, so the push service replaces an undelivered notification for the station with a newer one.
+
+| Push service response | What happens |
+|-----------------------|--------------|
+| `201` | Sent |
+| `404` or `410` | The subscription has gone (unsubscribed or expired): deleted from the table |
+| `400`, `403` or `413` | Refused (bad keys, a VAPID key mismatch, too large): logged and skipped, not retried |
+| Anything else (`429`, `5xx`, network errors) | The announcement is reported back for retry once all sends finish. After 5 attempts it goes to `web-push-deliverer-dead-letter-queue`, which raises the `web-push-deliverer-dead-letters` alarm |
+
+A retry sends to every subscription again. The `tag` makes a browser that already has the notification replace it rather than show it twice.
+
+#### VAPID keys
+
+The push services only accept notifications signed with the VAPID key pair ([RFC 8292](https://www.rfc-editor.org/rfc/rfc8292)) whose public key the browser subscribed with. Each stage has its own pair, kept as JSON (`{"publicKey": ..., "privateKey": ...}`) in the SSM SecureString parameter `/river-levels/vapid-keys` (`VAPID_KEYS_PARAMETER_NAME`; output as `VapidKeysParameterName`). It must hold **the same pair in all three regions**, because whichever region announces a change signs it. The subject is `https://kenilworthford.com`, so no email address is published.
+
+CloudFormation can't create SecureString parameters, so the parameter is created by hand, once per account, before the website lets anyone subscribe. This generates a pair and stores it in the three regions without printing the private key, then prints the public key for the website's config:
+
+```sh
+profile=AWSAdministratorAccess-<account id>
+keys=$(npx web-push generate-vapid-keys --json)
+for region in eu-west-2 eu-west-1 eu-central-1; do
+  aws ssm put-parameter --profile "$profile" --region "$region" \
+    --name /river-levels/vapid-keys --type SecureString --value "$keys"
+done
+node -pe 'JSON.parse(process.argv[1]).publicKey' "$keys"
+```
+
+`put-parameter` without `--overwrite` refuses to replace an existing parameter. Keep it that way: **replacing the keys breaks every subscription**, and browsers have to subscribe again. The public key isn't secret.
 
 ### API domains
 
@@ -514,6 +563,11 @@ Logical names as they appear in the CloudFormation template.
 | `x-notifier-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `MODE`, `STATIONS`, `X_CREDENTIALS_PARAMETER`. Event source: `x-notifier-queue`, batch size 10, `ReportBatchItemFailures`. |
 | `x-notifier-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `x-notifier-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+| `web-push-deliverer-queue` | `AWS::SQS::Queue` | Subscribed to `ford-announcements` with raw message delivery. 3-minute visibility timeout. Redrives to `web-push-deliverer-dead-letter-queue` after 5 receives. |
+| `web-push-deliverer-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
+| `web-push-deliverer-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `STATIONS`, `SUBSCRIPTIONS_TABLE`, `VAPID_KEYS_PARAMETER`. Event source: `web-push-deliverer-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `web-push-deliverer-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
+| `web-push-deliverer-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 | `x-smoke-test-lambda` | `AWS::Lambda::Function` | Development only. Node.js 26, arm64, 30 s timeout, X-Ray active. Env: `X_CREDENTIALS_PARAMETER`. |
 | `x-smoke-test` | `Custom::Trigger` | Development only. Invokes `x-smoke-test-lambda` after `x-notifier-lambda` whenever its version changes, failing the deploy if it fails. CDK adds the trigger provider's Lambda and role. |
 | `x-smoke-test-log-group` | `AWS::Logs::LogGroup` | Development only. One-year retention. |
@@ -533,7 +587,7 @@ Logical names as they appear in the CloudFormation template.
 - `ReadingsTableName`, `NotifierStateTableName` and `PushSubscriptionsTableName` from `RiverLevelsData`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
-- `XCredentialsParameterName` from `RiverLevelsNotifications`
+- `XCredentialsParameterName` and `VapidKeysParameterName` from each `RiverLevelsNotifications` stack
 
 **Tags** on every resource: `endor:ManagedBy=cdk`, `endor:Stage` (from the `STAGE` env var: `development`, `production`, or `local` when unset). There's no release version tag: a tag whose value changes every release would update every resource in every stack, making each deploy take about 25 minutes and adding an AWS Config charge per resource. The GitHub release records which version is deployed.
 
@@ -556,6 +610,9 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `ford-announcer-role` | SQS consume (added by CDK) | `ford-announcer-queue` |
 | `x-notifier-role` | `ssm:GetParameter` | `/river-levels/x-credentials` (decrypted with the AWS-managed `aws/ssm` key, which its key policy allows through SSM) |
 | `x-notifier-role` | SQS consume (added by CDK) | `x-notifier-queue` |
+| `web-push-deliverer-role` | `dynamodb:Scan`, `dynamodb:DeleteItem` | the region's replica of `push-subscriptions` |
+| `web-push-deliverer-role` | `ssm:GetParameter` | `/river-levels/vapid-keys` |
+| `web-push-deliverer-role` | SQS consume (added by CDK) | `web-push-deliverer-queue` |
 | `x-smoke-test-role` | `ssm:GetParameter` | `/river-levels/x-credentials` |
 | `api-publisher-role` | `sqs:ReceiveMessage`, `DeleteMessage`, `ChangeMessageVisibility`, `GetQueueAttributes`, `GetQueueUrl` (added by CDK) | `api-publisher-queue` |
 
@@ -590,12 +647,13 @@ flowchart LR
 - **Push subscriptions:** the `push-subscriptions` logs (service `push-subscriptions`) record each subscribe and unsubscribe with the subscription `id`, and each refused request with its reason. Endpoints are never logged.
 - **Announcements:** the `ford-announcer` logs (service `ford-announcer`) record each first state recorded, held-back change and announcement ("Announced a state change" with its `id` and `transition`). Failed announcements end up in `ford-announcer-dead-letter-queue`.
 - **Posts:** the `x-notifier` logs (service `x-notifier`) record each post ("Posted to X" with the announcement's `id`, the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
+- **Web push:** the `web-push-deliverer` logs (service `web-push-deliverer`) record "Delivered" for each announcement with counts (`subscriptions`, `sent`, `gone`, `rejected`, `failed`), and each gone, refused or failed subscription by `id` and status code. Endpoints are never logged. Failed announcements end up in `web-push-deliverer-dead-letter-queue`.
 - **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing parameter or a revoked credential in `/river-levels/x-credentials`, or the X API's limits.
 - **Restore:** use DynamoDB point-in-time recovery, available for the last 35 days.
 
 ### Alarms
 
-The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts), the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), the push subscription API's in [`src/api-stack/push-subscriptions.ts`](../src/api-stack/push-subscriptions.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). Each region has its own `river-levels-alerts` topic, in its `RiverLevels-<region>` stack, and every alarm emails `ALERT_EMAIL` through its region's topic, both when it fires and when it recovers. Each topic's email subscription has to be confirmed once.
+The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts), the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), the push subscription API's in [`src/api-stack/push-subscriptions.ts`](../src/api-stack/push-subscriptions.ts), and the notifications stack's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). Each region has its own `river-levels-alerts` topic, in its `RiverLevels-<region>` stack, and every alarm emails `ALERT_EMAIL` through its region's topic, both when it fires and when it recovers. Each topic's email subscription has to be confirmed once.
 
 | Alarm | Fires when | Where to look |
 |-------|-----------|---------------|
@@ -607,3 +665,4 @@ The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/a
 | `api-publisher-dead-letters` | `api-publisher-dead-letter-queue` has any messages | Publisher logs (service `api-publisher`); DynamoDB or S3 errors |
 | `ford-announcer-dead-letters` | `ford-announcer-dead-letter-queue` has any messages | Announcer logs (service `ford-announcer`); DynamoDB or SNS errors. No channel got the change |
 | `x-notifier-dead-letters` | `x-notifier-dead-letter-queue` has any messages | Notifier logs (service `x-notifier`); usually a missing `/river-levels/x-credentials` parameter or value, or an X API error |
+| `web-push-deliverer-dead-letters` | `web-push-deliverer-dead-letter-queue` has any messages | Deliverer logs (service `web-push-deliverer`); a missing `/river-levels/vapid-keys` parameter in that region, or push services failing |
