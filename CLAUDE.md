@@ -17,7 +17,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables, and the README overview in `.projenrc.ts` (`readme.description`) |
-| The push subscription API (`push-subscriptions*.ts`), its validation, CORS origins (`pushAllowedOrigins()`) or the `push-subscriptions` table | "Web push subscriptions" section, Architecture diagram, Resources, IAM and Alarms tables |
+| The push subscription API (`push-subscriptions*.ts`), its validation, CORS origins (`pushAllowedOrigins()`), the `push-subscriptions` table, or the web push deliverer, its notification format or failure handling | "Web push subscriptions" section, Architecture diagram, Resources, IAM and Alarms tables |
 | The X notifier, its decision rules or wording, the smoke test, or `xNotifierMode()` / `xSmokeTestEnabled()` | "Notifications" section, Resources and IAM tables, Operations |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
@@ -74,9 +74,10 @@ src/api-stack/
 src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state, push-subscriptions) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
-  index.ts                   NotificationsStack: ford-announcer and the ford-announcements topic, x-notifier, a queue, dead-letter queue and alarm for each, the X credentials SSM parameter (by name; created by hand); uses the region's replica of notifier-state
+  index.ts                   NotificationsStack: ford-announcer and the ford-announcements topic, x-notifier, web-push-deliverer, a queue, dead-letter queue and alarm for each, the X credentials and VAPID keys SSM parameters (by name; created by hand); uses the region's replicas of notifier-state and push-subscriptions
   ford-announcer.lambda.ts   station-status topic → decides and claims each ford state change (notifier-state) → ford-announcements topic, once across regions
   x-notifier.lambda.ts       ford-announcements topic → posts each announcement to X (log or post mode)
+  web-push-deliverer.lambda.ts  ford-announcements topic → web push to every push-subscriptions entry, signed with the VAPID keys SSM parameter (by name; created by hand, same pair in every region); deletes gone subscriptions
   announcement.ts            The announcement message format the channels read
   x-smoke-test.lambda.ts     Development only: a CDK trigger runs it when a deploy changes it (its code, the X client or their dependencies) to post to X and delete the post, failing the deploy if that fails
   decide.ts, messages.ts     When to post (first state recorded, 60-minute cooldown) and what to post
@@ -98,7 +99,7 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher, the push subscription API, the ford announcer and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `push-subscriptions`, `ford-announcer` in `announcer-powertools.ts`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher, the push subscription API, the ford announcer and the X notifier and the web push deliverer each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `push-subscriptions`, `ford-announcer` in `announcer-powertools.ts`, `x-notifier`, `web-push-deliverer`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.

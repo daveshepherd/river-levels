@@ -26,6 +26,8 @@ import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import type { NotifierMode } from '../stage';
 import { FordAnnouncerFunction } from './ford-announcer-function';
 import { FordAnnouncerRole } from './ford-announcer.role';
+import { WebPushDelivererFunction } from './web-push-deliverer-function';
+import { WebPushDelivererRole } from './web-push-deliverer.role';
 import { XNotifierFunction } from './x-notifier-function';
 import { XNotifierRole } from './x-notifier.role';
 import { XSmokeTestFunction } from './x-smoke-test-function';
@@ -62,6 +64,17 @@ export interface NotificationsStackProps extends StackProps {
    * replica in this stack's region is used.
    */
   stateTableName: string;
+  /**
+   * The multi-region `push-subscriptions` table from the DataStack, by name.
+   * Its replica in this stack's region is used.
+   */
+  pushSubscriptionsTableName: string;
+  /**
+   * The SSM SecureString parameter holding the stage's VAPID key pair, created
+   * by hand with the same keys in every region.
+   * @default VAPID_KEYS_PARAMETER_NAME
+   */
+  vapidKeysParameterName?: string;
   setDestroyPolicyToAllResources?: boolean;
 }
 
@@ -69,9 +82,17 @@ export interface NotificationsStackProps extends StackProps {
 export const X_CREDENTIALS_PARAMETER_NAME = '/river-levels/x-credentials';
 
 /**
+ * Where the VAPID keys for web push are kept: an SSM SecureString parameter
+ * with the same key pair in each region, because browsers' subscriptions are
+ * bound to the public key.
+ */
+export const VAPID_KEYS_PARAMETER_NAME = '/river-levels/vapid-keys';
+
+/**
  * Announces ford state changes and delivers them. The ford announcer decides
  * when a change is announced and publishes it once to the ford-announcements
- * topic; each channel (X first) subscribes to that topic with its own queue.
+ * topic; each channel (X and web push) subscribes to that topic with its own
+ * queue.
  */
 export class NotificationsStack extends Stack {
   public readonly stateTable: ITableV2;
@@ -79,6 +100,8 @@ export class NotificationsStack extends Stack {
   public readonly announcementsTopic: Topic;
   /** The SSM parameter the X credentials are read from. */
   public readonly credentialsParameterName: string;
+  /** The SSM parameter the VAPID keys are read from. */
+  public readonly vapidKeysParameterName: string;
 
   constructor(scope: Construct, id: string, props: NotificationsStackProps) {
     super(scope, id, props);
@@ -166,6 +189,45 @@ export class NotificationsStack extends Stack {
       alarmAction,
     );
 
+    // Web push to the browsers subscribed through the API's /push/subscriptions
+    this.vapidKeysParameterName =
+      props.vapidKeysParameterName ?? VAPID_KEYS_PARAMETER_NAME;
+    const subscriptionsTable = TableV2.fromTableName(
+      this,
+      'push-subscriptions',
+      props.pushSubscriptionsTableName,
+    );
+    const webPushDeliverer = new WebPushDelivererFunction(this, 'web-push-deliverer-lambda', {
+      architecture: Architecture.ARM_64,
+      environment: {
+        STATIONS: JSON.stringify(stations),
+        SUBSCRIPTIONS_TABLE: subscriptionsTable.tableName,
+        VAPID_KEYS_PARAMETER: this.vapidKeysParameterName,
+      },
+      logGroup: new LogGroup(this, 'web-push-deliverer-log-group', {
+        retention: RetentionDays.ONE_YEAR,
+      }),
+      memorySize: 256,
+      role: new WebPushDelivererRole(this, 'web-push-deliverer-role', {
+        subscriptionsTableArn: subscriptionsTable.tableArn,
+        vapidKeysParameterArn: this.formatArn({
+          arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+          resource: 'parameter',
+          resourceName: this.vapidKeysParameterName.replace(/^\//, ''),
+          service: 'ssm',
+        }),
+      }),
+      timeout: Duration.seconds(30),
+      tracing: Tracing.ACTIVE,
+    });
+    this.subscribe(
+      'web-push-deliverer',
+      this.announcementsTopic,
+      webPushDeliverer,
+      'Announcements failed to send as web push notifications after 5 attempts, so subscribed browsers may not have been told of a ford state change. They are in the web push deliverer dead-letter queue.',
+      alarmAction,
+    );
+
     if (props.smokeTest) {
       const smokeTest = new XSmokeTestFunction(this, 'x-smoke-test-lambda', {
         architecture: Architecture.ARM_64,
@@ -198,6 +260,10 @@ export class NotificationsStack extends Stack {
     new CfnOutput(this, 'XCredentialsParameterName', {
       description: 'Create this SSM SecureString parameter with the X credentials before switching the notifier to post',
       value: this.credentialsParameterName,
+    });
+    new CfnOutput(this, 'VapidKeysParameterName', {
+      description: 'Create this SSM SecureString parameter with the VAPID keys, the same in every region, before anyone subscribes',
+      value: this.vapidKeysParameterName,
     });
   }
 

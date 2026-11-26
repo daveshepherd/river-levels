@@ -12,6 +12,8 @@
     "bundle:api-stack/push-subscriptions.lambda:watch": "projen bundle:api-stack/push-subscriptions.lambda:watch",
     "bundle:notifications-stack/ford-announcer.lambda": "projen bundle:notifications-stack/ford-announcer.lambda",
     "bundle:notifications-stack/ford-announcer.lambda:watch": "projen bundle:notifications-stack/ford-announcer.lambda:watch",
+    "bundle:notifications-stack/web-push-deliverer.lambda": "projen bundle:notifications-stack/web-push-deliverer.lambda",
+    "bundle:notifications-stack/web-push-deliverer.lambda:watch": "projen bundle:notifications-stack/web-push-deliverer.lambda:watch",
     "bundle:notifications-stack/x-notifier.lambda": "projen bundle:notifications-stack/x-notifier.lambda",
     "bundle:notifications-stack/x-notifier.lambda:watch": "projen bundle:notifications-stack/x-notifier.lambda:watch",
     "bundle:notifications-stack/x-smoke-test.lambda": "projen bundle:notifications-stack/x-smoke-test.lambda",
@@ -54,6 +56,7 @@
     "@types/aws-lambda": "^8.10.164",
     "@types/jest": "^30",
     "@types/node": "^26",
+    "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "aws-cdk": "^2",
@@ -85,7 +88,8 @@
     "aws-cdk-lib": "^2.272.0",
     "axios": "^1.21.1",
     "constructs": "^10.5.1",
-    "twitter-api-v2": "^1.31.0"
+    "twitter-api-v2": "^1.31.0",
+    "web-push": "^3.6.7"
   },
   "devEngines": {
     "packageManager": {

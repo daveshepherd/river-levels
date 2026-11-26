@@ -96,6 +96,7 @@ for (const region of otherRegions) {
     crossRegionReferences: true,
     env: { region },
     mode: xNotifierMode(stage),
+    pushSubscriptionsTableName: dataStack.pushSubscriptionsTable.tableName,
     stateTableName: dataStack.notifierStateTable.tableName,
     statusTopic: regionalApi.statusTopic,
   });
@@ -152,6 +153,7 @@ new NotificationsStack(app, 'RiverLevelsNotifications', {
   env,
   mode: xNotifierMode(stage),
   smokeTest: xSmokeTestEnabled(stage),
+  pushSubscriptionsTableName: dataStack.pushSubscriptionsTable.tableName,
   stateTableName: dataStack.notifierStateTable.tableName,
   statusTopic: apiStack.statusTopic,
 });

@@ -30,6 +30,10 @@
       "type": "build"
     },
     {
+      "name": "@types/web-push",
+      "type": "build"
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "version": "^8",
       "type": "build"
@@ -157,6 +161,11 @@
     },
     {
       "name": "twitter-api-v2",
+      "type": "runtime"
+    },
+    {
+      "name": "web-push",
+      "version": "^3.6.7",
       "type": "runtime"
     }
   ],
