@@ -54,6 +54,7 @@
           "queue": "*",
           "maxReceiveCount": "*"
         },
+        "deliveryDelay": "*",
         "enforceSSL": true,
         "visibilityTimeout": "*"
       }
@@ -201,16 +202,16 @@
       }
     }
   ],
-  "/IntegrationTestApiStack/ApiBucket": [
-    {
-      "type": "aws:cdk:logicalId",
-      "data": "ApiBucket"
-    }
-  ],
   "/IntegrationTestApiStack/ApiDomainName": [
     {
       "type": "aws:cdk:logicalId",
       "data": "ApiDomainName"
+    }
+  ],
+  "/IntegrationTestApiStack/ApiBucket": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiBucket"
     }
   ],
   "/IntegrationTestApiStack/station-status-test-queue": [
@@ -442,6 +443,122 @@
       }
     }
   ],
+  "/IntegrationTestApiStack/push-subscriptions/role": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "assumedBy": {
+          "principalAccount": "*",
+          "assumeRoleAction": "*"
+        },
+        "description": "*",
+        "managedPolicies": [
+          {
+            "managedPolicyArn": "*"
+          }
+        ],
+        "path": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addManagedPolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addToPrincipalPolicy": [
+          {}
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachInlinePolicy": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/log-group": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "retention": 365
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/lambda": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "architecture": "*",
+        "environment": "*",
+        "logGroup": "*",
+        "memorySize": "*",
+        "reservedConcurrentExecutions": "*",
+        "role": "*",
+        "timeout": "*",
+        "tracing": "Active",
+        "runtime": "*",
+        "handler": "*",
+        "code": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addEnvironment": [
+          "*",
+          "*",
+          {
+            "removeInEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/url": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "authType": "NONE",
+        "cors": {
+          "allowedHeaders": "*",
+          "allowedMethods": [
+            "POST",
+            "DELETE"
+          ],
+          "allowedOrigins": "*",
+          "maxAge": "*"
+        },
+        "function": "*"
+      }
+    }
+  ],
   "/IntegrationTestApiStack/api/legacy-paths": [
     {
       "type": "aws:cdk:analytics:construct",
@@ -472,6 +589,7 @@
     {
       "type": "aws:cdk:analytics:construct",
       "data": {
+        "additionalBehaviors": "*",
         "comment": "*",
         "defaultBehavior": {
           "allowedMethods": "*",
@@ -490,6 +608,21 @@
         },
         "httpVersion": "http2and3",
         "priceClass": "PriceClass_100"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addBehavior": [
+          "*",
+          {},
+          {
+            "allowedMethods": "*",
+            "cachePolicy": "*",
+            "originRequestPolicy": "*",
+            "viewerProtocolPolicy": "https-only"
+          }
+        ]
       }
     }
   ],
@@ -608,6 +741,90 @@
       "data": "apipublisherlambdaSqsEventSourceIntegrationTestApiStackapipublisherqueueBA5A4318C7405B7E"
     }
   ],
+  "/IntegrationTestApiStack/push-subscriptions/role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsroleE725671E"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/role/push-subscriptions-policy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": {
+        "description": "*",
+        "path": "*",
+        "statements": "*"
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/role/DefaultPolicy": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "attachToRole": [
+          "*"
+        ]
+      }
+    },
+    {
+      "type": "aws:cdk:analytics:method",
+      "data": {
+        "addStatements": [
+          {}
+        ]
+      }
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/log-group/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsloggroupB3FC2F41"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/lambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionslambdaBA34AEC9"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/lambda/invoke-function-url": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionslambdainvokefunctionurlBBBDCFF3"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/lambda/invoke-function": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionslambdainvokefunctionFF9CDFC0"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/url/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsurl37B363FE"
+    }
+  ],
   "/IntegrationTestApiStack/api/legacy-paths/Resource": [
     {
       "type": "aws:cdk:logicalId",
@@ -636,6 +853,24 @@
     {
       "type": "aws:cdk:logicalId",
       "data": "stationstatustestqueueIntegrationTestApiStackstationstatus3AFA256115173574"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/role/push-subscriptions-policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsrolepushsubscriptionspolicyF6D86F66"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "pushsubscriptionsroleDefaultPolicy7CC7E995"
+    }
+  ],
+  "/IntegrationTestApiStack/push-subscriptions/lambda/Code/AssetBucket": [
+    {
+      "type": "aws:cdk:analytics:construct",
+      "data": "*"
     }
   ],
   "/IntegrationTestApiStack/api/distribution/Origin1/S3OriginAccessControl": [

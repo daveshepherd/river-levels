@@ -4,9 +4,9 @@ This page describes what the CDK app deploys and how data moves through it. The 
 
 - **App entry point:** [`src/main.ts`](../src/main.ts)
 - **Stacks:** eleven, all deployed by `cdk deploy --all --concurrency 4`. The app runs active-active in `eu-west-2` (London), `eu-west-1` (Ireland) and `eu-central-1` (Frankfurt) ([ADR 0001](adr/0001-multi-region-active-active.md)):
-  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)), in eu-west-2: the strongly consistent (MRSC) global tables `readings` and `notifier-state`, with replicas in all three regions. The other stacks get their names through exports, or cross-region references in the other regions.
+  - `RiverLevelsData` ([`DataStack`](../src/data-stack/index.ts)), in eu-west-2: the strongly consistent (MRSC) global tables `readings`, `notifier-state` and `push-subscriptions`, with replicas in all three regions. The other stacks get their names through exports, or cross-region references in the other regions.
   - `RiverLevels-eu-west-2`, `RiverLevels-eu-west-1` and `RiverLevels-eu-central-1` ([`StorageStack`](../src/storage-stack/index.ts) with `readingsTableName`): the crawler and SNS publisher in each region, against its replica of `readings`. See [Multi-region storage](#multi-region-storage).
-  - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)), in eu-west-2: publishes each station's status and chart as JSON files in S3, and serves them through CloudFront, failing over to eu-west-1's copy. It imports the notifications and alerts topics from `RiverLevels-eu-west-2`, so those can't be renamed or replaced while it uses them.
+  - `RiverLevelsApi` ([`ApiStack`](../src/api-stack/index.ts)), in eu-west-2: publishes each station's status and chart as JSON files in S3, and serves them through CloudFront, failing over to eu-west-1's copy. It also serves the web push subscription API (see [Web push subscriptions](#6-web-push-subscriptions)). It imports the notifications and alerts topics from `RiverLevels-eu-west-2`, so those can't be renamed or replaced while it uses them.
   - `RiverLevelsApi-eu-west-1` and `RiverLevelsApi-eu-central-1` ([`ApiStack`](../src/api-stack/index.ts) with `createDistribution: false`): each keeps its own region's copy of the station files current, for CloudFront to fail over to. See [Multi-region station files](#multi-region-station-files).
   - `RiverLevelsNotifications` ([`NotificationsStack`](../src/notifications-stack/index.ts)), in eu-west-2, and `RiverLevelsNotifications-eu-west-1` and `RiverLevelsNotifications-eu-central-1`: post ford state changes to X, against `notifier-state`, so only one region posts each change. See [Multi-region notifications](#multi-region-notifications).
   - `RiverLevelsApiDomain` ([`ApiDomainStack`](../src/api-domain-stack/index.ts)), in **`us-east-1`**: the hosted zone for the API's domain. It's in us-east-1 because the CloudFront certificate validated against it has to be, and keeping zone and certificate in one stack avoids the stacks depending on each other.
@@ -40,6 +40,7 @@ flowchart LR
     bucket[("S3<br/>api-bucket<br/>stations/{id}/status.json<br/>stations/{id}/chart.json")]
     cdn["CloudFront<br/>api/distribution<br/>legacy-paths function"]
     statustopic["SNS topic<br/>station-status"]
+    pushapi["push-subscriptions Lambda<br/>function URL · arm64 · 256 MB · 10 s<br/>reserved concurrency 2"]
   end
 
   subgraph notifications["AWS · RiverLevelsNotifications stack · eu-west-2"]
@@ -56,7 +57,7 @@ flowchart LR
   end
 
   subgraph data["AWS · RiverLevelsData stack · eu-west-2"]
-    mrsc[("DynamoDB MRSC global tables<br/>readings · notifier-state<br/>eu-west-2 · eu-west-1 · eu-central-1")]
+    mrsc[("DynamoDB MRSC global tables<br/>readings · notifier-state · push-subscriptions<br/>eu-west-2 · eu-west-1 · eu-central-1")]
   end
 
   regional["RiverLevels-, RiverLevelsApi- and<br/>RiverLevelsNotifications- stacks<br/>eu-west-1 · eu-central-1<br/>(the same pipeline in each region)"]
@@ -108,6 +109,10 @@ flowchart LR
   cdn -- "GetObject (origin access control)" --> bucket
   cdn -. "on 403 or 5xx" .-> regionalbucket
   website -- "GET /status, /chart" --> cdn
+  website -- "POST, DELETE /push/subscriptions" --> cdn
+  cdn -- "/push/* (not cached)" --> pushapi
+  pushapi -- "PutItem / DeleteItem (push-subscriptions)" --> mrsc
+  pushapi -. "metrics" .-> alarms
   parentzone -. "NS delegation (to do)" .-> zone
   cert -. "validated in" .-> zone
   cdn -. "custom domain, TLS 1.2 (when on)" .-> cert
@@ -379,6 +384,33 @@ flood-readings' crawler used to post these announcements. Production took over i
 
 While in `log` mode, production recorded each state change in `x-notifier-state` as if posted, so switching to `post` doesn't announce the current state. It posts at the next change.
 
+### 6. Web push subscriptions
+
+The kenilworthford.com website (a PWA) will offer to notify a browser of ford state changes through web push. This part stores the browsers' subscriptions. A later change adds the deliverer, which sends each announcement on `ford-announcements` to them, and the website change that subscribes.
+
+The [`push-subscriptions`](../src/api-stack/push-subscriptions.lambda.ts) Lambda ([`PushSubscriptionsApi`](../src/api-stack/push-subscriptions.ts)) has a function URL, which `api/distribution` serves at `/push/*`:
+
+- `POST /push/subscriptions` with the browser's `PushSubscription.toJSON()` (`{endpoint, keys: {p256dh, auth}}`) stores it and returns `201`. Posting the same endpoint again replaces it, since its keys may have changed.
+- `DELETE /push/subscriptions` with `{endpoint}` removes it and returns `204`, whether or not it existed.
+- An invalid request returns `400` with `{error}`. Another path returns `404`, another method `405`.
+
+**Validation:** the body must be JSON and at most 2 KB. The endpoint must be an `https` URL, with no port or credentials, at a browser push service: `fcm.googleapis.com` (Chrome, Edge), `*.push.services.mozilla.com` (Firefox), `*.push.apple.com` (Safari) or `*.notify.windows.com` (older Edge). So the deliverer only ever sends to a push service. `p256dh` must be base64url for 65 bytes and `auth` for 16 bytes ([RFC 8291](https://www.rfc-editor.org/rfc/rfc8291)).
+
+**Storage:** the `push-subscriptions` table in `RiverLevelsData`, keyed by `id`, the SHA-256 hex digest of the endpoint. Items hold `endpoint`, `p256dh`, `auth` and `subscribedAt` (ISO 8601). It's a multi-region table like the others, because the deliverer will run in whichever region announces a change. `RiverLevelsApi` gets its name from an export, `pushSubscriptions.tableName`.
+
+**CORS:** the function URL's own CORS configuration answers the preflight and adds the headers: `POST` and `DELETE`, the `content-type` header, a 1-day max age, and each stage's origins from `pushAllowedOrigins()` in [`stage.ts`](../src/stage.ts):
+
+| Stage | Allowed origins |
+|-------|-----------------|
+| `production` | `https://kenilworthford.com` |
+| `development`, `local` | `https://dev.kenilworthford.com`, `http://localhost:8080` (the website's dev server) |
+
+**CloudFront:** the `/push/*` behaviour allows every method, uses the managed `CachingDisabled` cache policy and the `AllViewerExceptHostHeader` origin request policy, which passes the `Origin` header on for CORS. It's HTTPS only. It isn't failed over: CloudFront origin groups only fail over `GET`, `HEAD` and `OPTIONS`, so the API is only in eu-west-2 (`pushSubscriptions` is only passed to `RiverLevelsApi`, and needs `createDistribution`). If eu-west-2 is down, subscribing fails until it's back; delivery won't depend on it.
+
+**Abuse:** the function URL has no IAM auth, because browsers call it without credentials, and origin access control would make them sign each request body. Anyone can call it, directly or through CloudFront. Reserved concurrency of 2 caps the cost of a flood of requests: extra requests get `429`. Validation keeps out anything that isn't a push subscription. Subscriptions for made-up endpoints at a real push service fail delivery, and the deliverer will delete a subscription when the push service answers `404` or `410`.
+
+**Privacy:** an endpoint identifies a browser, though not a person, so the Lambda never logs one: its logs (service `push-subscriptions`) use the subscription `id` and the push service's host. A deleted subscription stays in point-in-time recovery backups for up to 35 days. Subscriptions aren't used for anything but sending ford announcements.
+
 ### API domains
 
 Each stage's account owns a public hosted zone for its API domain, in the `RiverLevelsApiDomain` stack ([`apiDomainName()`](../src/stage.ts)):
@@ -444,7 +476,7 @@ Logical names as they appear in the CloudFormation template.
 | Resource | Type | Key settings |
 |----------|------|--------------|
 | `api-bucket` | `AWS::S3::Bucket` | Private (all public access blocked), S3-managed encryption, SSL enforced, versioned, old versions expire after 14 days. Retained when the stack is deleted. The bucket policy lets only the distribution read it, or, with `allowCloudFrontInAccount` (the regional stacks), any CloudFront distribution in the account. |
-| `api/distribution` | `AWS::CloudFront::Distribution` | Not created with `createDistribution: false`. Origin: `api-bucket` through origin access control, or an origin group failing over to `failoverBucket` when given. Managed `CachingOptimized` cache policy and the `api/cors` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. |
+| `api/distribution` | `AWS::CloudFront::Distribution` | Not created with `createDistribution: false`. Origin: `api-bucket` through origin access control, or an origin group failing over to `failoverBucket` when given. Managed `CachingOptimized` cache policy and the `api/cors` response headers policy. HTTPS only, HTTP/2 and 3, compression, price class 100. With `pushSubscriptions`, a `/push/*` behaviour to the function URL: all methods, `CachingDisabled`, `AllViewerExceptHostHeader`, HTTPS only. |
 | `api/alias-a`, `api/alias-aaaa` | `AWS::Route53::RecordSet` | Only when the stage's custom domain is on. Alias records at the domain's apex, in `api-zone`, pointing at the distribution. |
 | `api/cors` | `AWS::CloudFront::ResponseHeadersPolicy` | `Access-Control-Allow-Origin: *`, any request header, `GET`/`HEAD`/`OPTIONS`, 1-day max age, origin override. |
 | `api/legacy-paths` | `AWS::CloudFront::Function` | `cloudfront-js-2.0`, viewer request. Maps `/status` and `/chart` to the legacy station's files. |
@@ -454,6 +486,10 @@ Logical names as they appear in the CloudFormation template.
 | `api-publisher-lambda` event source | `AWS::Lambda::EventSourceMapping` | `api-publisher-queue`, batch size 100, 60 s batching window, `ReportBatchItemFailures`. |
 | `api-publisher-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `api-publisher-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
+| `push-subscriptions/lambda` | `AWS::Lambda::Function` | Only with `pushSubscriptions` (`RiverLevelsApi`). Node.js 26, arm64, 256 MB, 10 s timeout, reserved concurrency 2, X-Ray active. Env: `SUBSCRIPTIONS_TABLE`. |
+| `push-subscriptions/url` | `AWS::Lambda::Url` | Auth `NONE`. CORS: `POST`, `DELETE`, header `content-type`, the stage's `pushAllowedOrigins()`, 1-day max age. CDK adds the two `AWS::Lambda::Permission`s for public invocation through the URL. |
+| `push-subscriptions/errors` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
+| `push-subscriptions/log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 
 `RiverLevelsApiDomain` stack (us-east-1):
 
@@ -470,6 +506,7 @@ Logical names as they appear in the CloudFormation template.
 | `ford-announcer-queue` | `AWS::SQS::Queue` | Subscribed to `station-status` with raw message delivery. 3-minute visibility timeout. Redrives to `ford-announcer-dead-letter-queue` after 5 receives. |
 | `ford-announcer-dead-letter-queue` | `AWS::SQS::Queue` | 14-day retention, SSL enforced. |
 | `ford-announcer-lambda` | `AWS::Lambda::Function` | Node.js 26, arm64, 256 MB, 30 s timeout, X-Ray active. Env: `ANNOUNCEMENTS_TOPIC_ARN`, `STATE_TABLE`. Event source: `ford-announcer-queue`, batch size 10, `ReportBatchItemFailures`. |
+| `push-subscriptions/errors` | The push subscription API throws in a 5-minute window (browsers got a `502`) | Its logs (service `push-subscriptions`); DynamoDB errors |
 | `ford-announcer-dead-letters` | `AWS::CloudWatch::Alarm` | See [Alarms](#alarms). |
 | `ford-announcer-log-group` | `AWS::Logs::LogGroup` | One-year retention. |
 | `x-notifier-queue` | `AWS::SQS::Queue` | Subscribed to `ford-announcements` with raw message delivery. 3-minute visibility timeout. Redrives to `x-notifier-dead-letter-queue` after 5 receives. |
@@ -489,10 +526,11 @@ Logical names as they appear in the CloudFormation template.
 |----------|------|--------------|
 | `readings` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, replicas in `eu-west-2`, `eu-west-1` and `eu-central-1` (fixed at creation). Partition key `station` (S), sort key `timestamp` (N). On-demand billing. Point-in-time recovery for 35 days. Deletion protection on. Stream `NEW_AND_OLD_IMAGES`. Retained when the stack is deleted. |
 | `notifier-state` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, same three regions. Partition key `station` (S). Point-in-time recovery. Deletion protection on. Retained when the stack is deleted. |
+| `push-subscriptions` | `AWS::DynamoDB::GlobalTable` | Multi-Region strong consistency, same three regions. Partition key `id` (S). Point-in-time recovery. Deletion protection on. Retained when the stack is deleted. |
 
 **Stack outputs:**
 - `RiverLevelsTable` (the table ARN) from each `RiverLevels-<region>` stack
-- `ReadingsTableName` and `NotifierStateTableName` from `RiverLevelsData`
+- `ReadingsTableName`, `NotifierStateTableName` and `PushSubscriptionsTableName` from `RiverLevelsData`
 - `ApiBucket` (the bucket name) and `ApiDomainName` (the distribution's domain) from `RiverLevelsApi`
 - `NameServers` (comma-separated, for the parent zone's `NS` records) and `HostedZoneId` from `RiverLevelsApiDomain`
 - `XCredentialsParameterName` from `RiverLevelsNotifications`
@@ -512,6 +550,7 @@ Each Lambda has its own role under the `/service-role/` path. Both roles attach 
 | `api-publisher-role` | `dynamodb:Query` | the region's replica of `readings` |
 | `api-publisher-role` | `s3:PutObject` | `stations/*` in `api-bucket` |
 | `api-publisher-role` | `sns:Publish` | `station-status` |
+| `push-subscriptions-role` | `dynamodb:PutItem`, `dynamodb:DeleteItem` | the eu-west-2 replica of `push-subscriptions` |
 | `ford-announcer-role` | `dynamodb:GetItem`, `dynamodb:PutItem` | the region's replica of `notifier-state` |
 | `ford-announcer-role` | `sns:Publish` | `ford-announcements` |
 | `ford-announcer-role` | SQS consume (added by CDK) | `ford-announcer-queue` |
@@ -548,6 +587,7 @@ flowchart LR
 - **Traces:** X-Ray. The crawler records subsegments for the latest-reading lookup, the API fetch and the database writes, and traces each DynamoDB call and the HTTPS request to the flood API.
 - **Failed notifications:** messages arriving in `sns-publisher-failure-queue`.
 - **Failed station files:** messages arriving in `api-publisher-dead-letter-queue`. The publisher logs through Powertools Logger as service `api-publisher`.
+- **Push subscriptions:** the `push-subscriptions` logs (service `push-subscriptions`) record each subscribe and unsubscribe with the subscription `id`, and each refused request with its reason. Endpoints are never logged.
 - **Announcements:** the `ford-announcer` logs (service `ford-announcer`) record each first state recorded, held-back change and announcement ("Announced a state change" with its `id` and `transition`). Failed announcements end up in `ford-announcer-dead-letter-queue`.
 - **Posts:** the `x-notifier` logs (service `x-notifier`) record each post ("Posted to X" with the announcement's `id`, the post's ID and X's `rateLimit`) or would-be post in log mode. Failed posts end up in `x-notifier-dead-letter-queue`.
 - **Smoke test:** a failed development deploy whose `RiverLevelsNotifications` events show `x-smoke-test` failing means the post or delete failed. Check the `x-smoke-test-lambda` logs (service `x-notifier`) for the X error. The usual causes are a missing parameter or a revoked credential in `/river-levels/x-credentials`, or the X API's limits.
@@ -555,7 +595,7 @@ flowchart LR
 
 ### Alarms
 
-The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts) the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). Each region has its own `river-levels-alerts` topic, in its `RiverLevels-<region>` stack, and every alarm emails `ALERT_EMAIL` through its region's topic, both when it fires and when it recovers. Each topic's email subscription has to be confirmed once.
+The storage alarms are in [`src/storage-stack/alarms.ts`](../src/storage-stack/alarms.ts), the API publisher's in [`src/api-stack/index.ts`](../src/api-stack/index.ts), the push subscription API's in [`src/api-stack/push-subscriptions.ts`](../src/api-stack/push-subscriptions.ts), and the X notifier's in [`src/notifications-stack/index.ts`](../src/notifications-stack/index.ts). Each region has its own `river-levels-alerts` topic, in its `RiverLevels-<region>` stack, and every alarm emails `ALERT_EMAIL` through its region's topic, both when it fires and when it recovers. Each topic's email subscription has to be confirmed once.
 
 | Alarm | Fires when | Where to look |
 |-------|-----------|---------------|

@@ -89,3 +89,17 @@ const X_SMOKE_TEST_ENABLED: Record<Stage, boolean> = {
 export function xSmokeTestEnabled(stage: Stage): boolean {
   return X_SMOKE_TEST_ENABLED[stage];
 }
+
+/**
+ * The website origins allowed to call each stage's push subscription API
+ * (CORS). Development also allows the website's local dev server.
+ */
+const PUSH_ALLOWED_ORIGINS: Record<Stage, string[]> = {
+  local: ['https://dev.kenilworthford.com', 'http://localhost:8080'],
+  development: ['https://dev.kenilworthford.com', 'http://localhost:8080'],
+  production: ['https://kenilworthford.com'],
+};
+
+export function pushAllowedOrigins(stage: Stage): string[] {
+  return PUSH_ALLOWED_ORIGINS[stage];
+}

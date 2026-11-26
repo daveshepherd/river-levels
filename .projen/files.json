@@ -22,6 +22,7 @@
     "projenrc/tsconfig.json",
     "README.md",
     "src/api-stack/api-publisher-function.ts",
+    "src/api-stack/push-subscriptions-function.ts",
     "src/notifications-stack/ford-announcer-function.ts",
     "src/notifications-stack/x-notifier-function.ts",
     "src/notifications-stack/x-smoke-test-function.ts",

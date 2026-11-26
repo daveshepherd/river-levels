@@ -1,16 +1,16 @@
 {
   "version": "55.0.0",
   "files": {
-    "0e30d0798e32cd943e8a2161cc1d24028e974b74da43cd4328ce7fbb7a6b1baa": {
+    "4101cfa9b79d6177aa6f9b6e10dfb0f92de5119d84f87e0bfc1201929b7b7823": {
       "displayName": "IntegrationTestApiFixtures Template",
       "source": {
         "path": "IntegrationTestApiFixtures.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-current_region-a32e216d": {
+        "current_account-current_region-1cec7798": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
-          "objectKey": "0e30d0798e32cd943e8a2161cc1d24028e974b74da43cd4328ce7fbb7a6b1baa.json",
+          "objectKey": "4101cfa9b79d6177aa6f9b6e10dfb0f92de5119d84f87e0bfc1201929b7b7823.json",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
         }
       }

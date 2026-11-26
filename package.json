@@ -8,6 +8,8 @@
     "bundle": "projen bundle",
     "bundle:api-stack/api-publisher.lambda": "projen bundle:api-stack/api-publisher.lambda",
     "bundle:api-stack/api-publisher.lambda:watch": "projen bundle:api-stack/api-publisher.lambda:watch",
+    "bundle:api-stack/push-subscriptions.lambda": "projen bundle:api-stack/push-subscriptions.lambda",
+    "bundle:api-stack/push-subscriptions.lambda:watch": "projen bundle:api-stack/push-subscriptions.lambda:watch",
     "bundle:notifications-stack/ford-announcer.lambda": "projen bundle:notifications-stack/ford-announcer.lambda",
     "bundle:notifications-stack/ford-announcer.lambda:watch": "projen bundle:notifications-stack/ford-announcer.lambda:watch",
     "bundle:notifications-stack/x-notifier.lambda": "projen bundle:notifications-stack/x-notifier.lambda",

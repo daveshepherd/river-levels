@@ -1,5 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataStack, DataStackProps } from '../../src/data-stack';
 
 function synth(props: Partial<DataStackProps> = {}) {
@@ -57,7 +57,19 @@ describe('DataStack', () => {
     });
   });
 
-  test('that both tables are retained', () => {
+  test('that the push subscriptions table is strongly consistent in three regions, keyed by id', () => {
+    synth().template.hasResourceProperties('AWS::DynamoDB::GlobalTable', {
+      KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+      MultiRegionConsistency: 'STRONG',
+      Replicas: Match.arrayWith([
+        Match.objectLike({ Region: 'eu-west-1' }),
+        Match.objectLike({ Region: 'eu-central-1' }),
+        Match.objectLike({ Region: 'eu-west-2' }),
+      ]),
+    });
+  });
+
+  test('that every table is retained', () => {
     const { template } = synth();
     for (const table of Object.values(template.findResources('AWS::DynamoDB::GlobalTable'))) {
       expect(table.DeletionPolicy).toBe('Retain');
@@ -84,6 +96,7 @@ describe('DataStack', () => {
     const { template } = synth();
     template.hasOutput('ReadingsTableName', {});
     template.hasOutput('NotifierStateTableName', {});
+    template.hasOutput('PushSubscriptionsTableName', {});
   });
 
   test('that a region outside the EU strong consistency set is rejected', () => {

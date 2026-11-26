@@ -2407,7 +2407,7 @@ var require_sampling_rule = __commonJS({
     SamplingRule.prototype.setRate = function setRate(rate) {
       this.rate = rate;
     };
-    SamplingRule.prototype.getRate = function getRate2() {
+    SamplingRule.prototype.getRate = function getRate() {
       return this.rate;
     };
     SamplingRule.prototype.getName = function getName() {
@@ -4424,8 +4424,8 @@ var require_call_capturer = __commonJS({
         this.services[attribute] = newServices[attribute];
       }
     };
-    CallCapturer.prototype.capture = function capture(serviceName, response) {
-      var operation = response.request.operation;
+    CallCapturer.prototype.capture = function capture(serviceName, response2) {
+      var operation = response2.request.operation;
       var call = this.services[serviceName] !== void 0 ? this.services[serviceName].operations[operation] : null;
       if (call === null) {
         logger2.getLogger().debug('Call "' + serviceName + "." + operation + '" is not whitelisted for additional data capturing. Ignoring.');
@@ -4435,16 +4435,16 @@ var require_call_capturer = __commonJS({
       for (var paramType in call) {
         var params = call[paramType];
         if (paramType === paramTypes.REQ_PARAMS) {
-          captureCallParams(params, response.request.params, dataCaptured);
+          captureCallParams(params, response2.request.params, dataCaptured);
         } else if (paramType === paramTypes.REQ_DESC) {
-          captureDescriptors(params, response.request.params, dataCaptured);
+          captureDescriptors(params, response2.request.params, dataCaptured);
         } else if (paramType === paramTypes.RES_PARAMS) {
-          if (response.data) {
-            captureCallParams(params, response.data, dataCaptured);
+          if (response2.data) {
+            captureCallParams(params, response2.data, dataCaptured);
           }
         } else if (paramType === paramTypes.RES_DESC) {
-          if (response.data) {
-            captureDescriptors(params, response.data, dataCaptured);
+          if (response2.data) {
+            captureDescriptors(params, response2.data, dataCaptured);
           }
         } else {
           logger2.getLogger().error('Unknown parameter type "' + paramType + '". Must be "request_descriptors", "response_descriptors", "request_parameters" or "response_parameters".');
@@ -4568,9 +4568,9 @@ var require_capture = __commonJS({
       current = parentSeg.addNewSubsegment(name);
       executeFcn = captureFcn(fcn, current);
       try {
-        const response = executeFcn(current);
+        const response2 = executeFcn(current);
         current.close();
-        return response;
+        return response2;
       } catch (e) {
         current.close(e);
         throw e;
@@ -7760,16 +7760,17 @@ var require_lib = __commonJS({
   }
 });
 
-// src/api-stack/api-publisher.lambda.ts
-var api_publisher_lambda_exports = {};
-__export(api_publisher_lambda_exports, {
-  CACHE_CONTROL: () => CACHE_CONTROL,
-  CHART_DAYS: () => CHART_DAYS,
-  handler: () => handler
+// src/api-stack/push-subscriptions.lambda.ts
+var push_subscriptions_lambda_exports = {};
+__export(push_subscriptions_lambda_exports, {
+  MAX_BODY_BYTES: () => MAX_BODY_BYTES,
+  PATH: () => PATH,
+  handler: () => handler,
+  parseSubscription: () => parseSubscription,
+  subscriptionId: () => subscriptionId
 });
-module.exports = __toCommonJS(api_publisher_lambda_exports);
-var import_client_s3 = require("@aws-sdk/client-s3");
-var import_client_sns = require("@aws-sdk/client-sns");
+module.exports = __toCommonJS(push_subscriptions_lambda_exports);
+var import_node_crypto2 = require("node:crypto");
 
 // node_modules/@aws-lambda-powertools/logger/lib/esm/constants.js
 var LogJsonIndent = {
@@ -7918,9 +7919,12 @@ var InvokeStore;
 })(InvokeStore || (InvokeStore = {}));
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/constants.js
+var AWS_EXECUTION_ENV_VAR = "AWS_EXECUTION_ENV";
+var WEB_FUNCTION_EXECUTION_ENV_SUFFIX = "-lambda-web";
 var AWS_LAMBDA_INITIALIZATION_TYPE_ENV_VAR = "AWS_LAMBDA_INITIALIZATION_TYPE";
 var AWS_LAMBDA_MAX_CONCURRENCY = "AWS_LAMBDA_MAX_CONCURRENCY";
 var POWERTOOLS_DEV_ENV_VAR = "POWERTOOLS_DEV";
+var POWERTOOLS_SDK_UA_APP_ID_DISABLED_ENV_VAR = "POWERTOOLS_SDK_UA_APP_ID_DISABLED";
 var POWERTOOLS_SERVICE_NAME_ENV_VAR = "POWERTOOLS_SERVICE_NAME";
 var XRAY_TRACE_ID_ENV_VAR = "_X_AMZN_TRACE_ID";
 
@@ -7988,6 +7992,7 @@ var getServiceName = () => {
     defaultValue: ""
   });
 };
+var DEFAULT_MAX_DECOMPRESSED_SIZE = 16 * 1024 * 1024;
 var getXrayTraceDataFromEnv = () => {
   const xRayTraceEnv = globalThis.awslambda?.InvokeStore?.getXRayTraceId() ?? getStringFromEnv({
     key: XRAY_TRACE_ID_ENV_VAR,
@@ -8013,11 +8018,17 @@ var isRequestXRaySampled = () => {
   return xRayTraceData?.Sampled === "1";
 };
 var shouldUseInvokeStore = () => {
-  const res = getStringFromEnv({
+  const maxConcurrency = getStringFromEnv({
     key: AWS_LAMBDA_MAX_CONCURRENCY,
     defaultValue: ""
   });
-  return res !== "";
+  if (maxConcurrency !== "") {
+    return true;
+  }
+  return getStringFromEnv({
+    key: AWS_EXECUTION_ENV_VAR,
+    defaultValue: ""
+  }).endsWith(WEB_FUNCTION_EXECUTION_ENV_SUFFIX);
 };
 var getXRayTraceIdFromEnv = () => {
   const xRayTraceData = getXrayTraceDataFromEnv();
@@ -8178,7 +8189,7 @@ var LogFormatter = class {
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/version.js
-var PT_VERSION = "2.36.0";
+var PT_VERSION = "2.37.0";
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/awsSdkUtils.js
 var EXEC_ENV = process.env.AWS_EXECUTION_ENV || "NA";
@@ -8414,8 +8425,19 @@ var Utility = class {
 };
 
 // node_modules/@aws-lambda-powertools/commons/lib/esm/index.js
+var isSdkUaAppIdDisabled = () => {
+  try {
+    return getBooleanFromEnv({
+      key: POWERTOOLS_SDK_UA_APP_ID_DISABLED_ENV_VAR,
+      defaultValue: false,
+      extendedParsing: true
+    });
+  } catch {
+    return false;
+  }
+};
 var env = process.env.AWS_EXECUTION_ENV || "NA";
-if (!process.env.AWS_SDK_UA_APP_ID?.includes("/PTEnv/")) {
+if (!isSdkUaAppIdDisabled() && !process.env.AWS_SDK_UA_APP_ID?.includes("/PTEnv/")) {
   const ptUserAgent = `PT/NO-OP/${PT_VERSION}/PTEnv/${env}`;
   process.env.AWS_SDK_UA_APP_ID = process.env.AWS_SDK_UA_APP_ID ? `${process.env.AWS_SDK_UA_APP_ID}/${ptUserAgent}` : ptUserAgent;
 }
@@ -10251,11 +10273,11 @@ var ProviderService = class {
       }
     };
     const onResponse = (message) => {
-      const { request, response } = message;
+      const { request, response: response2 } = message;
       const subsegment = this.#takeFetchSubsegment(request);
       if (isHttpSubsegment(subsegment)) {
-        const status = response.statusCode;
-        const contentLenght = findHeaderAndDecode(response.headers, "content-length");
+        const status = response2.statusCode;
+        const contentLenght = findHeaderAndDecode(response2.headers, "content-length");
         subsegment.http = {
           ...subsegment.http,
           response: {
@@ -10725,7 +10747,7 @@ var Tracer = class extends Utility {
    * Usually you won't need to call this method unless you are creating custom subsegments or using manual mode.
    *
    * @see https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-segments
-   * @see https://docs.aws.amazon.com/powertools/typescript/latest/core/tracer/#escape-hatch-mechanism
+   * @see https://docs.aws.amazon.com/powertools/typescript/latest/features/tracer/#escape-hatch-mechanism
    *
    * @example
    * ```typescript
@@ -11033,272 +11055,145 @@ var Tracer = class extends Utility {
   }
 };
 
-// src/api-stack/powertools.ts
-var logger = new Logger({ serviceName: "api-publisher" });
-var tracer = new Tracer({ serviceName: "api-publisher" });
-
-// src/api-stack/readings.ts
+// src/api-stack/push-subscriptions.lambda.ts
 var import_client_dynamodb = require("@aws-sdk/client-dynamodb");
+var logger = new Logger({ serviceName: "push-subscriptions" });
+var tracer = new Tracer({ serviceName: "push-subscriptions" });
 var dynamoDbClient = tracer.captureAWSv3Client(new import_client_dynamodb.DynamoDBClient({}));
-function toReading(item) {
-  if (!item.timestamp?.N || !item.reading_depth?.N) {
-    return null;
+var PATH = "/push/subscriptions";
+var MAX_BODY_BYTES = 2048;
+var PUSH_SERVICE_HOSTS = [
+  /^fcm\.googleapis\.com$/,
+  /^[a-z0-9-]+\.push\.services\.mozilla\.com$/,
+  /^[a-z0-9-]+\.push\.apple\.com$/,
+  /^[a-z0-9-]+\.notify\.windows\.com$/
+];
+var BASE64URL = /^[A-Za-z0-9_-]+={0,2}$/;
+var BadRequest = class extends Error {
+};
+function subscriptionId(endpoint) {
+  return (0, import_node_crypto2.createHash)("sha256").update(endpoint).digest("hex");
+}
+function response(statusCode, error) {
+  return error ? {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ error })
+  } : { statusCode };
+}
+function parseBody(event) {
+  const body = event.isBase64Encoded ? Buffer.from(event.body ?? "", "base64").toString("utf8") : event.body ?? "";
+  if (Buffer.byteLength(body) > MAX_BODY_BYTES) {
+    throw new BadRequest("body too large");
   }
+  let parsed;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    throw new BadRequest("body is not JSON");
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new BadRequest("body is not an object");
+  }
+  return parsed;
+}
+function parseEndpoint(value) {
+  if (typeof value !== "string") {
+    throw new BadRequest("endpoint is missing");
+  }
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new BadRequest("endpoint is not a URL");
+  }
+  if (url.protocol !== "https:" || url.port !== "" || url.username !== "" || !PUSH_SERVICE_HOSTS.some((host) => host.test(url.hostname))) {
+    throw new BadRequest("endpoint is not at a known push service");
+  }
+  return url;
+}
+function parseKey(value, name, bytes) {
+  if (typeof value !== "string" || !BASE64URL.test(value) || Buffer.from(value, "base64url").length !== bytes) {
+    throw new BadRequest(`keys.${name} is not a ${bytes}-byte base64url value`);
+  }
+  return value;
+}
+function parseSubscription(body) {
+  const endpoint = parseEndpoint(body.endpoint);
+  const keys = body.keys ?? {};
   return {
-    date: new Date(Number.parseFloat(item.timestamp.N)),
-    depth: Number.parseFloat(item.reading_depth.N)
+    endpoint: endpoint.href,
+    keys: {
+      // An uncompressed P-256 public key and a 16-byte auth secret (RFC 8291)
+      p256dh: parseKey(keys.p256dh, "p256dh", 65),
+      auth: parseKey(keys.auth, "auth", 16)
+    }
   };
 }
-function toReadings(items = []) {
-  return items.map(toReading).filter((r) => r !== null);
-}
-async function getLatestReadings(station, limit) {
-  const result = await dynamoDbClient.send(
-    new import_client_dynamodb.QueryCommand({
-      ExpressionAttributeValues: { ":station": { S: station } },
-      KeyConditionExpression: "station = :station",
-      Limit: limit,
-      ScanIndexForward: false,
-      TableName: process.env.DYNAMODB_READINGS_TABLE
-    })
-  );
-  return toReadings(result.Items);
-}
-async function getReadingsSince(station, since) {
-  const readings = [];
-  let exclusiveStartKey;
-  do {
-    const result = await dynamoDbClient.send(
-      new import_client_dynamodb.QueryCommand({
-        ExclusiveStartKey: exclusiveStartKey,
-        ExpressionAttributeNames: { "#timestamp": "timestamp" },
-        ExpressionAttributeValues: {
-          ":station": { S: station },
-          ":since": { N: since.getTime().toString() }
-        },
-        KeyConditionExpression: "station = :station AND #timestamp >= :since",
-        ScanIndexForward: true,
-        TableName: process.env.DYNAMODB_READINGS_TABLE
-      })
-    );
-    readings.push(...toReadings(result.Items));
-    exclusiveStartKey = result.LastEvaluatedKey;
-  } while (exclusiveStartKey);
-  return readings;
-}
-
-// src/api-stack/station-keys.ts
-function stationKeys(stationId) {
-  return {
-    status: `stations/${stationId}/status.json`,
-    chart: `stations/${stationId}/chart.json`
-  };
-}
-
-// src/api-stack/status.ts
-var STATUS_READINGS = 12;
-function roundTo2(value) {
-  const snapped = Number(value.toFixed(12));
-  const scaled = Number((Math.abs(snapped) * 100).toPrecision(15));
-  return Math.sign(snapped) * Math.round(scaled) / 100;
-}
-function standardDeviation(values) {
-  if (values.length < 2) {
-    return 0;
-  }
-  const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (values.length - 1);
-  return Math.sqrt(variance);
-}
-function getFordState(depth, ford) {
-  if (depth > ford.impassableAboveMetres) {
-    return "impassable";
-  }
-  if (depth > ford.floodedAboveMetres) {
-    return "flooded";
-  }
-  return "clear";
-}
-function getDirection(depths) {
-  if (depths.length === 0) {
-    return "none";
-  }
-  const mean = depths.reduce((a, b) => a + b, 0) / depths.length;
-  const difference = roundTo2(depths[0] - mean);
-  if (difference > 0) {
-    return "rising";
-  }
-  if (difference < 0) {
-    return "falling";
-  }
-  return "none";
-}
-function getRate(depths, direction) {
-  if (direction === "none") {
-    return "none";
-  }
-  const spread = standardDeviation(depths);
-  if (spread <= 0.01) {
-    return "slow";
-  }
-  if (spread <= 0.03) {
-    return "moderate";
-  }
-  return "fast";
-}
-function getStationStatus(readings, ford) {
-  if (readings.length === 0) {
-    return null;
-  }
-  const depths = readings.map((reading) => reading.depth);
-  const direction = getDirection(depths);
-  return {
-    depth: depths[0],
-    direction,
-    rate: getRate(depths, direction),
-    ...ford ? { state: getFordState(depths[0], ford) } : {},
-    lastUpdate: readings[0].date.toISOString()
-  };
-}
-
-// src/storage-stack/stations.ts
-function validateStations(stations) {
-  if (!Array.isArray(stations) || stations.length === 0) {
-    throw new Error("At least one station must be configured");
-  }
-  const ids = /* @__PURE__ */ new Set();
-  for (const station of stations) {
-    if (!station?.id || !station.measureId) {
-      throw new Error(
-        `Each station needs an id and a measureId: ${JSON.stringify(station)}`
-      );
-    }
-    if (ids.has(station.id)) {
-      throw new Error(`Duplicate station id: ${station.id}`);
-    }
-    ids.add(station.id);
-    if (station.maxDepthRiseMetres !== void 0 && !(station.maxDepthRiseMetres > 0)) {
-      throw new Error(
-        `maxDepthRiseMetres must be greater than 0 for station ${station.id}`
-      );
-    }
-    if (station.ford) {
-      const { floodedAboveMetres, impassableAboveMetres } = station.ford;
-      if (!Number.isFinite(floodedAboveMetres) || !Number.isFinite(impassableAboveMetres) || floodedAboveMetres >= impassableAboveMetres) {
-        throw new Error(
-          `ford.floodedAboveMetres must be below ford.impassableAboveMetres for station ${station.id}`
-        );
+async function subscribe2(body) {
+  const subscription = parseSubscription(body);
+  const id = subscriptionId(subscription.endpoint);
+  await dynamoDbClient.send(
+    new import_client_dynamodb.PutItemCommand({
+      TableName: process.env.SUBSCRIPTIONS_TABLE,
+      Item: {
+        id: { S: id },
+        endpoint: { S: subscription.endpoint },
+        p256dh: { S: subscription.keys.p256dh },
+        auth: { S: subscription.keys.auth },
+        subscribedAt: { S: (/* @__PURE__ */ new Date()).toISOString() }
       }
-      if (station.ford.website !== void 0 && !station.ford.website.startsWith("https://")) {
-        throw new Error(
-          `ford.website must be an https:// URL for station ${station.id}`
-        );
-      }
-    }
-  }
-  return stations;
-}
-function parseStations(json) {
-  if (!json) {
-    throw new Error("The STATIONS environment variable is not set");
-  }
-  return validateStations(JSON.parse(json));
-}
-
-// src/api-stack/api-publisher.lambda.ts
-var CHART_DAYS = 365;
-var CACHE_CONTROL = "max-age=300";
-var s3Client = tracer.captureAWSv3Client(new import_client_s3.S3Client({}));
-var snsClient = tracer.captureAWSv3Client(new import_client_sns.SNSClient({}));
-async function putJson(key, body) {
-  await s3Client.send(
-    new import_client_s3.PutObjectCommand({
-      Body: JSON.stringify(body),
-      Bucket: process.env.API_BUCKET,
-      CacheControl: CACHE_CONTROL,
-      ContentType: "application/json",
-      Key: key
     })
   );
-}
-async function publishStation(station) {
-  const keys = stationKeys(station.id);
-  const latest = await getLatestReadings(station.id, STATUS_READINGS);
-  const status = getStationStatus(latest, station.ford);
-  if (!status) {
-    logger.warn("No readings stored for station, nothing to publish");
-    return;
-  }
-  await putJson(keys.status, status);
-  const message = { station: station.id, ...status };
-  await snsClient.send(
-    new import_client_sns.PublishCommand({
-      Message: JSON.stringify(message),
-      TopicArn: process.env.STATUS_TOPIC_ARN
-    })
-  );
-  const since = /* @__PURE__ */ new Date();
-  since.setDate(since.getDate() - CHART_DAYS);
-  const chart = (await getReadingsSince(station.id, since)).map((reading) => [
-    reading.date.getTime(),
-    reading.depth
-  ]);
-  await putJson(keys.chart, chart);
-  logger.info("Published station", {
-    state: status.state,
-    direction: status.direction,
-    chartPoints: chart.length
+  logger.info("Subscribed", {
+    id,
+    pushService: new URL(subscription.endpoint).hostname
   });
+}
+async function unsubscribe(body) {
+  const id = subscriptionId(parseEndpoint(body.endpoint).href);
+  await dynamoDbClient.send(
+    new import_client_dynamodb.DeleteItemCommand({
+      TableName: process.env.SUBSCRIPTIONS_TABLE,
+      Key: { id: { S: id } }
+    })
+  );
+  logger.info("Unsubscribed", { id });
 }
 async function handler(event, context) {
   if (context) {
     logger.addContext(context);
   }
-  const stations = new Map(
-    parseStations(process.env.STATIONS).map((station) => [station.id, station])
-  );
-  const messageIdsByStation = /* @__PURE__ */ new Map();
-  for (const record of event.Records) {
-    let stationId;
-    try {
-      stationId = JSON.parse(record.body).station;
-    } catch {
-      stationId = void 0;
-    }
-    if (typeof stationId !== "string" || !stations.has(stationId)) {
-      logger.warn("Ignoring a message for an unknown station", {
-        messageId: record.messageId,
-        station: stationId
-      });
-      continue;
-    }
-    const ids = messageIdsByStation.get(stationId) ?? [];
-    ids.push(record.messageId);
-    messageIdsByStation.set(stationId, ids);
+  if (event.rawPath !== PATH) {
+    return response(404, "not found");
   }
-  const failedMessageIds = [];
-  for (const [stationId, messageIds] of messageIdsByStation) {
-    logger.appendKeys({ station: stationId });
-    try {
-      await publishStation(stations.get(stationId));
-    } catch (error) {
-      logger.error("Publishing failed for station", { error });
-      failedMessageIds.push(...messageIds);
-    } finally {
-      logger.removeKeys(["station"]);
+  const method = event.requestContext.http.method;
+  try {
+    if (method === "POST") {
+      await subscribe2(parseBody(event));
+      return response(201);
     }
+    if (method === "DELETE") {
+      await unsubscribe(parseBody(event));
+      return response(204);
+    }
+    return response(405, "method not allowed");
+  } catch (error) {
+    if (error instanceof BadRequest) {
+      logger.info("Refused a request", { method, reason: error.message });
+      return response(400, error.message);
+    }
+    logger.error("Storing the subscription failed", { method, error });
+    throw error;
   }
-  return {
-    batchItemFailures: failedMessageIds.map((itemIdentifier) => ({
-      itemIdentifier
-    }))
-  };
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  CACHE_CONTROL,
-  CHART_DAYS,
-  handler
+  MAX_BODY_BYTES,
+  PATH,
+  handler,
+  parseSubscription,
+  subscriptionId
 });
 /*! Bundled license information:
 

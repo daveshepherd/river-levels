@@ -1,16 +1,16 @@
 {
   "version": "55.0.0",
   "files": {
-    "cfb06b6626bae5221422285a7423329ab305ab25c094aef26c3fd8caf96a2c41": {
+    "427f393720d8b0024ca432545e6eaf36eb980d900e85d2339aab45068a0944a8": {
       "displayName": "IntegrationTestDataStack Template",
       "source": {
         "path": "IntegrationTestDataStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-eu-west-2-782315b7": {
+        "current_account-eu-west-2-b63ecab6": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-2",
-          "objectKey": "cfb06b6626bae5221422285a7423329ab305ab25c094aef26c3fd8caf96a2c41.json",
+          "objectKey": "427f393720d8b0024ca432545e6eaf36eb980d900e85d2339aab45068a0944a8.json",
           "region": "eu-west-2",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-2"
         }

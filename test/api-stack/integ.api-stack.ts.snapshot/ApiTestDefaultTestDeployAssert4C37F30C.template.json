@@ -1,6 +1,6 @@
 {
  "Resources": {
-  "AwsApiCallawssdkclientdynamodbPutItemCommandd5df82951f9d5a4b0204a4a9dcfe3b4a": {
+  "AwsApiCallawssdkclientdynamodbPutItemCommand339b0b394fc6210e8b7add85012ae67f": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbPutItemC",
    "Properties": {
     "ServiceToken": {
@@ -12,7 +12,7 @@
     "service": "@aws-sdk/client-dynamodb",
     "api": "PutItemCommand",
     "parameters": {
-     "Item": "{\"station\":{\"S\":\"kenilworth\"},\"timestamp\":{\"N\":\"1795043060718\"},\"reading_depth\":{\"N\":\"1.3\"}}",
+     "Item": "{\"station\":{\"S\":\"kenilworth\"},\"timestamp\":{\"N\":\"1795732182700\"},\"reading_depth\":{\"N\":\"1.3\"}}",
      "TableName": {
       "Fn::Join": [
        "",
@@ -33,7 +33,7 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1795043060727"
+    "salt": "1795732182711"
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -126,6 +126,24 @@
          "Resource": [
           "*"
          ]
+        },
+        {
+         "Action": [
+          "states:StartExecution"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          "*"
+         ]
+        },
+        {
+         "Action": [
+          "dynamodb:GetItem"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          "*"
+         ]
         }
        ]
       }
@@ -157,7 +175,7 @@
     }
    }
   },
-  "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5": {
+  "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4": {
    "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-snsPublishComman",
    "Properties": {
     "ServiceToken": {
@@ -169,7 +187,7 @@
     "service": "@aws-sdk/client-sns",
     "api": "PublishCommand",
     "parameters": {
-     "Message": "\"{\\\"reading_depth\\\":1.3,\\\"station\\\":\\\"kenilworth\\\",\\\"timestamp\\\":1795043060718}\"",
+     "Message": "\"{\\\"reading_depth\\\":1.3,\\\"station\\\":\\\"kenilworth\\\",\\\"timestamp\\\":1795732182700}\"",
      "TopicArn": {
       "Fn::Join": [
        "",
@@ -190,10 +208,10 @@
      }
     },
     "flattenResponse": "false",
-    "salt": "1795043060728"
+    "salt": "1795732182711"
    },
    "DependsOn": [
-    "AwsApiCallawssdkclientdynamodbPutItemCommandd5df82951f9d5a4b0204a4a9dcfe3b4a"
+    "AwsApiCallawssdkclientdynamodbPutItemCommand339b0b394fc6210e8b7add85012ae67f"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -209,7 +227,7 @@
     },
     "service": "@aws-sdk/client-s3",
     "api": "GetObjectCommand",
-    "expected": "{\"$ObjectLike\":{\"ContentType\":\"application/json\",\"CacheControl\":\"max-age=300\",\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"depth\":1.3,\"state\":\"flooded\",\"lastUpdate\":\"2026-11-18T23:04:20.718Z\"}}}}}",
+    "expected": "{\"$ObjectLike\":{\"ContentType\":\"application/json\",\"CacheControl\":\"max-age=300\",\"Body\":{\"$SerializedJson\":{\"$ObjectLike\":{\"depth\":1.3,\"state\":\"flooded\",\"lastUpdate\":\"2026-11-26T22:29:42.700Z\"}}}}}",
     "stateMachineArn": {
      "Ref": "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitFor1EBE87C1"
     },
@@ -235,10 +253,10 @@
      "Key": "\"stations/kenilworth/status.json\""
     },
     "flattenResponse": "false",
-    "salt": "1795043060728"
+    "salt": "1795732182712"
    },
    "DependsOn": [
-    "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5"
+    "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -261,7 +279,7 @@
     }
    },
    "DependsOn": [
-    "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5"
+    "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4"
    ]
   },
   "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForTimeoutProviderInvokeEB25BED6": {
@@ -282,7 +300,7 @@
     }
    },
    "DependsOn": [
-    "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5"
+    "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4"
    ]
   },
   "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForRole0B47EFED": {
@@ -330,7 +348,7 @@
     ]
    },
    "DependsOn": [
-    "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5"
+    "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4"
    ]
   },
   "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitFor1EBE87C1": {
@@ -367,7 +385,7 @@
    },
    "DependsOn": [
     "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11WaitForRole0B47EFED",
-    "AwsApiCallawssdkclientsnsPublishCommand989da183e01e4b2c20ac3a6ee57d26d5"
+    "AwsApiCallawssdkclientsnsPublishCommandb3ab6630cdcab8e9f9026c1e8b3c28d4"
    ]
   },
   "SingletonFunction76b3e830a873425f8453eddd85c86925Role918961BB": {
@@ -515,7 +533,7 @@
      "WaitTimeSeconds": "20"
     },
     "flattenResponse": "false",
-    "salt": "1795043060729"
+    "salt": "1795732182713"
    },
    "DependsOn": [
     "AwsApiCallawssdkclients3GetObjectCommand1f9ac95e04288d7dcc2a381a31bd2f11",
@@ -538,7 +556,7 @@
     },
     "service": "@aws-sdk/client-s3",
     "api": "GetObjectCommand",
-    "expected": "{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":[[1795043060718,1.3]]}}}",
+    "expected": "{\"$ObjectLike\":{\"Body\":{\"$SerializedJson\":[[1795732182700,1.3]]}}}",
     "parameters": {
      "Bucket": {
       "Fn::Join": [
@@ -561,7 +579,7 @@
      "Key": "\"stations/kenilworth/chart.json\""
     },
     "flattenResponse": "false",
-    "salt": "1795043060729"
+    "salt": "1795732182713"
    },
    "DependsOn": [
     "AwsApiCallawssdkclientsqsReceiveMessageCommand630b2ee2371f6d69a0120e703c0c6a70"
@@ -608,7 +626,7 @@
      "Ref": "HttpApiCall9fd98548a3df1c9d51f49ade8bfb663cWaitForD8EA9E31"
     },
     "flattenResponse": "false",
-    "salt": "1795043060729"
+    "salt": "1795732182713"
    },
    "DependsOn": [
     "AwsApiCallawssdkclients3GetObjectCommand3da61a04b02aaad89e81d474a561a00e"
@@ -781,7 +799,7 @@
     },
     "expected": "{\"$ObjectLike\":{\"status\":200,\"headers\":{\"$ObjectLike\":{\"access-control-allow-origin\":[\"*\"]}}}}",
     "flattenResponse": "false",
-    "salt": "1795043060729"
+    "salt": "1795732182713"
    },
    "DependsOn": [
     "HttpApiCall9fd98548a3df1c9d51f49ade8bfb663c",
@@ -822,12 +840,316 @@
       ]
      }
     },
-    "expected": "{\"$ObjectLike\":{\"status\":200,\"body\":[[1795043060718,1.3]]}}",
+    "expected": "{\"$ObjectLike\":{\"status\":200,\"body\":[[1795732182700,1.3]]}}",
     "flattenResponse": "false",
-    "salt": "1795043060729"
+    "salt": "1795732182713"
    },
    "DependsOn": [
     "HttpApiCall635f09126dce0b0d05ba91eeec4bbff5"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "HttpApiCallab863b6b49add3275ac561ddc5d2ec93": {
+   "Type": "Custom::DeployAssert@HttpCall",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F",
+      "Arn"
+     ]
+    },
+    "parameters": {
+     "url": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestApiStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092"
+         }
+        },
+        "/push/subscriptions"
+       ]
+      ]
+     },
+     "fetchOptions": {
+      "method": "OPTIONS",
+      "headers": {
+       "Origin": "https://kenilworthford.com",
+       "Access-Control-Request-Method": "POST",
+       "Access-Control-Request-Headers": "content-type"
+      }
+     }
+    },
+    "expected": "{\"$ObjectLike\":{\"status\":200,\"headers\":{\"$ObjectLike\":{\"access-control-allow-origin\":[\"https://kenilworthford.com\"]}}}}",
+    "stateMachineArn": {
+     "Ref": "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForD625300A"
+    },
+    "flattenResponse": "false",
+    "salt": "1795732182713"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForIsCompleteProviderInvokeCC029FA5": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "SingletonFunction76b3e830a873425f8453eddd85c86925Handler81461ECE",
+      "Arn"
+     ]
+    },
+    "Principal": {
+     "Fn::GetAtt": [
+      "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F",
+      "Arn"
+     ]
+    }
+   }
+  },
+  "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForTimeoutProviderInvokeC64AAE41": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA",
+      "Arn"
+     ]
+    },
+    "Principal": {
+     "Fn::GetAtt": [
+      "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F",
+      "Arn"
+     ]
+    }
+   }
+  },
+  "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "states.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "Policies": [
+     {
+      "PolicyName": "InlineInvokeFunctions",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Action": "lambda:InvokeFunction",
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "SingletonFunction76b3e830a873425f8453eddd85c86925Handler81461ECE",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForD625300A": {
+   "Type": "AWS::StepFunctions::StateMachine",
+   "Properties": {
+    "DefinitionString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"StartAt\":\"framework-isComplete-task\",\"States\":{\"framework-isComplete-task\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"States.ALL\"],\"IntervalSeconds\":15,\"MaxAttempts\":3,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"Next\":\"framework-onTimeout-task\"}],\"Type\":\"Task\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "SingletonFunction76b3e830a873425f8453eddd85c86925Handler81461ECE",
+         "Arn"
+        ]
+       },
+       "\"},\"framework-onTimeout-task\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41aHandlerADF3E6EA",
+         "Arn"
+        ]
+       },
+       "\"}}}"
+      ]
+     ]
+    },
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F"
+   ]
+  },
+  "HttpApiCall0636348c0965b20b7df97d5090cf9049": {
+   "Type": "Custom::DeployAssert@HttpCall",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F",
+      "Arn"
+     ]
+    },
+    "parameters": {
+     "url": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestApiStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092"
+         }
+        },
+        "/push/subscriptions"
+       ]
+      ]
+     },
+     "fetchOptions": {
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/json",
+       "Origin": "https://kenilworthford.com"
+      },
+      "body": "{\"endpoint\":\"https://fcm.googleapis.com/fcm/send/integ-test\",\"expirationTime\":null,\"keys\":{\"p256dh\":\"BAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE\",\"auth\":\"AgICAgICAgICAgICAgICAg\"}}"
+     }
+    },
+    "expected": "{\"$ObjectLike\":{\"status\":201,\"headers\":{\"$ObjectLike\":{\"access-control-allow-origin\":[\"https://kenilworthford.com\"]}}}}",
+    "flattenResponse": "false",
+    "salt": "1795732182714"
+   },
+   "DependsOn": [
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93",
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForIsCompleteProviderInvokeCC029FA5",
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForD625300A",
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForRole399EEE4F",
+    "HttpApiCallab863b6b49add3275ac561ddc5d2ec93WaitForTimeoutProviderInvokeC64AAE41"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "AwsApiCallawssdkclientdynamodbGetItemCommand780628aea12e6be2f3bbc83267edaa24": {
+   "Type": "Custom::DeployAssert@SdkCall@aws-sdkclient-dynamodbGetItemC",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F",
+      "Arn"
+     ]
+    },
+    "service": "@aws-sdk/client-dynamodb",
+    "api": "GetItemCommand",
+    "expected": "{\"$ObjectLike\":{\"Item\":{\"$ObjectLike\":{\"endpoint\":{\"S\":\"https://fcm.googleapis.com/fcm/send/integ-test\"}}}}}",
+    "parameters": {
+     "Key": "{\"id\":{\"S\":\"5189f8ef7e05703d7ae791f813ebffff3fa2770fe5b1948645f772631bec7c06\"}}",
+     "TableName": {
+      "Fn::Join": [
+       "",
+       [
+        "\"",
+        {
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestApiFixtures",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputRefpushsubscriptionstable20B891BD1D17A60B"
+         }
+        },
+        "\""
+       ]
+      ]
+     }
+    },
+    "flattenResponse": "false",
+    "salt": "1795732182714"
+   },
+   "DependsOn": [
+    "HttpApiCall0636348c0965b20b7df97d5090cf9049"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "HttpApiCallcf6697bb756f35285516cd6865909e87": {
+   "Type": "Custom::DeployAssert@HttpCall",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "SingletonFunction1488541a7b23466481b69b4408076b81HandlerCD40AE9F",
+      "Arn"
+     ]
+    },
+    "parameters": {
+     "url": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Fn::GetStackOutput": {
+          "StackName": "IntegrationTestApiStack",
+          "Region": {
+           "Ref": "AWS::Region"
+          },
+          "OutputName": "PublishOutputFnGetAttapidistribution146B80A5DomainName4A836092"
+         }
+        },
+        "/push/subscriptions"
+       ]
+      ]
+     },
+     "fetchOptions": {
+      "method": "DELETE",
+      "headers": {
+       "Content-Type": "application/json",
+       "Origin": "https://kenilworthford.com"
+      },
+      "body": "{\"endpoint\":\"https://fcm.googleapis.com/fcm/send/integ-test\"}"
+     }
+    },
+    "expected": "{\"$ObjectLike\":{\"status\":204}}",
+    "flattenResponse": "false",
+    "salt": "1795732182714"
+   },
+   "DependsOn": [
+    "AwsApiCallawssdkclientdynamodbGetItemCommand780628aea12e6be2f3bbc83267edaa24"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
@@ -878,6 +1200,38 @@
    "Value": {
     "Fn::GetAtt": [
      "HttpApiCallc381be6a0e0da54de1b133cf790e367a",
+     "assertion"
+    ]
+   }
+  },
+  "AssertionResultsHttpApiCallab863b6b49add3275ac561ddc5d2ec93": {
+   "Value": {
+    "Fn::GetAtt": [
+     "HttpApiCallab863b6b49add3275ac561ddc5d2ec93",
+     "assertion"
+    ]
+   }
+  },
+  "AssertionResultsHttpApiCall0636348c0965b20b7df97d5090cf9049": {
+   "Value": {
+    "Fn::GetAtt": [
+     "HttpApiCall0636348c0965b20b7df97d5090cf9049",
+     "assertion"
+    ]
+   }
+  },
+  "AssertionResultsAwsApiCallawssdkclientdynamodbGetItemCommand780628aea12e6be2f3bbc83267edaa24": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AwsApiCallawssdkclientdynamodbGetItemCommand780628aea12e6be2f3bbc83267edaa24",
+     "assertion"
+    ]
+   }
+  },
+  "AssertionResultsHttpApiCallcf6697bb756f35285516cd6865909e87": {
+   "Value": {
+    "Fn::GetAtt": [
+     "HttpApiCallcf6697bb756f35285516cd6865909e87",
      "assertion"
     ]
    }

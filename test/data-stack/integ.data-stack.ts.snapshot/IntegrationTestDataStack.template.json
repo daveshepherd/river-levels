@@ -164,6 +164,83 @@
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete"
+  },
+  "pushsubscriptionsFF38FC72": {
+   "Type": "AWS::DynamoDB::GlobalTable",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "id",
+      "KeyType": "HASH"
+     }
+    ],
+    "MultiRegionConsistency": "STRONG",
+    "Replicas": [
+     {
+      "DeletionProtectionEnabled": false,
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": "eu-west-1",
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     },
+     {
+      "DeletionProtectionEnabled": false,
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": "eu-central-1",
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     },
+     {
+      "DeletionProtectionEnabled": false,
+      "PointInTimeRecoverySpecification": {
+       "PointInTimeRecoveryEnabled": true
+      },
+      "Region": "eu-west-2",
+      "Tags": [
+       {
+        "Key": "endor:ManagedBy",
+        "Value": "cdk"
+       },
+       {
+        "Key": "endor:Stage",
+        "Value": "development"
+       }
+      ]
+     }
+    ],
+    "StreamSpecification": {
+     "StreamViewType": "NEW_AND_OLD_IMAGES"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
   }
  },
  "Outputs": {
@@ -175,6 +252,11 @@
   "NotifierStateTableName": {
    "Value": {
     "Ref": "notifierstateEF9F54ED"
+   }
+  },
+  "PushSubscriptionsTableName": {
+   "Value": {
+    "Ref": "pushsubscriptionsFF38FC72"
    }
   },
   "PublishOutputRefreadingsA064D750D95EE332": {

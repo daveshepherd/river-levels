@@ -1,6 +1,6 @@
 import { App, Duration, Stack } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { CachePolicy, OriginRequestPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -348,6 +348,89 @@ describe('ApiStack', () => {
     synth().template.hasResourceProperties('AWS::SQS::Queue', {
       DelaySeconds: Match.absent(),
       RedrivePolicy: Match.anyValue(),
+    });
+  });
+
+  describe('push subscriptions', () => {
+    const pushSubscriptions = {
+      allowedOrigins: ['https://kenilworthford.com'],
+      tableName: 'push-subscriptions',
+    };
+
+    test('that there is no push subscription API by default', () => {
+      const { template } = synth();
+      template.resourceCountIs('AWS::Lambda::Url', 0);
+    });
+
+    test('that the API is a public function URL with CORS for the website', () => {
+      const { template } = synth({ pushSubscriptions });
+
+      template.hasResourceProperties('AWS::Lambda::Url', {
+        AuthType: 'NONE',
+        Cors: {
+          AllowHeaders: ['content-type'],
+          AllowMethods: ['POST', 'DELETE'],
+          AllowOrigins: ['https://kenilworthford.com'],
+          MaxAge: 86400,
+        },
+      });
+      template.hasResourceProperties('AWS::Lambda::Function', {
+        Environment: {
+          Variables: Match.objectLike({ SUBSCRIPTIONS_TABLE: 'push-subscriptions' }),
+        },
+        ReservedConcurrentExecutions: 2,
+      });
+    });
+
+    test('that the function can only add and remove subscriptions', () => {
+      const { template } = synth({ pushSubscriptions });
+
+      template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+        Description: 'Add and remove web push subscriptions',
+        PolicyDocument: {
+          Statement: [
+            Match.objectLike({
+              Action: ['dynamodb:PutItem', 'dynamodb:DeleteItem'],
+              Effect: 'Allow',
+            }),
+          ],
+        },
+      });
+    });
+
+    test('that CloudFront serves the API at /push/* without caching', () => {
+      const { template } = synth({ pushSubscriptions });
+
+      template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: Match.objectLike({
+          CacheBehaviors: [
+            Match.objectLike({
+              AllowedMethods: Match.arrayWith(['POST', 'DELETE']),
+              CachePolicyId: CachePolicy.CACHING_DISABLED.cachePolicyId,
+              OriginRequestPolicyId: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER.originRequestPolicyId,
+              PathPattern: '/push/*',
+              ViewerProtocolPolicy: 'https-only',
+            }),
+          ],
+        }),
+      });
+    });
+
+    test('that errors raise an alarm', () => {
+      const { template } = synth({ pushSubscriptions });
+
+      template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+        MetricName: 'Errors',
+        Namespace: 'AWS/Lambda',
+        Threshold: 1,
+        AlarmActions: Match.anyValue(),
+      });
+    });
+
+    test('that the API needs the distribution', () => {
+      expect(() => synth({ createDistribution: false, pushSubscriptions })).toThrow(
+        /pushSubscriptions needs createDistribution/,
+      );
     });
   });
 });
