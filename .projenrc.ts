@@ -17,6 +17,9 @@ const project = new CdkTypeScriptApp({
     '@aws-sdk/client-ssm',
     'axios',
     'twitter-api-v2',
+    // 3.x: 4.0.0 was released in November 2026 after three years without a
+    // release, so it waits until it has a track record
+    'web-push@^3.6.7',
   ],
   // Weekly rather than daily: each upgrade release changes the Lambdas in
   // every stack and region, and Control Tower's AWS Config recorder charges
@@ -28,6 +31,7 @@ const project = new CdkTypeScriptApp({
     'A scraper and APIs for getting river readings from the Environment Agency',
   devDeps: [
     '@types/aws-lambda',
+    '@types/web-push',
     'aws-sdk-client-mock-jest',
     'aws-sdk-client-mock',
     'cdk-nag',
@@ -80,7 +84,7 @@ The \`RiverLevelsApi\` stack queues those notifications and, once per batch, rew
 - \`stations/{id}/status.json\`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is \`clear\`, \`flooded\` or \`impassable\`
 - \`stations/{id}/chart.json\`: every reading from the last year, as \`[[timestamp, depth], ...]\`
 
-Each station's status is also published to a \`station-status\` topic. An announcer announces each ford state change (clear, flooded, impassable) once, at most once an hour per station, and a notifier posts it to X. Browsers can subscribe to web push notifications of these changes at \`/push/subscriptions\` on the same domain; the subscriptions are stored, and their delivery is still to come.
+Each station's status is also published to a \`station-status\` topic. An announcer announces each ford state change (clear, flooded, impassable) once, at most once an hour per station, and a notifier posts it to X. Browsers can subscribe to web push notifications of these changes at \`/push/subscriptions\` on the same domain; each change is sent to them as a notification.
 
 CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
 

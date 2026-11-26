@@ -13,6 +13,7 @@ function synth(props: Partial<NotificationsStackProps> = {}) {
     alertsTopic: new Topic(fixtures, 'alerts'),
     env: { region: 'eu-west-2' },
     mode: 'log',
+    pushSubscriptionsTableName: 'push-subscriptions',
     stateTableName: 'notifier-state',
     statusTopic: new Topic(fixtures, 'status'),
     ...props,
@@ -66,11 +67,11 @@ describe('NotificationsStack', () => {
     });
   });
 
-  test('that statuses feed the announcer and announcements feed the X notifier', () => {
+  test('that statuses feed the announcer and announcements feed the X notifier and web push deliverer', () => {
     const { stack, template } = synth();
 
     const subscriptions = Object.values(template.findResources('AWS::SNS::Subscription'));
-    expect(subscriptions).toHaveLength(2);
+    expect(subscriptions).toHaveLength(3);
     for (const subscription of subscriptions) {
       expect(subscription.Properties).toMatchObject({ Protocol: 'sqs', RawMessageDelivery: true });
     }
@@ -80,7 +81,7 @@ describe('NotificationsStack', () => {
     template.resourcePropertiesCountIs(
       'AWS::Lambda::EventSourceMapping',
       { BatchSize: 10, FunctionResponseTypes: ['ReportBatchItemFailures'] },
-      2,
+      3,
     );
   });
 
@@ -109,7 +110,7 @@ describe('NotificationsStack', () => {
         VisibilityTimeout: 180,
         RedrivePolicy: Match.objectLike({ maxReceiveCount: 5 }),
       },
-      2,
+      3,
     );
   });
 
@@ -152,10 +153,60 @@ describe('NotificationsStack', () => {
     });
   });
 
+  test('that the web push deliverer is given the subscriptions table, stations and VAPID keys parameter', () => {
+    synth().template.hasResourceProperties('AWS::Lambda::Function', {
+      Description: 'src/notifications-stack/web-push-deliverer.lambda.ts',
+      Architectures: ['arm64'],
+      Timeout: 30,
+      TracingConfig: { Mode: 'Active' },
+      Environment: {
+        Variables: Match.objectLike({
+          STATIONS: Match.anyValue(),
+          SUBSCRIPTIONS_TABLE: 'push-subscriptions',
+          VAPID_KEYS_PARAMETER: '/river-levels/vapid-keys',
+        }),
+      },
+    });
+  });
+
+  test('that the web push deliverer can only read and prune subscriptions and read the VAPID keys', () => {
+    synth().template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      Description:
+        'Read web push subscriptions and remove gone ones, and read the VAPID keys, to send announcements',
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: ['dynamodb:Scan', 'dynamodb:DeleteItem'],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': ['', Match.arrayWith([':table/push-subscriptions'])],
+            },
+          },
+          {
+            Action: 'ssm:GetParameter',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': ['', Match.arrayWith([':parameter/river-levels/vapid-keys'])],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('that the VAPID keys parameter name is a stack output and can be changed', () => {
+    synth().template.hasOutput('VapidKeysParameterName', {
+      Value: '/river-levels/vapid-keys',
+    });
+    const { stack, template } = synth({ vapidKeysParameterName: '/other/vapid' });
+    expect(stack.vapidKeysParameterName).toBe('/other/vapid');
+    template.hasOutput('VapidKeysParameterName', { Value: '/other/vapid' });
+  });
+
   test('that each dead-letter queue has an alarm that notifies the alerts topic', () => {
     const { template } = synth();
 
-    template.resourceCountIs('AWS::CloudWatch::Alarm', 2);
+    template.resourceCountIs('AWS::CloudWatch::Alarm', 3);
     template.hasResourceProperties('AWS::CloudWatch::Alarm', {
       MetricName: 'ApproximateNumberOfMessagesVisible',
       AlarmActions: [Match.anyValue()],

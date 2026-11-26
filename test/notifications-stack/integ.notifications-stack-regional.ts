@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import { ExpectedResult, IntegTest, Match } from '@aws-cdk/integ-tests-alpha';
 import { App, Aspects, Duration, Stack, Tags } from 'aws-cdk-lib';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -33,6 +34,8 @@ const stackUnderTest = new NotificationsStack(app, 'IntegrationTestRegionalNotif
   crossRegionReferences: true,
   env: { region: 'eu-west-1' },
   mode: 'log',
+  // Empty, so the web push deliverer sends nothing and needs no VAPID keys
+  pushSubscriptionsTableName: data.pushSubscriptionsTable.tableName,
   setDestroyPolicyToAllResources: true,
   stateTableName: data.notifierStateTable.tableName,
   stations: [{ id: 'kenilworth', measureId: '2627-level-stage-i-15_min-mASD' }],
@@ -130,6 +133,30 @@ publishStatus('clear')
         interval: Duration.seconds(15),
         backoffRate: 2,
       }),
+  )
+  // The web push deliverer got the announcement too, with no one to send it to
+  .next(
+    integ.assertions
+      .awsApiCall('@aws-sdk/client-cloudwatch-logs', 'FilterLogEventsCommand', {
+        filterPattern: '"No subscriptions to deliver to"',
+        logGroupName: (
+          stackUnderTest.node.findChild('web-push-deliverer-log-group') as LogGroup
+        ).logGroupName,
+      })
+      .expect(
+        ExpectedResult.objectLike({
+          events: Match.arrayWith([
+            Match.objectLike({
+              message: Match.stringLikeRegexp('kenilworth:flooded'),
+            }),
+          ]),
+        }),
+      )
+      .waitForAssertions({
+        totalTimeout: Duration.minutes(5),
+        interval: Duration.seconds(15),
+        backoffRate: 2,
+      }),
   );
 
 NagSuppressions.addStackSuppressions(stackUnderTest, [
@@ -150,7 +177,12 @@ NagSuppressions.addStackSuppressions(stackUnderTest, [
     reason: 'the cross-region reference provider is managed by CDK and pins its own runtime',
   },
 ]);
-for (const queue of ['ford-announcer-dead-letter-queue', 'x-notifier-dead-letter-queue', 'test-dlq']) {
+for (const queue of [
+  'ford-announcer-dead-letter-queue',
+  'x-notifier-dead-letter-queue',
+  'web-push-deliverer-dead-letter-queue',
+  'test-dlq',
+]) {
   NagSuppressions.addResourceSuppressionsByPath(
     stackUnderTest,
     `/IntegrationTestRegionalNotificationsStack/${queue}/Resource`,

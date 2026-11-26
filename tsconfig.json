@@ -29,7 +29,8 @@
     "types": [
       "aws-lambda",
       "jest",
-      "node"
+      "node",
+      "web-push"
     ],
     "moduleResolution": "nodenext",
     "typeRoots": [
