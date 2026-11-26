@@ -13,7 +13,7 @@ import {
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
-import { ITableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { ITableV2, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
 import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Alias } from 'aws-cdk-lib/aws-kms';
 import { Architecture, Tracing } from 'aws-cdk-lib/aws-lambda';
@@ -33,6 +33,7 @@ import { ApplyDestroyPolicyAspect } from '../destroy-policy';
 import { ApiPublisherFunction } from './api-publisher-function';
 import { ApiPublisherRole } from './api-publisher.role';
 import { ApiCustomDomain, ApiDistribution } from './distribution';
+import { PushSubscriptionsApi } from './push-subscriptions';
 import {
   StationConfig,
   STATIONS,
@@ -90,7 +91,19 @@ export interface ApiStackProps extends StackProps {
    * us-east-1, so both stacks need crossRegionReferences.
    */
   customDomain?: ApiCustomDomain;
+  /**
+   * Serve the web push subscription API at /push/subscriptions. Only with
+   * createDistribution, since it is served through the distribution.
+   */
+  pushSubscriptions?: PushSubscriptionsOptions;
   setDestroyPolicyToAllResources?: boolean;
+}
+
+export interface PushSubscriptionsOptions {
+  /** The push-subscriptions table, in this stack's region. */
+  tableName: string;
+  /** The website origins allowed to call the API (CORS). */
+  allowedOrigins: string[];
 }
 
 /**
@@ -221,12 +234,29 @@ export class ApiStack extends Stack {
       alarm.addOkAction(action);
     }
 
-    if (props.createDistribution ?? true) {
+    const createDistribution = props.createDistribution ?? true;
+    if (props.pushSubscriptions && !createDistribution) {
+      throw new Error('pushSubscriptions needs createDistribution');
+    }
+    const push = props.pushSubscriptions
+      ? new PushSubscriptionsApi(this, 'push-subscriptions', {
+        alertsTopic: props.alertsTopic,
+        allowedOrigins: props.pushSubscriptions.allowedOrigins,
+        table: TableV2.fromTableName(
+          this,
+          'push-subscriptions-table',
+          props.pushSubscriptions.tableName,
+        ),
+      })
+      : undefined;
+
+    if (createDistribution) {
       this.distribution = new ApiDistribution(this, 'api', {
         bucket: this.apiBucket,
         customDomain: props.customDomain,
         failoverBucket: props.failoverBucket,
         legacyStationId,
+        pushSubscriptionsUrl: push?.functionUrl,
       }).distribution;
       new CfnOutput(this, 'ApiDomainName', {
         value: this.distribution.distributionDomainName,

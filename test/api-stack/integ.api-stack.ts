@@ -1,4 +1,5 @@
 import 'source-map-support/register';
+import { createHash } from 'node:crypto';
 import { ExpectedResult, IntegTest, Match } from '@aws-cdk/integ-tests-alpha';
 import { App, Aspects, Duration, Stack, Tags } from 'aws-cdk-lib';
 import { AttributeType, TableV2 } from 'aws-cdk-lib/aws-dynamodb';
@@ -19,6 +20,11 @@ const readingsTable = new TableV2(fixtures, 'readings-table', {
   pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
   sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
 });
+// Stand-in for the data stack's push-subscriptions table
+const pushSubscriptionsTable = new TableV2(fixtures, 'push-subscriptions-table', {
+  partitionKey: { name: 'id', type: AttributeType.STRING },
+  pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+});
 const notificationsTopic = new Topic(fixtures, 'notifications', {
   enforceSSL: true,
 });
@@ -26,6 +32,10 @@ Aspects.of(fixtures).add(new ApplyDestroyPolicyAspect());
 
 const stackUnderTest = new ApiStack(app, 'IntegrationTestApiStack', {
   notificationsTopic,
+  pushSubscriptions: {
+    allowedOrigins: ['https://kenilworthford.com'],
+    tableName: pushSubscriptionsTable.tableName,
+  },
   readingsTable,
   setDestroyPolicyToAllResources: true,
   stations: [
@@ -201,6 +211,81 @@ integ.assertions
           body: [[timestamp, 1.3]],
         }),
       ),
+  );
+
+// A browser subscribing to web push through CloudFront, then unsubscribing.
+// The endpoint is never sent to, so it doesn't have to be real.
+const pushUrl = `https://${distribution.distributionDomainName}/push/subscriptions`;
+const pushEndpoint = 'https://fcm.googleapis.com/fcm/send/integ-test';
+const corsHeaders = { 'access-control-allow-origin': ['https://kenilworthford.com'] };
+integ.assertions
+  // The CORS preflight a browser sends first
+  .httpApiCall(pushUrl, {
+    method: 'OPTIONS',
+    headers: {
+      'Origin': 'https://kenilworthford.com',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type',
+    },
+  })
+  .expect(
+    ExpectedResult.objectLike({
+      status: 200,
+      headers: Match.objectLike(corsHeaders),
+    }),
+  )
+  .waitForAssertions({
+    totalTimeout: Duration.minutes(5),
+    interval: Duration.seconds(15),
+    backoffRate: 2,
+  })
+  .next(
+    integ.assertions
+      .httpApiCall(pushUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'https://kenilworthford.com',
+        },
+        body: JSON.stringify({
+          endpoint: pushEndpoint,
+          expirationTime: null,
+          keys: {
+            p256dh: Buffer.concat([Buffer.from([4]), Buffer.alloc(64, 1)]).toString('base64url'),
+            auth: Buffer.alloc(16, 2).toString('base64url'),
+          },
+        }),
+      })
+      .expect(
+        ExpectedResult.objectLike({
+          status: 201,
+          headers: Match.objectLike(corsHeaders),
+        }),
+      ),
+  )
+  .next(
+    integ.assertions
+      .awsApiCall('@aws-sdk/client-dynamodb', 'GetItemCommand', {
+        Key: { id: { S: createHash('sha256').update(pushEndpoint).digest('hex') } },
+        TableName: pushSubscriptionsTable.tableName,
+      })
+      .expect(
+        ExpectedResult.objectLike({
+          Item: Match.objectLike({ endpoint: { S: pushEndpoint } }),
+        }),
+      ),
+  )
+  .next(
+    integ.assertions
+      .httpApiCall(pushUrl, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'https://kenilworthford.com',
+        },
+        body: JSON.stringify({ endpoint: pushEndpoint }),
+      })
+      .expect(ExpectedResult.objectLike({ status: 204 })),
   );
 
 NagSuppressions.addStackSuppressions(stackUnderTest, [

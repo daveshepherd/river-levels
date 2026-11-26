@@ -34,6 +34,7 @@ export interface DataStackProps extends StackProps {
 export class DataStack extends Stack {
   public readonly readingsTable: TableV2;
   public readonly notifierStateTable: TableV2;
+  public readonly pushSubscriptionsTable: TableV2;
 
   constructor(scope: Construct, id: string, props: DataStackProps) {
     super(scope, id, props);
@@ -67,6 +68,18 @@ export class DataStack extends Stack {
       replicas,
     });
 
+    // Browsers' web push subscriptions to ford announcements, keyed by a hash
+    // of the push endpoint. Written by the subscription API in eu-west-2 and
+    // read by the push deliverer in every region.
+    this.pushSubscriptionsTable = new TableV2(this, 'push-subscriptions', {
+      deletionProtection: !destroy,
+      multiRegionConsistency: MultiRegionConsistency.STRONG,
+      partitionKey: { name: 'id', type: AttributeType.STRING },
+      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+      removalPolicy: destroy ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
+      replicas,
+    });
+
     if (destroy) {
       Aspects.of(this).add(new ApplyDestroyPolicyAspect());
     }
@@ -75,6 +88,9 @@ export class DataStack extends Stack {
     });
     new CfnOutput(this, 'NotifierStateTableName', {
       value: this.notifierStateTable.tableName,
+    });
+    new CfnOutput(this, 'PushSubscriptionsTableName', {
+      value: this.pushSubscriptionsTable.tableName,
     });
   }
 }

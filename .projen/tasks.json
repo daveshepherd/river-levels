@@ -76,6 +76,9 @@
           "spawn": "bundle:api-stack/api-publisher.lambda"
         },
         {
+          "spawn": "bundle:api-stack/push-subscriptions.lambda"
+        },
+        {
           "spawn": "bundle:notifications-stack/ford-announcer.lambda"
         },
         {
@@ -123,6 +126,45 @@
             "--target=node26",
             "--platform=node",
             "--outfile=assets/api-stack/api-publisher.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*",
+            "--watch"
+          ]
+        }
+      ]
+    },
+    "bundle:api-stack/push-subscriptions.lambda": {
+      "name": "bundle:api-stack/push-subscriptions.lambda",
+      "description": "Create a JavaScript bundle from src/api-stack/push-subscriptions.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/api-stack/push-subscriptions.lambda.ts",
+            "--target=node26",
+            "--platform=node",
+            "--outfile=assets/api-stack/push-subscriptions.lambda/index.js",
+            "--packages=bundle",
+            "--tsconfig=test/tsconfig.json",
+            "--external:@aws-sdk/*"
+          ]
+        }
+      ]
+    },
+    "bundle:api-stack/push-subscriptions.lambda:watch": {
+      "name": "bundle:api-stack/push-subscriptions.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/api-stack/push-subscriptions.lambda.ts",
+      "steps": [
+        {
+          "execArgs": [
+            "esbuild",
+            "--bundle",
+            "src/api-stack/push-subscriptions.lambda.ts",
+            "--target=node26",
+            "--platform=node",
+            "--outfile=assets/api-stack/push-subscriptions.lambda/index.js",
             "--packages=bundle",
             "--tsconfig=test/tsconfig.json",
             "--external:@aws-sdk/*",

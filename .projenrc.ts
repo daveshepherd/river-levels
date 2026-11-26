@@ -80,7 +80,7 @@ The \`RiverLevelsApi\` stack queues those notifications and, once per batch, rew
 - \`stations/{id}/status.json\`: the latest depth, whether the river is rising or falling and how fast, and, for a station with a ford, whether the ford is \`clear\`, \`flooded\` or \`impassable\`
 - \`stations/{id}/chart.json\`: every reading from the last year, as \`[[timestamp, depth], ...]\`
 
-Each station's status is also published to a \`station-status\` topic. An announcer announces each ford state change (clear, flooded, impassable) once, at most once an hour per station, and a notifier posts it to X.
+Each station's status is also published to a \`station-status\` topic. An announcer announces each ford state change (clear, flooded, impassable) once, at most once an hour per station, and a notifier posts it to X. Browsers can subscribe to web push notifications of these changes at \`/push/subscriptions\` on the same domain; the subscriptions are stored, and their delivery is still to come.
 
 CloudWatch alarms email the maintainer when the crawler stops or notifications stall.
 

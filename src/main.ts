@@ -6,6 +6,7 @@ import { NotificationsStack } from './notifications-stack';
 import {
   apiCustomDomainEnabled,
   apiDomainName,
+  pushAllowedOrigins,
   resolveStage,
   xNotifierMode,
   xSmokeTestEnabled,
@@ -135,6 +136,11 @@ const apiStack = new ApiStack(app, 'RiverLevelsApi', {
   failoverBucket: regionalApiStacks.get('eu-west-1')!.apiBucket,
   notificationsTopic: storageStack.riverLevelsNotificationsTopic,
   otherNotificationsTopicArns: otherNotificationsTopicArns(env.region),
+  // Only here: CloudFront can't fail over POST and DELETE to another region
+  pushSubscriptions: {
+    allowedOrigins: pushAllowedOrigins(stage),
+    tableName: dataStack.pushSubscriptionsTable.tableName,
+  },
   readingsTable: storageStack.riverLevelsTable,
 });
 for (const region of otherRegions) {

@@ -10,12 +10,18 @@ import {
   FunctionEventType,
   FunctionRuntime,
   HttpVersion,
+  OriginRequestPolicy,
   PriceClass,
   ResponseHeadersPolicy,
   SecurityPolicyProtocol,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
-import { OriginGroup, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import {
+  FunctionUrlOrigin,
+  OriginGroup,
+  S3BucketOrigin,
+} from 'aws-cdk-lib/aws-cloudfront-origins';
+import { IFunctionUrl } from 'aws-cdk-lib/aws-lambda';
 import {
   AaaaRecord,
   ARecord,
@@ -70,7 +76,12 @@ export interface ApiDistributionProps {
    * policy.
    */
   failoverBucket?: IBucket;
+  /** The push subscription API, served at /push/*. */
+  pushSubscriptionsUrl?: IFunctionUrl;
 }
+
+/** The path pattern CloudFront sends to the push subscription API. */
+export const PUSH_PATH_PATTERN = '/push/*';
 
 /** Responses from the primary origin that send a request to the failover origin. */
 export const FAILOVER_STATUS_CODES = [403, 500, 502, 503, 504];
@@ -121,6 +132,23 @@ export class ApiDistribution extends Construct {
       })
       : undefined;
     this.distribution = new Distribution(this, 'distribution', {
+      ...(props.pushSubscriptionsUrl
+        ? {
+          additionalBehaviors: {
+            // Not cached, with every method, and the viewer's headers (Origin
+            // for the function URL's CORS) passed on. Not failed over: an
+            // origin group only fails over GET, HEAD and OPTIONS.
+            [PUSH_PATH_PATTERN]: {
+              allowedMethods: AllowedMethods.ALLOW_ALL,
+              cachePolicy: CachePolicy.CACHING_DISABLED,
+              origin: new FunctionUrlOrigin(props.pushSubscriptionsUrl),
+              originRequestPolicy:
+                OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+              viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
+            },
+          },
+        }
+        : {}),
       ...(customDomain
         ? {
           certificate: customDomain.certificate,

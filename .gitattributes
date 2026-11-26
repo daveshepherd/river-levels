@@ -26,6 +26,7 @@
 /projenrc/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
 /README.md linguist-generated
 /src/api-stack/api-publisher-function.ts linguist-generated
+/src/api-stack/push-subscriptions-function.ts linguist-generated
 /src/notifications-stack/ford-announcer-function.ts linguist-generated
 /src/notifications-stack/x-notifier-function.ts linguist-generated
 /src/notifications-stack/x-smoke-test-function.ts linguist-generated

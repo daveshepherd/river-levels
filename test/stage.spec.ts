@@ -1,6 +1,7 @@
 import {
   apiCustomDomainEnabled,
   apiDomainName,
+  pushAllowedOrigins,
   resolveStage,
   xNotifierMode,
   xSmokeTestEnabled,
@@ -66,5 +67,15 @@ describe('xSmokeTestEnabled', () => {
     ['production', false],
   ] as const)('that %s smoke tests X: %s', (stage, enabled) => {
     expect(xSmokeTestEnabled(stage)).toBe(enabled);
+  });
+});
+
+describe('pushAllowedOrigins', () => {
+  test.each([
+    ['local', ['https://dev.kenilworthford.com', 'http://localhost:8080']],
+    ['development', ['https://dev.kenilworthford.com', 'http://localhost:8080']],
+    ['production', ['https://kenilworthford.com']],
+  ] as const)('that %s allows %j', (stage, origins) => {
+    expect(pushAllowedOrigins(stage)).toStrictEqual(origins);
   });
 });

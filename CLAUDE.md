@@ -17,6 +17,7 @@ See [docs/infrastructure.md](docs/infrastructure.md) for the architecture, data 
 | `src/storage-stack/stations.ts` (adding, removing or changing stations) | Stations section, and the README overview in `.projenrc.ts` (`readme.description`) |
 | Publisher batching, filtering, failure handling, or the SNS message format | Publish flowchart, message example |
 | The API publisher, `status.ts`, or the station file paths and formats in `src/api-stack/` | "Publish station files" section, Resources and IAM tables, and the README overview in `.projenrc.ts` (`readme.description`) |
+| The push subscription API (`push-subscriptions*.ts`), its validation, CORS origins (`pushAllowedOrigins()`) or the `push-subscriptions` table | "Web push subscriptions" section, Architecture diagram, Resources, IAM and Alarms tables |
 | The X notifier, its decision rules or wording, the smoke test, or `xNotifierMode()` / `xSmokeTestEnabled()` | "Notifications" section, Resources and IAM tables, Operations |
 | Deploy jobs or workflow options in `.projenrc.ts` | Deployment diagram |
 | Alarms, dashboards or failure queues | Operations section |
@@ -53,7 +54,7 @@ Gotchas:
 
 ```
 src/main.ts                  App entry point: DataStack "RiverLevelsData" (MRSC readings and notifier-state tables) in eu-west-2; in each of eu-west-2, eu-west-1 and eu-central-1 a StorageStack "RiverLevels-<region>"; ApiStack "RiverLevelsApi" (with the CloudFront distribution, failing over to eu-west-1) and NotificationsStack "RiverLevelsNotifications" in eu-west-2, "RiverLevelsApi-<region>" and "RiverLevelsNotifications-<region>" in the other two; ApiDomainStack "RiverLevelsApiDomain" in us-east-1
-src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode() and xSmokeTestEnabled() per stage
+src/stage.ts                 resolveStage() from the STAGE env var; apiDomainName(), apiCustomDomainEnabled(), xNotifierMode(), xSmokeTestEnabled() and pushAllowedOrigins() per stage
 src/destroy-policy.ts        ApplyDestroyPolicyAspect, used by both stacks for integ test teardown
 src/storage-stack/
   index.ts                   StorageStack: crawler and SNS publisher against the region's replica of the readings table
@@ -66,9 +67,11 @@ src/storage-stack/
 src/api-stack/
   index.ts                   ApiStack: API bucket, publisher queue and dead-letter queue, publisher, alarm
   api-publisher.lambda.ts    SQS batches of new-reading notifications → stations/{id}/status.json and chart.json in S3
+  push-subscriptions.ts      PushSubscriptionsApi (RiverLevelsApi only): the push-subscriptions Lambda's function URL, served by CloudFront at /push/*, and its alarm
+  push-subscriptions.lambda.ts  POST / DELETE /push/subscriptions: validates a browser's web push subscription and stores or removes it in push-subscriptions
   status.ts                  Ford status logic (state, direction, rate), ported from flood-readings
   distribution.ts            CloudFront in front of the bucket; legacy-paths function maps /status and /chart
-src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
+src/data-stack/              DataStack: the MRSC global tables (readings, notifier-state, push-subscriptions) in eu-west-2, eu-west-1 and eu-central-1 for the active-active move in docs/adr/0001-multi-region-active-active.md; used by every storage, API and notifications stack
 src/api-domain-stack/        ApiDomainStack (us-east-1): the API domain's hosted zone, delegated from endor-infrastructure, and its certificate when the stage's custom domain is on
 src/notifications-stack/
   index.ts                   NotificationsStack: ford-announcer and the ford-announcements topic, x-notifier, a queue, dead-letter queue and alarm for each, the X credentials SSM parameter (by name; created by hand); uses the region's replica of notifier-state
@@ -88,13 +91,14 @@ test/<stack>/integ.*.ts.snapshot/   Committed snapshots that CI compares against
 - **Station files** (read by the kenilworthford.com website, so keep them backward compatible): `stations/{id}/status.json` is `{depth, direction, rate, state?, lastUpdate}` and `stations/{id}/chart.json` is `[[timestamp, depth], ...]` for the last 365 days. CloudFront also serves Kenilworth's at `/status` and `/chart`, the paths the website calls; keep those working.
 - **Station status messages** on the `station-status` topic: `{station, depth, direction, rate, state?, lastUpdate}`, published once per batch per station, whether or not anything changed.
 - **Announcements** on the `ford-announcements` topic: `{id, station, transition, state, previousState, depth, lastUpdate, announcedAt}` (`announcement.ts`), published once per ford state change, by the region that claimed it. Each channel subscribes with its own queue.
+- **Push subscriptions** (`push-subscriptions` table, in `RiverLevelsData`): partition key `id` (S, the SHA-256 hex digest of the endpoint), with `endpoint`, `p256dh`, `auth` and `subscribedAt`. The website will POST `PushSubscription.toJSON()` to `/push/subscriptions` and DELETE `{endpoint}` there; keep that request format working. An endpoint identifies a browser: never log one.
 - **SNS message body** (other systems subscribe to this, so keep it backward compatible): `{"reading_depth": number, "station": string, "timestamp": number}`. A message is published only on `INSERT` stream events.
 - **Stream failures:** the publisher returns `batchItemFailures` so retries resume from the first unpublished record. After 5 retries, the batch goes to `sns-publisher-failure-queue`.
 
 ## Testing conventions
 
 - AWS SDK calls are mocked with `aws-sdk-client-mock` and `aws-sdk-client-mock-jest`. HTTP calls are mocked with `nock`.
-- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher, the ford announcer and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `ford-announcer` in `announcer-powertools.ts`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
+- Lambda code logs through Powertools Logger, never `console.log`, and logs counts and IDs rather than whole payloads. The crawler and its modules (`flood-api-client/`, `store/`) share the `logger` and `traced()` from `src/storage-stack/powertools.ts` (service `crawler`). The SNS publisher, the API publisher, the push subscription API, the ford announcer and the X notifier each have their own Logger and Tracer (services `sns-publisher`, `api-publisher`, `push-subscriptions`, `ford-announcer` in `announcer-powertools.ts`, `x-notifier`; the X smoke test shares `x-notifier`). `test/setup.ts` silences the logger in tests, because it writes to stdout and bypasses `--silent`.
 - Stack tests use `Template.fromStack` assertions from `aws-cdk-lib/assertions`.
 - cdk-nag (`AwsSolutionsChecks`) runs **only in the integ tests**. Suppress expected findings there with `NagSuppressions` and give a reason, not in `src/`.
 - Stacks accept `setDestroyPolicyToAllResources` so integ stacks tear down cleanly.
